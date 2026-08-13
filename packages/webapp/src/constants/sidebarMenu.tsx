@@ -83,6 +83,15 @@ export const SidebarMenu = [
                 },
               },
               {
+                text: <T id={'subcategories'} />,
+                href: '/items/subcategories',
+                type: ISidebarMenuItemType.Link,
+                permission: {
+                  subject: AbilitySubject.Item,
+                  ability: ItemAction.View,
+                },
+              },
+              {
                 text: <T id={'sidebar.warehouse_transfer'} />,
                 href: '/warehouses-transfers',
                 type: ISidebarMenuItemType.Link,
@@ -117,6 +126,16 @@ export const SidebarMenu = [
                 href: '/items/categories/new',
                 type: ISidebarMenuItemType.Dialog,
                 dialogName: DialogsName.ItemCategoryForm,
+                permission: {
+                  subject: AbilitySubject.Item,
+                  ability: ItemAction.Create,
+                },
+              },
+              {
+                text: <T id={'sidebar.new_item_subcategory'} />,
+                href: '/items/subcategories/new',
+                type: ISidebarMenuItemType.Dialog,
+                dialogName: DialogsName.ItemSubcategoryForm,
                 permission: {
                   subject: AbilitySubject.Item,
                   ability: ItemAction.Create,

@@ -403,6 +403,15 @@ export const events = {
   },
 
   /**
+   * Item subcategory service.
+   */
+  itemSubcategory: {
+    onCreated: 'onItemSubcategoryCreated',
+    onEdited: 'onItemSubcategoryEdited',
+    onDeleted: 'onItemSubcategoryDeleted',
+  },
+
+  /**
    * Inventory service.
    */
   inventory: {

@@ -7,11 +7,13 @@ import type {
   CreateItemBody,
   EditItemBody,
   ItemCategoriesListResponse,
+  ItemSubcategoriesListResponse,
 } from '@bigcapital/sdk-ts';
 import {
   useItem,
   useSettingsItems,
   useItemsCategories,
+  useItemsSubcategories,
   useCreateItem,
   useEditItem,
   useAccounts,
@@ -33,6 +35,7 @@ type ItemFormContextValue = {
   accounts: AccountsList;
   item: Item | undefined;
   itemsCategories: ItemCategoriesListResponse;
+  itemsSubcategories: ItemSubcategoriesListResponse;
   taxRates: TaxRatesListResponse;
   submitPayload: ItemFormSubmitPayload;
   isNewMode: boolean;
@@ -40,6 +43,7 @@ type ItemFormContextValue = {
   isFormLoading: boolean;
   isAccountsLoading: boolean;
   isItemsCategoriesLoading: boolean;
+  isItemsSubcategoriesLoading: boolean;
   isItemLoading: boolean;
   isTaxRatesLoading: boolean;
 
@@ -65,6 +69,10 @@ function ItemFormProvider({ itemId, ...props }: ItemFormProviderProps) {
   // Fetches the items categories list.
   const { isLoading: isItemsCategoriesLoading, data: itemsCategories } =
     useItemsCategories();
+
+  // Fetches the items subcategories list.
+  const { isLoading: isItemsSubcategoriesLoading, data: itemsSubcategories } =
+    useItemsSubcategories();
 
   const { data: taxRates, isLoading: isTaxRatesLoading } = useTaxRates();
 
@@ -95,6 +103,7 @@ function ItemFormProvider({ itemId, ...props }: ItemFormProviderProps) {
     isItemsSettingsLoading ||
     isAccountsLoading ||
     isItemsCategoriesLoading ||
+    isItemsSubcategoriesLoading ||
     isTaxRatesLoading ||
     isItemLoading;
 
@@ -104,6 +113,7 @@ function ItemFormProvider({ itemId, ...props }: ItemFormProviderProps) {
     accounts: accounts ?? [],
     item,
     itemsCategories: itemsCategories ?? [],
+    itemsSubcategories: itemsSubcategories ?? [],
     taxRates: taxRates ?? [],
     submitPayload,
     isNewMode,
@@ -111,6 +121,7 @@ function ItemFormProvider({ itemId, ...props }: ItemFormProviderProps) {
     isFormLoading,
     isAccountsLoading,
     isItemsCategoriesLoading,
+    isItemsSubcategoriesLoading,
     isItemLoading,
     isTaxRatesLoading,
 

@@ -32,6 +32,7 @@ export * from './invite';
 export * from './authentication';
 export * from './contacts';
 export * from './items-categories';
+export * from './items-subcategories';
 export * from './views';
 export * from './transactions-locking';
 export * from './vendor-credits';

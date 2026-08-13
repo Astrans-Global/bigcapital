@@ -56,6 +56,7 @@ const Schema = Yup.object().shape({
     })
     .label(intl.get('inventory_account')),
   category_id: Yup.number().positive().nullable(),
+  subcategory_id: Yup.number().positive().nullable(),
   stock: Yup.string() || Yup.boolean(),
   sellable: Yup.boolean().required(),
   purchasable: Yup.boolean().required(),
@@ -64,6 +65,10 @@ const Schema = Yup.object().shape({
 export const transformItemFormData = (item, defaultValue) => {
   return {
     ...item,
+    // The API returns camelCase (`categoryId`/`subcategoryId`) while the form
+    // still keys these fields in snake_case, so map them across explicitly.
+    category_id: defaultTo(item?.categoryId, item?.category_id ?? null),
+    subcategory_id: defaultTo(item?.subcategoryId, item?.subcategory_id ?? null),
     sellable: !!defaultTo(item?.sellable, defaultValue.sellable),
     purchasable: !!defaultTo(item?.purchasable, defaultValue.purchasable),
     active: !!defaultTo(item?.active, defaultValue.active),

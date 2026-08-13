@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   FormGroup,
   RadioGroup,
@@ -8,7 +8,7 @@ import {
   Position,
   MenuItem,
 } from '@blueprintjs/core';
-import { ErrorMessage, FastField } from 'formik';
+import { ErrorMessage, FastField, useFormikContext } from 'formik';
 import { CLASSES } from '@/constants/classes';
 import {
   Hint,
@@ -31,8 +31,46 @@ import intl from 'react-intl-universal';
  */
 export function ItemFormPrimarySection() {
   // Item form context.
-  const { isNewMode, item, itemsCategories } = useItemFormContext();
+  const { isNewMode, item, itemsCategories, itemsSubcategories } =
+    useItemFormContext();
   const nameFieldRef = useRef(null);
+
+  // Formik context - used to filter/reset the subcategory field alongside category.
+  const { values, setFieldValue } = useFormikContext();
+
+  // Subcategories that belong to the currently selected category.
+  const filteredSubcategories = useMemo(
+    () =>
+      values.category_id
+        ? (itemsSubcategories || []).filter(
+            (subcategory) => subcategory.categoryId === values.category_id,
+          )
+        : [],
+    [itemsSubcategories, values.category_id],
+  );
+
+  // Resets the selected subcategory once it no longer belongs to the
+  // currently selected category (e.g. after the user switches category).
+  // Skips the very first run so an item's existing subcategory isn't wiped
+  // out while the subcategories list is still loading on mount.
+  const prevCategoryIdRef = useRef(values.category_id);
+  useEffect(() => {
+    const prevCategoryId = prevCategoryIdRef.current;
+    prevCategoryIdRef.current = values.category_id;
+
+    if (prevCategoryId === values.category_id) {
+      return;
+    }
+    if (
+      values.subcategory_id &&
+      !filteredSubcategories.some(
+        (subcategory) => subcategory.id === values.subcategory_id,
+      )
+    ) {
+      setFieldValue('subcategory_id', '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.category_id]);
 
   useEffect(() => {
     // Auto focus item name field once component mount.
@@ -129,6 +167,23 @@ export function ItemFormPrimarySection() {
               valueAccessor={'id'}
               textAccessor={'name'}
               placeholder={<T id={'select_category'} />}
+              popoverProps={{ minimal: true, captureDismiss: true }}
+            />
+          </FFormGroup>
+
+          {/*----------- Item subcategory ----------*/}
+          <FFormGroup
+            name={'subcategory_id'}
+            label={intl.get('subcategory')}
+            inline={true}
+          >
+            <FSelect
+              name={'subcategory_id'}
+              items={filteredSubcategories}
+              valueAccessor={'id'}
+              textAccessor={'name'}
+              disabled={!values.category_id}
+              placeholder={<T id={'select_subcategory'} />}
               popoverProps={{ minimal: true, captureDismiss: true }}
             />
           </FFormGroup>

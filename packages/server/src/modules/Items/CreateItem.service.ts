@@ -40,6 +40,12 @@ export class CreateItemService {
     if (itemDTO.categoryId) {
       await this.validators.validateItemCategoryExistance(itemDTO.categoryId);
     }
+    if (itemDTO.subcategoryId) {
+      await this.validators.validateItemSubcategoryExistance(
+        itemDTO.subcategoryId,
+        itemDTO.categoryId,
+      );
+    }
     if (itemDTO.sellAccountId) {
       await this.validators.validateItemSellAccountExistance(
         itemDTO.sellAccountId,

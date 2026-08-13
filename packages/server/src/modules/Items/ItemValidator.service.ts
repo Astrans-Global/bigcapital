@@ -11,6 +11,7 @@ import { Account } from '../Accounts/models/Account.model';
 import { TaxRateModel } from '../TaxRates/models/TaxRate.model';
 import { ItemEntry } from '../TransactionItemEntry/models/ItemEntry';
 import { ItemCategory } from '../ItemCategories/models/ItemCategory.model';
+import { ItemSubcategory } from '../ItemSubcategories/models/ItemSubcategory.model';
 import { AccountTransaction } from '../Accounts/models/AccountTransaction.model';
 import { InventoryAdjustment } from '../InventoryAdjutments/models/InventoryAdjustment';
 import { TenantModelProxy } from '../System/models/TenantBaseModel';
@@ -41,6 +42,9 @@ export class ItemsValidators {
 
     @Inject(ItemCategory.name)
     private itemCategoryModel: TenantModelProxy<typeof ItemCategory>,
+
+    @Inject(ItemSubcategory.name)
+    private itemSubcategoryModel: TenantModelProxy<typeof ItemSubcategory>,
 
     @Inject(AccountTransaction.name)
     private accountTransactionModel: TenantModelProxy<
@@ -182,6 +186,27 @@ export class ItemsValidators {
 
     if (!foundCategory) {
       throw new ServiceError(ERRORS.ITEM_CATEOGRY_NOT_FOUND);
+    }
+  }
+
+  /**
+   * Validate item subcategory existance and that it belongs to the given category.
+   * @param {number} itemSubcategoryId
+   * @param {number} categoryId
+   */
+  public async validateItemSubcategoryExistance(
+    itemSubcategoryId: number,
+    categoryId?: number,
+  ) {
+    const foundSubcategory = await this.itemSubcategoryModel()
+      .query()
+      .findById(itemSubcategoryId);
+
+    if (!foundSubcategory) {
+      throw new ServiceError(ERRORS.ITEM_SUBCATEGORY_NOT_FOUND);
+    }
+    if (categoryId && foundSubcategory.categoryId !== categoryId) {
+      throw new ServiceError(ERRORS.ITEM_SUBCATEGORY_NOT_UNDER_CATEGORY);
     }
   }
 

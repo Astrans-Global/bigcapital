@@ -11,6 +11,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 
 export class CommandItemDto {
@@ -167,6 +168,11 @@ export class CommandItemDto {
   })
   purchaseTaxRateId?: number;
 
+  // `@Expose({ name })` binds this field from the legacy snake_case key
+  // (`category_id`) that the webapp's Formik form + SDK request middleware
+  // actually sends on the wire, since `plainToInstance` copies plain keys
+  // verbatim otherwise and `category_id` would be silently whitelist-stripped.
+  @Expose({ name: 'category_id' })
   @IsOptional()
   @ToNumber()
   @IsInt()
@@ -178,6 +184,19 @@ export class CommandItemDto {
     example: 5,
   })
   categoryId?: number;
+
+  @Expose({ name: 'subcategory_id' })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @Min(0)
+  @ApiProperty({
+    description: 'ID of the item subcategory',
+    required: false,
+    minimum: 0,
+    example: 12,
+  })
+  subcategoryId?: number;
 
   @IsOptional()
   @IsString()

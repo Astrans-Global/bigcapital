@@ -111,6 +111,20 @@ export const getDashboardRoutes = () => [
     defaultSearchResource: RESOURCES_TYPES.ITEM,
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
+  {
+    path: `/items/subcategories`,
+    component: lazy(() =>
+      import('@/containers/ItemsSubcategories/ItemSubcategoriesList').then(
+        (m) => ({
+          default: m.ItemSubcategoriesList,
+        }),
+      ),
+    ),
+    breadcrumb: intl.get('subcategories'),
+    pageTitle: intl.get('subcategories'),
+    defaultSearchResource: RESOURCES_TYPES.ITEM,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
   // Items.
   {
     path: `/items/import`,

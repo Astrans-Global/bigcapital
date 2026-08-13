@@ -28,6 +28,7 @@ export class Item extends TenantBaseModel {
   public readonly costAccountId: number;
   public readonly inventoryAccountId: number;
   public readonly categoryId: number;
+  public readonly subcategoryId: number;
   public readonly pictureUri: string;
   public readonly sellAccountId: number;
   public readonly sellDescription: string;
@@ -97,6 +98,9 @@ export class Item extends TenantBaseModel {
       ItemCategory,
     } = require('../../ItemCategories/models/ItemCategory.model');
     const {
+      ItemSubcategory,
+    } = require('../../ItemSubcategories/models/ItemSubcategory.model');
+    const {
       ItemWarehouseQuantity,
     } = require('../../Warehouses/models/ItemWarehouseQuantity');
     const {
@@ -118,6 +122,18 @@ export class Item extends TenantBaseModel {
         join: {
           from: 'items.categoryId',
           to: 'items_categories.id',
+        },
+      },
+
+      /**
+       * Item may belongs to subcategory model.
+       */
+      subcategory: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: ItemSubcategory,
+        join: {
+          from: 'items.subcategoryId',
+          to: 'items_subcategories.id',
         },
       },
 

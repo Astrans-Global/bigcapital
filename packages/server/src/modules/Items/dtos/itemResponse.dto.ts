@@ -145,6 +145,22 @@ export class ItemResponseDto {
   };
 
   @ApiProperty({
+    description: 'The ID of the item subcategory',
+    example: 12,
+    required: false,
+  })
+  subcategoryId?: number;
+
+  @ApiProperty({
+    description: 'The subcategory details',
+    required: false,
+  })
+  subcategory?: {
+    id: number;
+    name: string;
+  };
+
+  @ApiProperty({
     description: 'The description shown on sales documents',
     example:
       'Premium ergonomic office chair with adjustable height and lumbar support',

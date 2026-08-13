@@ -40,6 +40,7 @@ const defaultInitialValues = {
   sell_tax_rate_id: '',
   inventory_account_id: '',
   category_id: '',
+  subcategory_id: '',
   sellable: 1,
   purchasable: true,
   sell_description: '',
