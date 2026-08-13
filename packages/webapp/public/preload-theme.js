@@ -4,10 +4,8 @@ const theme =
     ? 'dark'
     : 'light');
 
-if (theme === 'dark') {
-  document.documentElement.classList.add('bp4-dark');
-  document.body.classList.add('bp4-dark');
-}
+document.documentElement.classList.toggle('bp4-dark', theme === 'dark');
+document.body.classList.toggle('bp4-dark', theme === 'dark');
 
 // Remove dark mode for payment portal pages
 if (window.location.pathname.startsWith('/payment')) {
