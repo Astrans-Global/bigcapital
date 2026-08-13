@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
-import { Icon } from '@/components/Icon';
+import { AstransLogo } from '@/components/Icons/AstransLogo';
 
 export function AuthCopyright() {
-  return <Icon width={122} height={22} icon={'bigcapital'} />;
+  return <AstransLogo variant="black" height={22} />;
 }

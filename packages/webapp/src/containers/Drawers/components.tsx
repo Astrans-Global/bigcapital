@@ -1,15 +1,16 @@
 // @ts-nocheck
 import React from 'react';
 import moment from 'moment';
-import { Icon, If, Money } from '@/components';
+import { If, Money } from '@/components';
+import { AstransLogo } from '@/components/Icons/AstransLogo';
 
 export const TemplateHeader = ({ defaultLabels }) => (
   <div className={'template__header'}>
     <div className={'template__header--title'}>
       <h1>{defaultLabels.name}</h1>
-      <p>info@bigcapital.ly </p>
+      <p>info@astransdms.xyz </p>
     </div>
-    <Icon icon="bigcapital" height={30} width={200} />
+    <AstransLogo variant="black" height={36} />
   </div>
 );
 

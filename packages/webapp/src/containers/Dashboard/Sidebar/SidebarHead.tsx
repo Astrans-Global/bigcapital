@@ -10,6 +10,7 @@ import {
 import styled, { x } from '@xstyled/emotion';
 
 import { Icon, FormattedMessage as T } from '@/components';
+import { AstransLogo } from '@/components/Icons/AstransLogo';
 
 import {
   useAuthenticatedAccount,
@@ -253,11 +254,10 @@ function SidebarHeadJSX({
       </div>
 
       <div className="sidebar__head-logo">
-        <Icon
-          icon={'mini-bigcapital'}
-          width={28}
+        <AstransLogo
+          variant="white"
           height={28}
-          className="bigcapital--alt"
+          style={{ maxWidth: 28, maxHeight: 28 }}
         />
       </div>
     </div>
