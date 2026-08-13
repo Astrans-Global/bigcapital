@@ -366,10 +366,59 @@ export const safeInvoke = (func, ...rest) => {
   func && func(...rest);
 };
 
+// Camel<->snake key pairs that legacy snake_case forms (Preferences/General
+// and similar) still bind to, while API responses (organization metadata,
+// settings, etc.) are camelCased. Without this bridge those fields read back
+// empty even though they were saved correctly.
+const TRANSFORM_TO_FORM_KEY_PAIRS: Array<[string, string]> = [
+  ['baseCurrency', 'base_currency'],
+  ['fiscalYear', 'fiscal_year'],
+  ['dateFormat', 'date_format'],
+  ['taxNumber', 'tax_number'],
+  ['primaryColor', 'primary_color'],
+  ['logoKey', 'logo_key'],
+  ['logoUri', 'logo_uri'],
+  ['tenantId', 'tenant_id'],
+];
+
+const bridgeCamelSnakeAddress = (address: Record<string, any>) => {
+  const bridged = { ...address };
+  const pairs: Array<[string, string]> = [
+    ['postalCode', 'postal_code'],
+    ['stateProvince', 'state_province'],
+  ];
+  pairs.forEach(([camel, snake]) => {
+    if (bridged[snake] == null && bridged[camel] != null) {
+      bridged[snake] = bridged[camel];
+    }
+    if (bridged[camel] == null && bridged[snake] != null) {
+      bridged[camel] = bridged[snake];
+    }
+  });
+  return bridged;
+};
+
 export const transformToForm = (obj, emptyInitialValues) => {
+  if (!obj || !emptyInitialValues) {
+    return {};
+  }
+  const formKeys = Object.keys(emptyInitialValues);
+  const bridged = { ...obj };
+
+  TRANSFORM_TO_FORM_KEY_PAIRS.forEach(([camel, snake]) => {
+    if (formKeys.includes(snake) && bridged[snake] == null && bridged[camel] != null) {
+      bridged[snake] = bridged[camel];
+    }
+    if (formKeys.includes(camel) && bridged[camel] == null && bridged[snake] != null) {
+      bridged[camel] = bridged[snake];
+    }
+  });
+  if (bridged.address && typeof bridged.address === 'object' && !Array.isArray(bridged.address)) {
+    bridged.address = bridgeCamelSnakeAddress(bridged.address);
+  }
   return _.pickBy(
-    obj,
-    (val, key) => val !== null && Object.keys(emptyInitialValues).includes(key),
+    bridged,
+    (val, key) => val !== null && formKeys.includes(key),
   );
 };
 

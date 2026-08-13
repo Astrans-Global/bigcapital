@@ -1,4 +1,8 @@
-import moment from 'moment';
+// `moment` is a CJS-only module and this project's tsconfig doesn't set
+// `esModuleInterop`, so a plain default import compiles to `moment_1.default`
+// which is undefined at runtime (moment itself is the callable export).
+// Import the namespace and call it directly to sidestep the interop gap.
+import * as moment from 'moment';
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
 import { SystemUser } from '@/modules/System/models/SystemUser';

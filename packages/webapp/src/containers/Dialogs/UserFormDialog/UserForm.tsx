@@ -36,7 +36,7 @@ function UserFormInner({
 
   const initialFormValues = {
     ...initialValues,
-    ...(isEditMode && transformToForm(user, initialValues)),
+    ...(isEditMode && user && transformToForm(user, initialValues)),
   };
 
   const handleSubmit = (values, { setSubmitting, setErrors }) => {
@@ -71,6 +71,7 @@ function UserFormInner({
     <Formik
       validationSchema={UserFormSchema}
       initialValues={initialFormValues}
+      enableReinitialize
       onSubmit={handleSubmit}
     >
       <UserFormContent calloutCode={calloutCode} />

@@ -10,6 +10,12 @@ import { useResourceData } from '../GenericResource';
  * @returns
  */
 function transfromResourceDataToSearch(resource) {
+  // A bad/empty search response (or one still resolving) may not carry an
+  // `items` array yet; without this guard, typing quickly re-renders with
+  // `resource` undefined and crashes the whole SPA (blank screen).
+  if (!resource || !Array.isArray(resource.items)) {
+    return [];
+  }
   const selectItem = getUniversalSearchBind(resource._type, 'itemSelect');
 
   return resource.items.map((item) => ({
