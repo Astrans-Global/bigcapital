@@ -12,9 +12,12 @@ const AuthMetaBootContext = createContext();
 function AuthMetaBootProvider({ ...props }) {
   const { isLoading: isAuthMetaLoading, data: authMeta } = useAuthMetadata();
 
+  // useAuthApiFetcher() doesn't enable the camelCase response transform, so
+  // the wire response stays snake_case (`{ signup_disabled }`) — verified
+  // against the live /api/auth/meta response.
   const state = {
     isAuthMetaLoading,
-    signupDisabled: authMeta?.signupDisabled ?? authMeta?.meta?.signup_disabled,
+    signupDisabled: authMeta?.signup_disabled ?? authMeta?.signupDisabled,
   };
 
   if (isAuthMetaLoading) {
