@@ -11,6 +11,7 @@ import styled, { x } from '@xstyled/emotion';
 
 import { Icon, FormattedMessage as T } from '@/components';
 import { AstransLogo } from '@/components/Icons/AstransLogo';
+import { useIsDarkMode } from '@/hooks/useDarkMode';
 
 import {
   useAuthenticatedAccount,
@@ -38,11 +39,11 @@ const DashboardOrganizationMenu = styled(Menu)`
     padding: 8px 10px;
 
     &.is-active {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.06);
     }
 
     &:hover:not(.is-active):not(.bp4-disabled) {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.04);
     }
 
     &.bp4-disabled {
@@ -53,21 +54,50 @@ const DashboardOrganizationMenu = styled(Menu)`
 
   .bp4-menu-divider {
     margin: 8px 0;
-    border-top-color: rgba(255, 255, 255, 0.1);
+    border-top-color: rgba(0, 0, 0, 0.1);
   }
 
   .bp4-menu-item {
-    color: rgba(255, 255, 255, 0.9);
+    color: #1c2127;
     border-radius: 4px;
     line-height: 20px;
 
     &:hover:not(.bp4-disabled) {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      background: rgba(0, 0, 0, 0.05);
+      color: #1c2127;
     }
 
     .bp4-icon {
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  .bp4-dark & {
+    .org-workspace-item {
+      &.is-active {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &:hover:not(.is-active):not(.bp4-disabled) {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .bp4-menu-divider {
+      border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .bp4-menu-item {
+      color: rgba(255, 255, 255, 0.9);
+
+      &:hover:not(.bp4-disabled) {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+
+      .bp4-icon {
+        color: rgba(255, 255, 255, 0.6);
+      }
     }
   }
 `;
@@ -80,6 +110,7 @@ function SidebarHeadJSX({
   openDrawer,
 }) {
   const metadata = useCurrentOrganizationMetadata();
+  const isDarkMode = useIsDarkMode();
   const { data: user } = useAuthenticatedAccount();
   const { data: workspaces } = useWorkspaces();
   const currentOrganizationId = useAuthOrganizationId();
@@ -111,7 +142,9 @@ function SidebarHeadJSX({
                 gap={3}
                 py={'8px'}
                 px={'10px'}
-                backgroundColor="rgba(255, 255, 255, 0.05)"
+                backgroundColor={
+                  isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)'
+                }
                 borderRadius={4}
               >
                 {metadata?.logoUri ? (
@@ -140,7 +173,7 @@ function SidebarHeadJSX({
                     {firstLettersArgs(...(metadata?.name || '').split(' '))}
                   </x.div>
                 )}
-                <x.div fontWeight={600} color="#fff">
+                <x.div fontWeight={600} color={isDarkMode ? '#fff' : '#1c2127'}>
                   {metadata?.name}
                 </x.div>
               </x.div>
