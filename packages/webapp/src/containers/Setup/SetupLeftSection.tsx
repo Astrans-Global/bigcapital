@@ -3,7 +3,6 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Text } from '@blueprintjs/core';
 import { Icon, For, FormattedMessage as T, Stack } from '@/components';
-import { AstransLogo } from '@/components/Icons/AstransLogo';
 import { getFooterLinks } from '@/constants/footerLinks';
 import { useAuthActions } from '@/hooks/state';
 import style from './SetupLeftSection.module.scss';
@@ -94,7 +93,12 @@ export function SetupLeftSection() {
     <section className={'setup-page__left-section'}>
       <div className={'content'}>
         <div className={'content__logo'}>
-          <AstransLogo variant="white" height={44} />
+          <Icon
+            icon="bigcapital"
+            className={'bigcapital--alt'}
+            height={37}
+            width={190}
+          />
         </div>
         <SetupLeftSectionHeader />
         <SetupLeftSectionFooter />

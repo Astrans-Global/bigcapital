@@ -5,8 +5,7 @@ import {
   useCreateOneClickDemo,
   useOneClickDemoSignin,
 } from '@/hooks/query/oneclick-demo';
-import { Box, Stack } from '@/components';
-import { AstransLogo } from '@/components/Icons/AstransLogo';
+import { Box, Icon, Stack } from '@/components';
 import { useJob } from '@/hooks/query';
 import style from './OneClickDemoPage.module.scss';
 
@@ -60,7 +59,7 @@ export function OneClickDemoPageContent() {
     <Box className={style.root}>
       <Box className={style.inner}>
         <Stack align={'center'} spacing={40}>
-          <AstransLogo variant="black" height={44} />
+          <Icon icon="bigcapital" height={37} width={228} />
 
           {isLoading && (
             <Stack align={'center'} spacing={15}>

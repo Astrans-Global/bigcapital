@@ -118,22 +118,24 @@ function SidebarHeadJSX({
                   <x.img
                     src={metadata?.logoUri}
                     alt={metadata?.name}
-                    h={'60px'}
-                    w={'60px'}
-                    borderRadius={10}
-                    objectFit="cover"
+                    h={'28px'}
+                    w={'28px'}
+                    borderRadius={6}
+                    objectFit="contain"
+                    flexShrink={0}
                   />
                 ) : (
                   <x.div
-                    h={'60px'}
-                    w={'60px'}
-                    lineHeight="60px"
-                    borderRadius={10}
+                    h={'28px'}
+                    w={'28px'}
+                    lineHeight="28px"
+                    borderRadius={6}
                     backgroundColor="#CB22E5"
                     textAlign="center"
                     fontWeight={400}
-                    fontSize={16}
+                    fontSize={11}
                     color="#fff"
+                    flexShrink={0}
                   >
                     {firstLettersArgs(...(metadata?.name || '').split(' '))}
                   </x.div>

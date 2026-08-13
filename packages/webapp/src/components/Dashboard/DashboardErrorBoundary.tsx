@@ -1,7 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { FormattedMessage as T } from '@/components';
-import { AstransLogo } from '@/components/Icons/AstransLogo';
+import { FormattedMessage as T, Icon } from '@/components';
 
 export default function DashboardErrorBoundary({}) {
   return (
@@ -12,7 +11,7 @@ export default function DashboardErrorBoundary({}) {
       <p>
         <T id={'if_the_problem_stuck_please_contact_us_as_soon_as_possible'} />
       </p>
-      <AstransLogo variant="black" height={36} />
+      <Icon icon="bigcapital" height={30} width={160} />
     </div>
   );
 }

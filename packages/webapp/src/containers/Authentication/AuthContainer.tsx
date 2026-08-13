@@ -1,7 +1,6 @@
 // @ts-nocheck
 import styled from 'styled-components';
-import { FormattedMessage as T } from '@/components';
-import { AstransLogo } from '@/components/Icons/AstransLogo';
+import { Icon, FormattedMessage as T } from '@/components';
 
 interface AuthContainerProps {
   children: React.ReactNode;
@@ -12,7 +11,7 @@ export function AuthContainer({ children }: AuthContainerProps) {
     <AuthPage>
       <AuthInsider>
         <AuthLogo>
-          <AstransLogo variant="black" height={44} />
+          <Icon icon="bigcapital" height={37} width={214} />
         </AuthLogo>
 
         {children}

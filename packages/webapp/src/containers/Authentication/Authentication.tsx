@@ -7,12 +7,23 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Spinner } from '@blueprintjs/core';
 
 import authenticationRoutes from '@/routes/authentication';
-import { Box, FormattedMessage as T } from '@/components';
+import { Box } from '@/components';
 import { AuthMetaBootProvider } from './AuthMetaBoot';
 
 import '@/style/pages/Authentication/Auth.scss';
 import { useIsDarkMode } from '@/hooks/useDarkMode';
-import { AstransLogo } from '@/components/Icons/AstransLogo';
+
+function toggleColorTheme() {
+  const nextIsDark = !(
+    document.documentElement.classList.contains('bp4-dark') ||
+    document.body.classList.contains('bp4-dark')
+  );
+  document.documentElement.classList.toggle('bp4-dark', nextIsDark);
+  document.body.classList.toggle('bp4-dark', nextIsDark);
+  try {
+    localStorage.setItem('theme', nextIsDark ? 'dark' : 'light');
+  } catch (e) {}
+}
 
 export function Authentication() {
   const isDarkMode = useIsDarkMode();
@@ -20,11 +31,9 @@ export function Authentication() {
   return (
     <BodyClassName className={'authentication'}>
       <AuthPage>
-        <AuthInsider>
-          <AuthLogo>
-            <AstransLogo variant={isDarkMode ? 'white' : 'black'} height={44} />
-          </AuthLogo>
+        <AuthTitle>Astrans Global DMS</AuthTitle>
 
+        <AuthInsider>
           <AuthMetaBootProvider>
             <Suspense
               fallback={
@@ -37,6 +46,10 @@ export function Authentication() {
             </Suspense>
           </AuthMetaBootProvider>
         </AuthInsider>
+
+        <AuthThemeToggle type="button" onClick={toggleColorTheme}>
+          {isDarkMode ? 'Light mode' : 'Dark mode'}
+        </AuthThemeToggle>
       </AuthPage>
     </BodyClassName>
   );
@@ -73,10 +86,54 @@ const AuthInsider = styled.div`
   width: 384px;
   margin: 0 auto;
   margin-bottom: 40px;
-  padding-top: 80px;
+  padding-top: 32px;
 `;
 
-const AuthLogo = styled.div`
+const AuthTitle = styled.h1`
+  margin: 0;
+  padding: 36px 16px 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
   text-align: center;
-  margin-bottom: 40px;
+  white-space: nowrap;
+  color: #1c2127;
+
+  .bp4-dark & {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  @media (max-height: 700px) {
+    padding-top: 14px;
+    font-size: 26px;
+  }
+  @media (max-width: 520px) {
+    font-size: 24px;
+    white-space: normal;
+    max-width: 92vw;
+    margin: 0 auto;
+  }
+`;
+
+const AuthThemeToggle = styled.button`
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+  color: #1c2127;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  .bp4-dark & {
+    background: #252a31;
+    color: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
 `;
