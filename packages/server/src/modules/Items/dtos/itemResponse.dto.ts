@@ -161,6 +161,13 @@ export class ItemResponseDto {
   };
 
   @ApiProperty({
+    description: 'The pack size of the item in litres',
+    example: 4,
+    required: false,
+  })
+  packSizeLitres?: number;
+
+  @ApiProperty({
     description: 'The description shown on sales documents',
     example:
       'Premium ergonomic office chair with adjustable height and lumbar support',

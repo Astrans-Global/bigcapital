@@ -301,6 +301,17 @@ export const ItemMeta = {
       relationImportMatch: ['name'],
       importHint: 'item.field.category_hint',
     },
+    subcategoryId: {
+      name: 'item.field.subcategory',
+      fieldType: 'relation',
+      relationModel: 'ItemSubcategory',
+      relationImportMatch: ['name'],
+      importHint: 'item.field.subcategory_hint',
+    },
+    packSizeLitres: {
+      name: 'item.field.pack_size_litres',
+      fieldType: 'number',
+    },
     active: {
       name: 'item.field.active',
       fieldType: 'boolean',

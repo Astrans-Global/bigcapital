@@ -29,6 +29,7 @@ export class Item extends TenantBaseModel {
   public readonly inventoryAccountId: number;
   public readonly categoryId: number;
   public readonly subcategoryId: number;
+  public readonly packSizeLitres: number;
   public readonly pictureUri: string;
   public readonly sellAccountId: number;
   public readonly sellDescription: string;

@@ -198,6 +198,19 @@ export class CommandItemDto {
   })
   subcategoryId?: number;
 
+  @Expose({ name: 'pack_size_litres' })
+  @IsOptional()
+  @ToNumber()
+  @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(0)
+  @ApiProperty({
+    description: 'Pack size of the item in litres, used for total litres calculations',
+    required: false,
+    minimum: 0,
+    example: 4,
+  })
+  packSizeLitres?: number;
+
   @IsOptional()
   @IsString()
   @ApiProperty({

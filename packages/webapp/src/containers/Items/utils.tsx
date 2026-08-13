@@ -41,6 +41,7 @@ const defaultInitialValues = {
   inventory_account_id: '',
   category_id: '',
   subcategory_id: '',
+  pack_size_litres: '',
   sellable: 1,
   purchasable: true,
   sell_description: '',

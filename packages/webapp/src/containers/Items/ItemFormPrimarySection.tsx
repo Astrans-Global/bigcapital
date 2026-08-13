@@ -155,6 +155,24 @@ export function ItemFormPrimarySection() {
             <FInputGroup name={'code'} medium={true} fastField />
           </FFormGroup>
 
+          {/*----------- Pack size (litres) ----------*/}
+          <FFormGroup
+            name={'pack_size_litres'}
+            label={intl.get('pack_size_litres')}
+            inline={true}
+            fastField
+          >
+            <FInputGroup
+              name={'pack_size_litres'}
+              medium={true}
+              type={'number'}
+              min={0}
+              step={'any'}
+              placeholder={intl.get('pack_size_litres_placeholder')}
+              fastField
+            />
+          </FFormGroup>
+
           {/*----------- Item category ----------*/}
           <FFormGroup
             name={'category_id'}

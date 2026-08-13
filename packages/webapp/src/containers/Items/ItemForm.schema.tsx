@@ -57,6 +57,11 @@ const Schema = Yup.object().shape({
     .label(intl.get('inventory_account')),
   category_id: Yup.number().positive().nullable(),
   subcategory_id: Yup.number().positive().nullable(),
+  pack_size_litres: Yup.number()
+    .min(0)
+    .max(DATATYPES_LENGTH.DECIMAL_13_3)
+    .nullable()
+    .label(intl.get('pack_size_litres')),
   stock: Yup.string() || Yup.boolean(),
   sellable: Yup.boolean().required(),
   purchasable: Yup.boolean().required(),
@@ -69,6 +74,10 @@ export const transformItemFormData = (item, defaultValue) => {
     // still keys these fields in snake_case, so map them across explicitly.
     category_id: defaultTo(item?.categoryId, item?.category_id ?? null),
     subcategory_id: defaultTo(item?.subcategoryId, item?.subcategory_id ?? null),
+    pack_size_litres: defaultTo(
+      item?.packSizeLitres,
+      item?.pack_size_litres ?? null,
+    ),
     sellable: !!defaultTo(item?.sellable, defaultValue.sellable),
     purchasable: !!defaultTo(item?.purchasable, defaultValue.purchasable),
     active: !!defaultTo(item?.active, defaultValue.active),
