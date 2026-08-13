@@ -50,7 +50,7 @@ export const AuthInsiderCopyright = styled.div`
   text-align: center;
   font-size: 12px;
   color: #666;
-  margin-top: 1.2rem;
+  margin-top: 3.5rem;
 
   .bp4-icon-bigcapital {
     svg {

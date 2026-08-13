@@ -22,7 +22,14 @@ export function AstransLogo({
     <img
       src={src}
       alt="Astrans"
-      style={{ height, width: 'auto', maxWidth: '100%', objectFit: 'contain', ...style }}
+      style={{
+        display: 'block',
+        height,
+        width: 'auto',
+        maxWidth: '100%',
+        objectFit: 'contain',
+        ...style,
+      }}
       {...rest}
     />
   );

@@ -11,23 +11,9 @@ import { Box } from '@/components';
 import { AuthMetaBootProvider } from './AuthMetaBoot';
 
 import '@/style/pages/Authentication/Auth.scss';
-import { useIsDarkMode } from '@/hooks/useDarkMode';
-
-function toggleColorTheme() {
-  const nextIsDark = !(
-    document.documentElement.classList.contains('bp4-dark') ||
-    document.body.classList.contains('bp4-dark')
-  );
-  document.documentElement.classList.toggle('bp4-dark', nextIsDark);
-  document.body.classList.toggle('bp4-dark', nextIsDark);
-  try {
-    localStorage.setItem('theme', nextIsDark ? 'dark' : 'light');
-  } catch (e) {}
-}
+import { ColorThemeToggle } from '@/components/ColorThemeToggle';
 
 export function Authentication() {
-  const isDarkMode = useIsDarkMode();
-
   return (
     <BodyClassName className={'authentication'}>
       <AuthPage>
@@ -47,9 +33,7 @@ export function Authentication() {
           </AuthMetaBootProvider>
         </AuthInsider>
 
-        <AuthThemeToggle type="button" onClick={toggleColorTheme}>
-          {isDarkMode ? 'Light mode' : 'Dark mode'}
-        </AuthThemeToggle>
+        <ColorThemeToggle />
       </AuthPage>
     </BodyClassName>
   );
@@ -114,26 +98,5 @@ const AuthTitle = styled.h1`
     white-space: normal;
     max-width: 92vw;
     margin: 0 auto;
-  }
-`;
-
-const AuthThemeToggle = styled.button`
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 40;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: #fff;
-  color: #1c2127;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 13px;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-
-  .bp4-dark & {
-    background: #252a31;
-    color: rgba(255, 255, 255, 0.85);
-    border-color: rgba(255, 255, 255, 0.12);
   }
 `;

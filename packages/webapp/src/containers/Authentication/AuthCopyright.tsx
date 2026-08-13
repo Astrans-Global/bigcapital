@@ -9,7 +9,7 @@ export function AuthCopyright() {
 
   return (
     <AuthCopyrightRoot>
-      <AstransLogo variant={isDarkMode ? 'white' : 'black'} height={22} />
+      <AstransLogo variant={isDarkMode ? 'white' : 'black'} height={40} />
       <AuthCopyrightWordmark>Astrans</AuthCopyrightWordmark>
     </AuthCopyrightRoot>
   );
@@ -18,12 +18,12 @@ export function AuthCopyright() {
 const AuthCopyrightRoot = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 `;
 
 const AuthCopyrightWordmark = styled.span`
   font-family: 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 26px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #3d4450;
