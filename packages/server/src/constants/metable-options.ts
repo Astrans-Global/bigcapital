@@ -261,4 +261,11 @@ export const SettingsOptions = {
       type: 'boolean',
     },
   },
+  astrans_ops: {
+    // Default VAT % applied to GRN lines that don't carry their own tax
+    // rate. See docs/ops/PHASE1.md ("Settings: VAT % (default 18)").
+    default_vat_rate_percent: {
+      type: 'number',
+    },
+  },
 };
