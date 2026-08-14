@@ -37,6 +37,12 @@ export class ItemEntry extends BaseModel {
 
   public warehouseId: number;
 
+  // Which GRN price/discount batch (see item_price_lots) this line was
+  // sold from -- Astrans DMS invoice-side lot picker. See
+  // docs/ops/PHASE1.md ("Lots / GRN"). Not used by Bills (those write
+  // lots, they don't consume them) or any other transaction type yet.
+  public itemPriceLotId: number | null;
+
   item: Item;
   allocatedCostEntries: BillLandedCostEntry[];
 

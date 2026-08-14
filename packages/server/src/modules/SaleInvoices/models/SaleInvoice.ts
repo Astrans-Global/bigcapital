@@ -35,6 +35,11 @@ export class SaleInvoice extends TenantBaseModel {
 
   public dueDate: Date;
   public deliveredAt: Date | string;
+
+  // Astrans DMS status pipeline (Pending/Reserved/Invoiced/Delivered),
+  // layered on top of `deliveredAt` -- see docs/ops/PHASE1.md
+  // ("Status pipeline") and the creating migration's header comment.
+  public dmsStatus: 'pending' | 'reserved' | 'invoiced' | 'delivered';
   public currencyCode: string;
   public invoiceDate: Date;
 

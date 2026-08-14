@@ -153,4 +153,15 @@ export class ItemEntryDto {
     example: 1021,
   })
   costAccountId?: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @ToNumber()
+  @IsInt()
+  @ApiProperty({
+    description:
+      'The item price-lot (GRN price/discount batch) this line sells from',
+    example: 1,
+  })
+  itemPriceLotId?: number;
 }

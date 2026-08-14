@@ -11,6 +11,7 @@ import { ItemCategory } from '@/modules/ItemCategories/models/ItemCategory.model
 import { ItemSubcategory } from '@/modules/ItemSubcategories/models/ItemSubcategory.model';
 import { ItemPriceLot } from '@/modules/ItemPriceLots/models/ItemPriceLot.model';
 import { ItemPriceLotReceipt } from '@/modules/ItemPriceLots/models/ItemPriceLotReceipt.model';
+import { ItemPriceLotReservation } from '@/modules/ItemPriceLots/models/ItemPriceLotReservation.model';
 import { BillVatRecord } from '@/modules/GrnVat/models/BillVatRecord.model';
 import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { PdfTemplateModel } from '@/modules/PdfTemplate/models/PdfTemplate';
@@ -56,6 +57,7 @@ const models = [
   ItemSubcategory,
   ItemPriceLot,
   ItemPriceLotReceipt,
+  ItemPriceLotReservation,
   BillVatRecord,
   TaxRateModel,
   PdfTemplateModel,

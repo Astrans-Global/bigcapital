@@ -22,4 +22,19 @@ export class GetItemPriceLotsQueryDto {
   @IsOptional()
   @ApiPropertyOptional({ example: 3, description: 'Filter lots by warehouse' })
   warehouseId?: number;
+
+  // When editing an invoice that already holds stock aside (Reserved/
+  // Invoiced), that invoice's own hold shouldn't count against what it
+  // can pick -- see `GetItemPriceLotsService` for how this is applied.
+  @Expose({ name: 'exclude_invoice_id' })
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  @ApiPropertyOptional({
+    example: 45,
+    description:
+      "Adds this invoice's own active holds back into each lot's float quantity",
+  })
+  excludeInvoiceId?: number;
 }

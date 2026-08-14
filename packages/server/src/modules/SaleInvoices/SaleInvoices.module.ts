@@ -141,6 +141,10 @@ import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleI
     SaleInvoicePdf,
     SaleInvoicesExportable,
     SaleInvoicesImportable,
+    // Exported for the Astrans DMS status pipeline (ItemPriceLotsModule),
+    // which drives Delivered transitions through the native deliver flow
+    // rather than duplicating its GL/inventory-posting logic.
+    DeliverSaleInvoice,
   ],
 })
 export class SaleInvoicesModule {}
