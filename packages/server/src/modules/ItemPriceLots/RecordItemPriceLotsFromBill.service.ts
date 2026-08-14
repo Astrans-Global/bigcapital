@@ -91,7 +91,6 @@ export class RecordItemPriceLotsFromBillService {
           rate: entry.rate,
           discount: entry.discount,
           discountType: entry.discountType,
-          taxRate: entry.taxRate,
         })),
       },
       defaultVatRatePercent,
@@ -99,7 +98,7 @@ export class RecordItemPriceLotsFromBillService {
 
     for (let i = 0; i < inventoryEntries.length; i++) {
       const entry = inventoryEntries[i];
-      const { unitCostNet, vatRatePercent } = lotCosts[i];
+      const { listPriceExclVat, discountPercent, vatRatePercent } = lotCosts[i];
 
       // Idempotency: skip if this exact bill line was already recorded.
       const existingReceipt = await this.itemPriceLotReceiptModel()
@@ -117,11 +116,15 @@ export class RecordItemPriceLotsFromBillService {
         );
       }
 
+      // A lot's identity is its (price, discount, VAT) triple -- the same
+      // GRN terms mean the same lot, regardless of how many bills fed it.
       const existingLot = await this.itemPriceLotModel()
         .query(trx)
         .where('itemId', entry.itemId)
         .where('warehouseId', warehouseId)
-        .where('unitCostNet', unitCostNet)
+        .where('listPriceExclVat', listPriceExclVat)
+        .where('discountPercent', discountPercent)
+        .where('vatRatePercent', vatRatePercent)
         .first();
 
       let lotId: number;
@@ -140,7 +143,8 @@ export class RecordItemPriceLotsFromBillService {
           .insertAndFetch({
             itemId: entry.itemId,
             warehouseId,
-            unitCostNet,
+            listPriceExclVat,
+            discountPercent,
             vatRatePercent,
             originalQty: entry.quantity,
             realQty: entry.quantity,

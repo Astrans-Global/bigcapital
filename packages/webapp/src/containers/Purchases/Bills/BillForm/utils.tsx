@@ -19,6 +19,7 @@ import {
   updateItemsEntriesTotal,
   ensureEntriesHaveEmptyLine,
   assignEntriesTaxAmount,
+  assignEntriesTaxRate,
   aggregateItemEntriesTaxRates,
 } from '@/containers/Entries/utils';
 import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
@@ -73,7 +74,31 @@ export const defaultBill = {
   // Discount
   discount: '',
   discount_type: 'amount',
+
+  // Single bill-wide tax rate (applied to every line under the hood) --
+  // GRN VAT is one flat rate for the whole bill, never picked per line.
+  // See docs/ops/PHASE1.md ("Lots / GRN"). UI-only field, stripped back
+  // out of the request payload in `transformFormValuesToRequest`.
+  bill_tax_rate_id: '',
 };
+
+/**
+ * Stamps every entry with the single bill-wide tax rate and recomputes
+ * each entry's tax_rate/tax_amount from it -- the same fields Bigcapital's
+ * native per-line tax rate picker would have set, just driven from one
+ * control instead of one per row so the underlying GL/tax-rate-transaction
+ * posting keeps working unmodified.
+ */
+export const applyBillTaxRateToEntries = R.curry(
+  (billTaxRateId, taxRates, isInclusiveTax, entries) => {
+    if (!billTaxRateId) return entries;
+
+    return R.compose(
+      assignEntriesTaxAmount(isInclusiveTax),
+      assignEntriesTaxRate(taxRates),
+    )(entries.map((entry) => ({ ...entry, tax_rate_id: billTaxRateId })));
+  },
+);
 
 export const ERRORS = {
   // Bills
@@ -103,11 +128,18 @@ export const transformToEditForm = (bill) => {
 
   const attachments = transformAttachmentsToForm(bill);
 
+  // Reconstruct the bill-wide tax rate selection from whichever entry
+  // carries one -- every line should share the same tax_rate_id since
+  // it's only ever set via the single bill-level control.
+  const billTaxRateId =
+    bill.entries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
+
   return {
     ...transformToForm(bill, defaultBill),
     inclusive_exclusive_tax: bill.is_inclusive_tax
       ? TaxType.Inclusive
       : TaxType.Exclusive,
+    bill_tax_rate_id: billTaxRateId,
     entries,
     attachments,
   };
@@ -139,7 +171,7 @@ export const transformFormValuesToRequest = (values) => {
   const attachments = transformAttachmentsToRequest(values);
 
   return {
-    ...values,
+    ...R.omit(['bill_tax_rate_id'], values),
     entries: transformEntriesToSubmit(entries),
     open: false,
     attachments,

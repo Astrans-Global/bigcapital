@@ -5,7 +5,14 @@ export class ItemPriceLot extends BaseModel {
   itemId!: number;
   warehouseId!: number;
 
-  unitCostNet!: number;
+  // VAT-excluded, pre-discount unit list price from the originating GRN
+  // line(s), and the effective combined discount % (line + proportional
+  // header discount) relative to it. See the creating migration's header
+  // comment for the full rationale -- these two are stored separately
+  // (rather than one collapsed net cost) so both accounting (unitCostNet
+  // below) and future invoice display can be derived from the same data.
+  listPriceExclVat!: number;
+  discountPercent!: number;
   vatRatePercent!: number;
 
   originalQty!: number;
@@ -35,7 +42,7 @@ export class ItemPriceLot extends BaseModel {
    * Virtual attributes.
    */
   static get virtualAttributes() {
-    return ['floatQty'];
+    return ['floatQty', 'unitCostNet'];
   }
 
   /**
@@ -45,6 +52,21 @@ export class ItemPriceLot extends BaseModel {
    */
   get floatQty(): number {
     return this.realQty - this.reservedQty;
+  }
+
+  /**
+   * VAT-inclusive net cost per unit -- the "lot cost" used for COGS and
+   * accounts-payable. Always derived from the stored list price/discount/
+   * VAT snapshot rather than stored directly, so it can never drift out of
+   * sync with them. See docs/ops/PHASE1.md ("Lots / GRN").
+   * @returns {number}
+   */
+  get unitCostNet(): number {
+    const netExVat =
+      this.listPriceExclVat * (1 - this.discountPercent / 100);
+    const grossed = netExVat * (1 + this.vatRatePercent / 100);
+
+    return Math.round((grossed + Number.EPSILON) * 100) / 100;
   }
 
   /**

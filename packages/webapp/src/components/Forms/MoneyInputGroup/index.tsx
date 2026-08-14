@@ -28,6 +28,7 @@ export const CurrencyInput: FC<CurrencyInputProps> = ({
   placeholder,
   precision,
   prefix,
+  suffix,
   step,
   decimalSeparator = '.',
   groupSeparator = ',',
@@ -52,6 +53,7 @@ export const CurrencyInput: FC<CurrencyInputProps> = ({
     groupSeparator,
     turnOffSeparators,
     prefix,
+    suffix,
   };
 
   const cleanValueOptions: Partial<CleanValueOptions> = {

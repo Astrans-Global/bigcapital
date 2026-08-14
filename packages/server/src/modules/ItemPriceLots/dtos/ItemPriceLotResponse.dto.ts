@@ -11,13 +11,28 @@ export class ItemPriceLotResponseDto {
   warehouseId: number;
 
   @ApiProperty({
-    example: 118.0,
-    description: 'VAT-inclusive net cost per unit (the "lot cost")',
+    example: 2000.0,
+    description:
+      'VAT-excluded, pre-discount unit list price from the originating GRN line(s)',
   })
-  unitCostNet: number;
+  listPriceExclVat: number;
+
+  @ApiProperty({
+    example: 10,
+    description:
+      'Effective combined discount % (line + proportional header discount) relative to listPriceExclVat',
+  })
+  discountPercent: number;
 
   @ApiProperty({ example: 18, description: 'VAT % snapshot used for this lot' })
   vatRatePercent: number;
+
+  @ApiProperty({
+    example: 2124.0,
+    description:
+      'VAT-inclusive net cost per unit (the "lot cost"), derived from listPriceExclVat/discountPercent/vatRatePercent',
+  })
+  unitCostNet: number;
 
   @ApiProperty({ example: 100, description: 'Lifetime total received into this lot' })
   originalQty: number;

@@ -19,6 +19,7 @@ import {
 import { TaxType } from '@/interfaces/TaxRates';
 import { AdjustmentTotalLine } from '@/containers/Sales/Invoices/InvoiceForm/AdjustmentTotalLine';
 import { DiscountTotalLine } from '@/containers/Sales/Invoices/InvoiceForm/DiscountTotalLine';
+import { BillTaxRateTotalLine } from './BillTaxRateTotalLine';
 
 export function BillFormFooterRight() {
   const {
@@ -49,6 +50,7 @@ export function BillFormFooterRight() {
         currencyCode={currency_code}
         discountAmount={discountAmount}
       />
+      <BillTaxRateTotalLine />
       <AdjustmentTotalLine adjustmentAmount={adjustmentAmount} />
       {taxEntries.map((tax, index) => (
         <TotalLine
@@ -80,8 +82,10 @@ export function BillFormFooterRight() {
 
 const BillTotalLines = styled(TotalLines)`
   --x-color-text: #555;
-  --x-color-text: var(--color-light-gray4);
 
+  .bp4-dark & {
+    --x-color-text: var(--color-light-gray4);
+  }
   width: 100%;
   color: var(--x-color-text);
 `;

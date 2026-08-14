@@ -7,8 +7,6 @@ export interface ILotCostBillEntryInput {
   rate: number;
   discount?: number | null;
   discountType?: DiscountType | null;
-  /** Snapshot tax rate (0-100) assigned to this line, if any. */
-  taxRate?: number | null;
 }
 
 export interface ILotCostBillInput {
@@ -22,7 +20,20 @@ export interface ILotCostResult {
   lineNetExVat: number;
   /** This line's share of the bill-header discount (VAT-excl basis). */
   headerDiscountAllocated: number;
-  /** VAT rate (0-100) used to gross up this line. */
+  /**
+   * VAT-excluded, pre-discount unit list price -- stored as-is on the lot
+   * for future invoice display (see docs/ops/PHASE1.md "Lots / GRN").
+   */
+  listPriceExclVat: number;
+  /**
+   * Effective combined discount % (this line's own discount plus its
+   * proportional share of any bill-header discount), relative to
+   * `listPriceExclVat`. Rounded to 2dp for storage -- `unitCostNet` below
+   * is re-derived from this rounded figure, consistent with the project's
+   * round-2dp-and-absorb rounding convention.
+   */
+  discountPercent: number;
+  /** VAT rate (0-100) applied to the whole bill -- see `vatRatePercent`. */
   vatRatePercent: number;
   /** Final per-unit lot cost: VAT-inclusive net cost, rounded to 2dp. */
   unitCostNet: number;
@@ -46,11 +57,12 @@ function lineNetExVat(entry: ILotCostBillEntryInput): number {
 }
 
 /**
- * Computes the VAT-inclusive net unit cost ("lot cost") for every entry of
- * a GRN bill, per docs/ops/PHASE1.md ("Lots / GRN"):
+ * Computes the item price-lot fields for every entry of a GRN bill, per
+ * docs/ops/PHASE1.md ("Lots / GRN"):
  *
  *   lot_net_per_unit = (list_excl_vat * (1 - line_discount%) - proportional
  *                       share of bill-header discount) / quantity
+ *   discount_percent = (1 - lot_net_per_unit / list_excl_vat) * 100
  *   unit_cost_net = round(lot_net_per_unit * (1 + vat%), 2)
  *
  * The bill-header discount is allocated proportionally across lines by
@@ -59,8 +71,13 @@ function lineNetExVat(entry: ILotCostBillEntryInput): number {
  * virtuals so this is correct regardless of how those interact with
  * inclusive-tax/withholding-tax settings on the bill header.
  *
+ * There is deliberately no per-line tax rate here: VAT on a GRN is a
+ * single flat rate for the whole bill (never entered per line -- see the
+ * `enableTaxRates={false}` change on the Bill form), so `vatRatePercent`
+ * is the same org-configured `defaultVatRatePercent` for every entry.
+ *
  * @param bill - Header discount + line entries.
- * @param defaultVatRatePercent - Fallback VAT % for lines with no tax rate.
+ * @param defaultVatRatePercent - The org's single flat VAT % for this bill.
  * @returns One result per entry, in the same order as `bill.entries`.
  */
 export function computeItemPriceLotUnitCosts(
@@ -85,12 +102,25 @@ export function computeItemPriceLotUnitCosts(
     const lotNetPreVatPerUnit =
       entry.quantity > 0 ? lotNetPreVatTotal / entry.quantity : 0;
 
-    const vatRatePercent = entry.taxRate ?? defaultVatRatePercent;
-    const unitCostNet = round2(lotNetPreVatPerUnit * (1 + vatRatePercent / 100));
+    const listPriceExclVat = round2(entry.rate);
+    const discountPercent =
+      listPriceExclVat > 0
+        ? round2((1 - lotNetPreVatPerUnit / listPriceExclVat) * 100)
+        : 0;
+
+    const vatRatePercent = defaultVatRatePercent;
+    // Re-derive from the rounded (listPriceExclVat, discountPercent) pair
+    // rather than lotNetPreVatPerUnit directly, so unitCostNet always
+    // matches what the model's virtual attribute would compute from the
+    // persisted row (see ItemPriceLot.model.ts).
+    const netExVatFromStored = listPriceExclVat * (1 - discountPercent / 100);
+    const unitCostNet = round2(netExVatFromStored * (1 + vatRatePercent / 100));
 
     return {
       lineNetExVat: netExVat,
       headerDiscountAllocated,
+      listPriceExclVat,
+      discountPercent,
       vatRatePercent,
       unitCostNet,
     };
