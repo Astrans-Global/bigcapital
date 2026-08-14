@@ -53,7 +53,11 @@ exports.up = async function (knex) {
     table.timestamps();
 
     table.index(['item_id', 'warehouse_id']);
-    table.unique(['item_id', 'warehouse_id', 'unit_cost_net']);
+    // Explicit short name -- the default auto-generated name is fine here
+    // but kept explicit for consistency with the receipts table below.
+    table.unique(['item_id', 'warehouse_id', 'unit_cost_net'], {
+      indexName: 'item_price_lots_item_warehouse_cost_unique',
+    });
   });
 
   await knex.schema.createTable('item_price_lot_receipts', (table) => {
@@ -87,7 +91,11 @@ exports.up = async function (knex) {
     table.timestamps();
 
     table.index(['source_bill_id']);
-    table.unique(['source_bill_id', 'source_bill_entry_id']);
+    // Explicit short name -- the default auto-generated name exceeds
+    // MySQL's 64-char identifier limit (ER_TOO_LONG_IDENT).
+    table.unique(['source_bill_id', 'source_bill_entry_id'], {
+      indexName: 'item_price_lot_receipts_bill_entry_unique',
+    });
   });
 };
 
