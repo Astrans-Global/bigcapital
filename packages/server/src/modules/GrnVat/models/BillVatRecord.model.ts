@@ -10,7 +10,7 @@ import { BaseModel } from '@/models/Model';
 export class BillVatRecord extends BaseModel {
   billId!: number;
   billNumber!: string | null;
-  billDate!: string;
+  billDate!: Date | string;
   vendorId!: number;
 
   vatRatePercent!: number;
