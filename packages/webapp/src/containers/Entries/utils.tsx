@@ -139,6 +139,10 @@ export function useFetchItemRow({ landedCost, itemType, notifyNewRow }) {
             }
           : {}),
         taxRateId,
+        // Astrans DMS price-lot picker -- a lot picked for the *previous*
+        // item on this row no longer applies once the item itself changes,
+        // see docs/ops/PHASE1.md ("Lots / GRN").
+        item_price_lot_id: null,
       };
       setItemRow(null);
       saveInvoke(notifyNewRow, newRow, rowIndex);
@@ -260,6 +264,32 @@ export const useComposeRowsOnEditTableCell = () => {
       )(localValue);
     },
     [taxRates, isInclusiveTax, localValue, defaultEntry],
+  );
+};
+
+/**
+ * Compose rows when a price-lot is picked on a row -- merges the given
+ * patch (item_price_lot_id + that lot's own rate/discount, see
+ * `ItemPriceLotSuggestInputCell`) into the row rather than replacing a
+ * single field, then re-runs the same total/tax pipeline as a normal cell
+ * edit.
+ * @returns {Function}
+ */
+export const useComposeRowsOnEditPriceLot = () => {
+  const { taxRates, isInclusiveTax, localValue } =
+    useItemEntriesTableContext();
+
+  return useCallback(
+    (rowIndex, patch) => {
+      return R.compose(
+        assignEntriesTaxAmount(isInclusiveTax),
+        assignEntriesTaxRate(taxRates),
+        orderingLinesIndexes,
+        updateItemsEntriesTotal,
+        updateTableRow(rowIndex, patch),
+      )(localValue);
+    },
+    [taxRates, isInclusiveTax, localValue],
   );
 };
 

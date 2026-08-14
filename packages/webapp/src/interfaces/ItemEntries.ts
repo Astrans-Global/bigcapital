@@ -8,4 +8,7 @@ export interface ItemEntry {
   tax_rate_id: number;
   tax_rate: number;
   tax_amount: number;
+  // Astrans DMS price-lot picker (invoice lines only) -- see
+  // docs/ops/PHASE1.md ("Lots / GRN").
+  item_price_lot_id?: number | null;
 }

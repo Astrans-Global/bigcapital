@@ -48,6 +48,8 @@ export const defaultInvoiceEntry = {
   tax_rate_id: '',
   tax_rate: '',
   tax_amount: '',
+  // Astrans DMS price-lot picker -- see docs/ops/PHASE1.md ("Lots / GRN").
+  item_price_lot_id: '',
 };
 
 // Default invoice object.
@@ -86,6 +88,7 @@ export const defaultReqInvoiceEntry = {
   quantity: '',
   description: '',
   tax_rate_id: '',
+  item_price_lot_id: '',
 };
 
 /**

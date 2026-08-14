@@ -12,7 +12,7 @@ import { ITEM_TYPE } from '@/containers/Entries/utils';
  * Invoice items entries editor field.
  */
 export function InvoiceItemsEntriesEditorField() {
-  const { items, taxRates } = useInvoiceFormContext();
+  const { items, taxRates, invoiceId } = useInvoiceFormContext();
 
   return (
     <FastField
@@ -38,6 +38,13 @@ export function InvoiceItemsEntriesEditorField() {
           linesNumber={4}
           currencyCode={values.currency_code}
           isInclusiveTax={values.inclusive_exclusive_tax === TaxType.Inclusive}
+          // Astrans DMS price-lot picker -- see docs/ops/PHASE1.md
+          // ("Lots / GRN"). Editing an existing invoice excludes its own
+          // active holds from each lot's float qty (see
+          // `GetItemPriceLotsService.excludeInvoiceOwnHold`).
+          enablePriceLots
+          warehouseId={values.warehouse_id}
+          excludeInvoiceId={invoiceId}
         />
       )}
     </FastField>

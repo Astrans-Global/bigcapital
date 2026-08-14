@@ -33,6 +33,7 @@ export * from './authentication';
 export * from './contacts';
 export * from './items-categories';
 export * from './items-subcategories';
+export * from './item-price-lots';
 export * from './views';
 export * from './transactions-locking';
 export * from './vendor-credits';

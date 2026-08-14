@@ -15,6 +15,7 @@ import {
   NumericInputCell,
   CheckBoxFieldCell,
   ProjectBillableEntriesCell,
+  ItemPriceLotSuggestInputCell,
 } from '@/components/DataTableCells';
 import { useFeatureCan } from '@/hooks/state';
 import { TaxRatesSuggestInputCell } from '@/components/TaxRates/TaxRatesSuggestInputCell';
@@ -88,11 +89,24 @@ const LandedCostHeaderCell = () => {
 };
 
 /**
+ * Price-lot header cell.
+ */
+const PriceLotHeaderCell = () => {
+  return (
+    <>
+      Price lot
+      <Hint content="Which GRN price/discount batch this line sells from -- picking one fills in this row's price and discount." />
+    </>
+  );
+};
+
+/**
  * Retrieve editable items entries columns.
  */
 export function useEditableItemsEntriesColumns() {
   const { featureCan } = useFeatureCan();
-  const { landedCost, enableTaxRates } = useItemEntriesTableContext();
+  const { landedCost, enableTaxRates, enablePriceLots } =
+    useItemEntriesTableContext();
 
   const isProjectsFeatureEnabled = featureCan(Features.Projects);
 
@@ -108,6 +122,19 @@ export function useEditableItemsEntriesColumns() {
         className: 'item',
         fieldProps: { allowCreate: true },
       },
+      ...(enablePriceLots
+        ? [
+            {
+              id: 'item_price_lot_id',
+              Header: PriceLotHeaderCell,
+              accessor: 'item_price_lot_id',
+              Cell: ItemPriceLotSuggestInputCell,
+              disableSortBy: true,
+              width: 150,
+              className: 'item-price-lot',
+            },
+          ]
+        : []),
       {
         Header: intl.get('description'),
         accessor: 'description',

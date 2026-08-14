@@ -6,6 +6,7 @@ import { InclusiveButtonOptions } from './constants';
 import { FFormGroup, FSelect } from '@/components';
 import { EntriesActionsBar } from '@/containers/Entries/EntriesActionBar';
 import { composeEntriesOnEditInclusiveTax } from './utils';
+import { InvoiceDmsStatusControl } from './InvoiceDmsStatusControl';
 
 /**
  * Invoice form actions.
@@ -14,6 +15,7 @@ import { composeEntriesOnEditInclusiveTax } from './utils';
 export function InvoiceFormActions() {
   return (
     <EntriesActionsBar>
+      <InvoiceDmsStatusControl />
       <InvoiceExclusiveInclusiveSelect />
     </EntriesActionsBar>
   );

@@ -14,6 +14,7 @@ import BranchesListFieldCell from './BranchesListFieldCell';
 import { ProjectsListFieldCell } from './ProjectsListFieldCell';
 import { ProjectBillableEntriesCell } from './ProjectBillableEntriesCell';
 import { TextOverviewTooltipCell } from './TextOverviewTooltipCell';
+import { ItemPriceLotSuggestInputCell } from './ItemPriceLotSuggestInputCell';
 
 export {
   AccountsListFieldCell,
@@ -32,4 +33,5 @@ export {
   ProjectsListFieldCell,
   ProjectBillableEntriesCell,
   TextOverviewTooltipCell,
+  ItemPriceLotSuggestInputCell,
 };

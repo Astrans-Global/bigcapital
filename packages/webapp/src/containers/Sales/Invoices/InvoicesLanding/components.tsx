@@ -66,6 +66,34 @@ export const statusAccessor = (row) => {
   );
 };
 
+// Astrans DMS status pipeline (Pending -> Reserved -> Invoiced -> Delivered)
+// -- see docs/ops/PHASE1.md ("Status pipeline"). Kept as its own column
+// rather than folded into `InvoiceStatus` above, since that one reflects
+// Bigcapital's native payment/delivery state, not this DMS workflow stage.
+const DMS_STATUS_LABELS = {
+  pending: 'Pending',
+  reserved: 'Reserved',
+  invoiced: 'Invoiced',
+  delivered: 'Delivered',
+};
+
+const DMS_STATUS_INTENT = {
+  pending: Intent.NONE,
+  reserved: Intent.PRIMARY,
+  invoiced: Intent.WARNING,
+  delivered: Intent.SUCCESS,
+};
+
+export const dmsStatusAccessor = (row) => {
+  const status = row.dms_status || 'pending';
+
+  return (
+    <Tag intent={DMS_STATUS_INTENT[status]} round minimal>
+      {DMS_STATUS_LABELS[status]}
+    </Tag>
+  );
+};
+
 export const handleDeleteErrors = (errors) => {
   if (
     errors.find(
@@ -231,6 +259,14 @@ export function useInvoicesTableColumns() {
         accessor: (row) => statusAccessor(row),
         width: 160,
         className: 'status',
+        clickable: true,
+      },
+      {
+        id: 'dms_status',
+        Header: 'DMS Status',
+        accessor: (row) => dmsStatusAccessor(row),
+        width: 110,
+        className: 'dms_status',
         clickable: true,
       },
       {

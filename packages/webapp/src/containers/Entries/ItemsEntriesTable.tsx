@@ -11,6 +11,7 @@ import {
   useComposeRowsOnEditTableCell,
   useComposeRowsOnRemoveTableRow,
   useComposeRowsOnNewRow,
+  useComposeRowsOnEditPriceLot,
 } from './utils';
 import {
   ItemEntriesTableProvider,
@@ -62,6 +63,9 @@ function ItemEntriesTableRoot() {
     landedCost,
     taxRates,
     itemType,
+    enablePriceLots,
+    warehouseId,
+    excludeInvoiceId,
   } = useItemEntriesTableContext();
 
   // Editiable items entries columns.
@@ -70,6 +74,7 @@ function ItemEntriesTableRoot() {
   const composeRowsOnEditCell = useComposeRowsOnEditTableCell();
   const composeRowsOnDeleteRow = useComposeRowsOnRemoveTableRow();
   const composeRowsOnNewRow = useComposeRowsOnNewRow();
+  const composeRowsOnEditPriceLot = useComposeRowsOnEditPriceLot();
 
   // Handle the fetch item row details.
   const { setItemRow, cellsLoading, isItemFetching } = useFetchItemRow({
@@ -99,6 +104,20 @@ function ItemEntriesTableRoot() {
     handleChange(newRows);
   };
 
+  // Handles a price-lot being picked on a row -- fills in that lot's own
+  // price/discount (still editable after) alongside the lot id itself.
+  const handleUpdateItemPriceLot = useCallback(
+    (rowIndex, lot) => {
+      const newRows = composeRowsOnEditPriceLot(rowIndex, {
+        item_price_lot_id: lot.id,
+        rate: lot.listPriceExclVat,
+        discount: lot.discountPercent,
+      });
+      handleChange(newRows);
+    },
+    [composeRowsOnEditPriceLot, handleChange],
+  );
+
   return (
     <DataTableEditable
       className={classNames(CLASSES.DATATABLE_EDITOR_ITEMS_ENTRIES)}
@@ -116,6 +135,13 @@ function ItemEntriesTableRoot() {
         removeRow: handleRemoveRow,
         autoFocus: ['item_id', 0],
         currencyCode,
+        ...(enablePriceLots
+          ? {
+              updateItemPriceLot: handleUpdateItemPriceLot,
+              warehouseId,
+              excludeInvoiceId,
+            }
+          : {}),
       }}
     />
   );
