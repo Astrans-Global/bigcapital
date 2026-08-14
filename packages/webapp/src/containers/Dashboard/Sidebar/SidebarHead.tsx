@@ -29,6 +29,22 @@ const POPOVER_MODIFIERS = {
   offset: { offset: '28, 8' },
 };
 
+/**
+ * Our own Astrans brand mark (uploaded as the org/workspace logo) needs to
+ * flip between the black/white PNG variant with the theme. Any other
+ * genuinely custom-uploaded logo is returned untouched.
+ */
+const resolveThemedLogoUri = (uri, isDarkMode) => {
+  if (typeof uri !== 'string') return uri;
+  if (uri.includes('/brand/logo-black.png')) {
+    return isDarkMode ? uri.replace('logo-black.png', 'logo-white.png') : uri;
+  }
+  if (uri.includes('/brand/logo-white.png')) {
+    return isDarkMode ? uri : uri.replace('logo-white.png', 'logo-black.png');
+  }
+  return uri;
+};
+
 const DashboardOrganizationMenu = styled(Menu)`
   padding: 10px;
   min-width: 280px;
@@ -149,7 +165,7 @@ function SidebarHeadJSX({
               >
                 {metadata?.logoUri ? (
                   <x.img
-                    src={metadata?.logoUri}
+                    src={resolveThemedLogoUri(metadata?.logoUri, isDarkMode)}
                     alt={metadata?.name}
                     h={'28px'}
                     w={'28px'}
@@ -213,12 +229,15 @@ function SidebarHeadJSX({
                         >
                           {workspace.metadata?.logoUri ? (
                             <x.img
-                              src={workspace.metadata.logoUri}
+                              src={resolveThemedLogoUri(
+                                workspace.metadata.logoUri,
+                                isDarkMode,
+                              )}
                               alt={name}
                               w={'28px'}
                               h={'28px'}
-                              borderRadius={'10px'}
-                              objectFit="cover"
+                              borderRadius={6}
+                              objectFit="contain"
                               flexShrink={0}
                             />
                           ) : (
