@@ -36,6 +36,7 @@ import { ExpensesModule } from '../Expenses/Expenses.module';
 import { ItemCategoryModule } from '../ItemCategories/ItemCategory.module';
 import { ItemSubcategoryModule } from '../ItemSubcategories/ItemSubcategory.module';
 import { ItemPriceLotsModule } from '../ItemPriceLots/ItemPriceLots.module';
+import { GrnVatModule } from '../GrnVat/GrnVat.module';
 import { TaxRatesModule } from '../TaxRates/TaxRate.module';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
 import { BranchesModule } from '../Branches/Branches.module';
@@ -203,6 +204,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     ItemCategoryModule,
     ItemSubcategoryModule,
     ItemPriceLotsModule,
+    GrnVatModule,
     AccountsModule,
     ExpensesModule,
     TaxRatesModule,

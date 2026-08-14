@@ -58,7 +58,9 @@ export const defaultBill = {
   bill_date: moment(new Date()).format('YYYY-MM-DD'),
   due_date: moment(new Date()).format('YYYY-MM-DD'),
   reference_no: '',
-  inclusive_exclusive_tax: TaxType.Inclusive,
+  // Bills are always exclusive-of-tax -- see the "Amounts are" notice in
+  // BillFormEntriesActions.tsx for why this isn't user-editable here.
+  inclusive_exclusive_tax: TaxType.Exclusive,
   note: '',
   open: '',
   branch_id: '',
@@ -136,9 +138,9 @@ export const transformToEditForm = (bill) => {
 
   return {
     ...transformToForm(bill, defaultBill),
-    inclusive_exclusive_tax: bill.is_inclusive_tax
-      ? TaxType.Inclusive
-      : TaxType.Exclusive,
+    // Always exclusive-of-tax regardless of what's stored on the bill --
+    // see the "Amounts are" notice in BillFormEntriesActions.tsx.
+    inclusive_exclusive_tax: TaxType.Exclusive,
     bill_tax_rate_id: billTaxRateId,
     entries,
     attachments,
@@ -171,10 +173,16 @@ export const transformFormValuesToRequest = (values) => {
   const attachments = transformAttachmentsToRequest(values);
 
   return {
-    ...R.omit(['bill_tax_rate_id'], values),
+    ...R.omit(['bill_tax_rate_id', 'inclusive_exclusive_tax'], values),
     entries: transformEntriesToSubmit(entries),
     open: false,
     attachments,
+    // Bills are always exclusive-of-tax (see "Amounts are" notice) --
+    // explicit here rather than relying on the server DTO's default, and
+    // named to match what CommandBillDto actually expects (previously
+    // `inclusive_exclusive_tax` was sent as-is, a UI-only field the DTO
+    // doesn't recognize, so this never actually reached the server).
+    is_inclusive_tax: false,
   };
 };
 
