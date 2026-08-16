@@ -7,6 +7,7 @@ export enum ContactService {
 export interface IContactAddress {
   billingAddress1: string;
   billingAddress2: string;
+  billingAddress3?: string;
   billingAddressCity: string;
   billingAddressCountry: string;
   billingAddressEmail: string;
@@ -16,6 +17,7 @@ export interface IContactAddress {
 
   shippingAddress1: string;
   shippingAddress2: string;
+  shippingAddress3?: string;
   shippingAddressCity: string;
   shippingAddressCountry: string;
   shippingAddressEmail: string;
@@ -26,6 +28,7 @@ export interface IContactAddress {
 export interface IContactAddressDTO {
   billingAddress1?: string;
   billingAddress2?: string;
+  billingAddress3?: string;
   billingAddressCity?: string;
   billingAddressCountry?: string;
   billingAddressEmail?: string;
@@ -35,6 +38,7 @@ export interface IContactAddressDTO {
 
   shippingAddress1?: string;
   shippingAddress2?: string;
+  shippingAddress3?: string;
   shippingAddressCity?: string;
   shippingAddressCountry?: string;
   shippingAddressEmail?: string;

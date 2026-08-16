@@ -57,6 +57,9 @@ export class CustomerResponseDto {
   @ApiProperty({ required: false, example: 'Suite 100' })
   billingAddress2?: string;
 
+  @ApiProperty({ required: false, example: 'Floor 3' })
+  billingAddress3?: string;
+
   @ApiProperty({ required: false, example: 'New York' })
   billingAddressCity?: string;
 
@@ -80,6 +83,9 @@ export class CustomerResponseDto {
 
   @ApiProperty({ required: false, example: 'Unit 200' })
   shippingAddress2?: string;
+
+  @ApiProperty({ required: false, example: 'Floor 3' })
+  shippingAddress3?: string;
 
   @ApiProperty({ required: false, example: 'Los Angeles' })
   shippingAddressCity?: string;
@@ -118,4 +124,26 @@ export class CustomerResponseDto {
 
   @ApiProperty({ example: 1500.0 })
   closingBalance: number;
+
+  @ApiProperty({ required: false, example: 'CUST-001' })
+  code?: string;
+
+  @ApiProperty({ required: false, example: 1, description: 'The area ID' })
+  areaId?: number;
+
+  @ApiProperty({ required: false, example: 1, description: 'The route city ID' })
+  routeCityId?: number;
+
+  @ApiProperty({ required: false, example: 'Jane Doe' })
+  contactPerson?: string;
+
+  @ApiProperty({ required: false, example: '123456789' })
+  tinNumber?: string;
+
+  @ApiProperty({
+    example: 'B',
+    description:
+      'Customer risk category: A (low risk) / B (monitored) / C (high risk) / D (restricted)',
+  })
+  riskCategory: 'A' | 'B' | 'C' | 'D';
 }

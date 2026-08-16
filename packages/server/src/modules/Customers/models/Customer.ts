@@ -51,6 +51,7 @@ export class Customer extends TenantBaseModel {
 
   billingAddress1?: string;
   billingAddress2?: string;
+  billingAddress3?: string;
   billingAddressCity?: string;
   billingAddressCountry?: string;
   billingAddressEmail?: string;
@@ -60,6 +61,7 @@ export class Customer extends TenantBaseModel {
 
   shippingAddress1?: string;
   shippingAddress2?: string;
+  shippingAddress3?: string;
   shippingAddressCity?: string;
   shippingAddressCountry?: string;
   shippingAddressEmail?: string;
@@ -71,6 +73,12 @@ export class Customer extends TenantBaseModel {
   active: boolean;
 
   code?: string;
+
+  areaId?: number;
+  routeCityId?: number;
+  contactPerson?: string;
+  tinNumber?: string;
+  riskCategory: 'A' | 'B' | 'C' | 'D';
 
   /**
    * Query builder.
@@ -184,32 +192,59 @@ export class Customer extends TenantBaseModel {
   /**
    * Relationship mapping.
    */
-  // static get relationMappings() {
-  //   const SaleInvoice = require('models/SaleInvoice');
+  static get relationMappings() {
+    const { CustomerArea } = require('../../CustomerAreas/models/CustomerArea.model');
+    const {
+      CustomerRouteCity,
+    } = require('../../CustomerRouteCities/models/CustomerRouteCity.model');
 
-  //   return {
-  //     salesInvoices: {
-  //       relation: Model.HasManyRelation,
-  //       modelClass: SaleInvoice.default,
-  //       join: {
-  //         from: 'contacts.id',
-  //         to: 'sales_invoices.customerId',
-  //       },
-  //     },
+    return {
+      /**
+       * Customer belongs to an area.
+       */
+      area: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: CustomerArea,
+        join: {
+          from: 'contacts.areaId',
+          to: 'customer_areas.id',
+        },
+      },
 
-  //     overDueInvoices: {
-  //       relation: Model.HasManyRelation,
-  //       modelClass: SaleInvoice.default,
-  //       join: {
-  //         from: 'contacts.id',
-  //         to: 'sales_invoices.customerId',
-  //       },
-  //       filter: (query) => {
-  //         query.modify('overdue');
-  //       },
-  //     },
-  //   };
-  // }
+      /**
+       * Customer belongs to a route city.
+       */
+      routeCity: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: CustomerRouteCity,
+        join: {
+          from: 'contacts.routeCityId',
+          to: 'customer_route_cities.id',
+        },
+      },
+
+      // salesInvoices: {
+      //   relation: Model.HasManyRelation,
+      //   modelClass: SaleInvoice.default,
+      //   join: {
+      //     from: 'contacts.id',
+      //     to: 'sales_invoices.customerId',
+      //   },
+      // },
+
+      // overDueInvoices: {
+      //   relation: Model.HasManyRelation,
+      //   modelClass: SaleInvoice.default,
+      //   join: {
+      //     from: 'contacts.id',
+      //     to: 'sales_invoices.customerId',
+      //   },
+      //   filter: (query) => {
+      //     query.modify('overdue');
+      //   },
+      // },
+    };
+  }
 
   /**
    * Model search attributes.

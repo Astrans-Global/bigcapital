@@ -12,6 +12,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UnitOfWork } from '@/modules/Tenancy/TenancyDB/UnitOfWork.service';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { EditCustomerDto } from '../dtos/EditCustomer.dto';
+import { CustomerValidators } from './CustomerValidators.service';
 
 @Injectable()
 export class EditCustomer {
@@ -25,6 +26,7 @@ export class EditCustomer {
     private uow: UnitOfWork,
     private eventPublisher: EventEmitter2,
     private customerDTO: CreateEditCustomerDTO,
+    private customerValidators: CustomerValidators,
 
     @Inject(Customer.name)
     private customerModel: TenantModelProxy<typeof Customer>,
@@ -45,6 +47,11 @@ export class EditCustomer {
       .query()
       .findById(customerId)
       .throwIfNotFound();
+
+    await this.customerValidators.validateAreaRouteCityConsistency(
+      customerDTO.areaId,
+      customerDTO.routeCityId,
+    );
 
     // Transforms the given customer DTO to object.
     const customerObj = this.customerDTO.transformEditDTO(customerDTO);

@@ -252,6 +252,36 @@ export const CustomerMeta = {
       type: 'date',
       printable: false,
     },
+    areaId: {
+      name: 'Area',
+      column: 'area_id',
+      type: 'number',
+      printable: false,
+    },
+    routeCityId: {
+      name: 'Route City',
+      column: 'route_city_id',
+      type: 'number',
+      printable: false,
+    },
+    contactPerson: {
+      name: 'Contact Person',
+      column: 'contact_person',
+      type: 'text',
+      printable: false,
+    },
+    tinNumber: {
+      name: 'TIN Number',
+      column: 'tin_number',
+      type: 'text',
+      printable: false,
+    },
+    riskCategory: {
+      name: 'Risk Category',
+      column: 'risk_category',
+      type: 'text',
+      printable: false,
+    },
   },
   fields2: {
     customerType: {

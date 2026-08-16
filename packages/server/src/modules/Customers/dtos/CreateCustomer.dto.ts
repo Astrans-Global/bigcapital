@@ -1,9 +1,12 @@
 import {
   IsBoolean,
   IsEmail,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsString,
+  Matches,
+  Min,
   ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -167,4 +170,45 @@ export class CreateCustomerDto extends ContactAddressDto {
   @IsOptional()
   @IsString()
   code?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The area the customer belongs to',
+    example: 1,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  areaId?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'The route city the customer belongs to (must be under the selected area)',
+    example: 1,
+  })
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @Min(1)
+  routeCityId?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'Contact person name',
+    example: 'Jane Doe',
+  })
+  @IsOptional()
+  @IsString()
+  contactPerson?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'VAT/TIN number (9 digits)',
+    example: '123456789',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{9}$/, { message: 'tinNumber must be exactly 9 digits' })
+  tinNumber?: string;
 }

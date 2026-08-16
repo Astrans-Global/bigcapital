@@ -412,6 +412,24 @@ export const events = {
   },
 
   /**
+   * Customer area service.
+   */
+  customerArea: {
+    onCreated: 'onCustomerAreaCreated',
+    onEdited: 'onCustomerAreaEdited',
+    onDeleted: 'onCustomerAreaDeleted',
+  },
+
+  /**
+   * Customer route city service.
+   */
+  customerRouteCity: {
+    onCreated: 'onCustomerRouteCityCreated',
+    onEdited: 'onCustomerRouteCityEdited',
+    onDeleted: 'onCustomerRouteCityDeleted',
+  },
+
+  /**
    * Inventory service.
    */
   inventory: {

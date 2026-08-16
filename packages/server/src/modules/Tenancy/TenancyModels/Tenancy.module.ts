@@ -13,6 +13,8 @@ import { ItemPriceLot } from '@/modules/ItemPriceLots/models/ItemPriceLot.model'
 import { ItemPriceLotReceipt } from '@/modules/ItemPriceLots/models/ItemPriceLotReceipt.model';
 import { ItemPriceLotReservation } from '@/modules/ItemPriceLots/models/ItemPriceLotReservation.model';
 import { BillVatRecord } from '@/modules/GrnVat/models/BillVatRecord.model';
+import { CustomerArea } from '@/modules/CustomerAreas/models/CustomerArea.model';
+import { CustomerRouteCity } from '@/modules/CustomerRouteCities/models/CustomerRouteCity.model';
 import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { PdfTemplateModel } from '@/modules/PdfTemplate/models/PdfTemplate';
 import { Warehouse } from '@/modules/Warehouses/models/Warehouse.model';
@@ -59,6 +61,8 @@ const models = [
   ItemPriceLotReceipt,
   ItemPriceLotReservation,
   BillVatRecord,
+  CustomerArea,
+  CustomerRouteCity,
   TaxRateModel,
   PdfTemplateModel,
   Warehouse,

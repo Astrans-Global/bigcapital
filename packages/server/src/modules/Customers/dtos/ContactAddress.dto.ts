@@ -13,6 +13,11 @@ export class ContactAddressDto {
   @IsString()
   billingAddress2?: string;
 
+  @ApiProperty({ required: false, description: 'Billing address line 3' })
+  @IsOptional()
+  @IsString()
+  billingAddress3?: string;
+
   @ApiProperty({ required: false, description: 'Billing address city' })
   @IsOptional()
   @IsString()
@@ -52,6 +57,11 @@ export class ContactAddressDto {
   @IsOptional()
   @IsString()
   shippingAddress2?: string;
+
+  @ApiProperty({ required: false, description: 'Shipping address line 3' })
+  @IsOptional()
+  @IsString()
+  shippingAddress3?: string;
 
   @ApiProperty({ required: false, description: 'Shipping address city' })
   @IsOptional()

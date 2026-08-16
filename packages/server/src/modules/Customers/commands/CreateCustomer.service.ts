@@ -11,6 +11,7 @@ import {
 } from '../types/Customers.types';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateCustomerDto } from '../dtos/CreateCustomer.dto';
+import { CustomerValidators } from './CustomerValidators.service';
 
 @Injectable()
 export class CreateCustomer {
@@ -24,6 +25,7 @@ export class CreateCustomer {
     private readonly uow: UnitOfWork,
     private readonly eventPublisher: EventEmitter2,
     private readonly customerDTO: CreateEditCustomerDTO,
+    private readonly customerValidators: CustomerValidators,
 
     @Inject(Customer.name)
     private readonly customerModel: TenantModelProxy<typeof Customer>,
@@ -38,6 +40,10 @@ export class CreateCustomer {
     customerDTO: CreateCustomerDto,
     trx?: Knex.Transaction,
   ): Promise<Customer> {
+    await this.customerValidators.validateAreaRouteCityConsistency(
+      customerDTO.areaId,
+      customerDTO.routeCityId,
+    );
     // Transformes the customer DTO to customer object.
     const customerObj = await this.customerDTO.transformCreateDTO(customerDTO);
 
