@@ -37,11 +37,11 @@ const CustomerAreaFormSchema = Yup.object().shape({
     .label(intl.get('area_name')),
   invoice_number_code: Yup.string()
     .trim()
+    .required()
     .matches(/^[A-Za-z0-9]{2}$/, {
-      excludeEmptyString: true,
       message: intl.get('area_invoice_code_must_be_2_chars'),
     })
-    .nullable(),
+    .label(intl.get('area_invoice_code')),
   next_invoice_number: Yup.number()
     .integer()
     .min(1)
@@ -76,6 +76,7 @@ function CustomerAreaFormFields() {
       <FFormGroup
         name={'invoice_number_code'}
         label={intl.get('area_invoice_code')}
+        labelInfo={<FieldRequiredHint />}
         helperText={intl.get('area_invoice_code_hint')}
         inline
         fastField

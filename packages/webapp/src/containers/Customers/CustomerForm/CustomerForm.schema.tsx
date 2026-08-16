@@ -23,7 +23,6 @@ const Schema = Yup.object().shape({
 
   area_id: Yup.number().required().label(intl.get('area')),
   route_city_id: Yup.number().required().label(intl.get('route_city')),
-  contact_person: Yup.string().trim().nullable(),
   tin_number: Yup.string()
     .trim()
     .matches(/^\d{9}$/, {

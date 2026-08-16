@@ -98,11 +98,6 @@ export class EditCustomerDto extends ContactAddressDto {
   @Min(1)
   routeCityId?: number;
 
-  @ApiProperty({ required: false, description: 'Contact person name' })
-  @IsOptional()
-  @IsString()
-  contactPerson?: string;
-
   @ApiProperty({ required: false, description: 'VAT/TIN number (9 digits)' })
   @IsOptional()
   @IsString()

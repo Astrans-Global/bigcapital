@@ -22,12 +22,14 @@ import {
 } from '@/components';
 import { CustomerTypeRadioField } from './CustomerTypeRadioField';
 import { CustomerFormSectionTitle } from './CustomerFormSectionTitle';
+import { useCustomerFormContext } from './CustomerFormProvider';
 import { useAutofocus } from '@/hooks';
 import { useCustomerAreas, useCustomerRouteCities } from '@/hooks/query';
 
 export function CustomerFormBasicSection({}) {
   const firstNameFieldRef = useAutofocus();
   const { values, setFieldValue } = useFormikContext();
+  const { isNewMode } = useCustomerFormContext();
 
   const { data: customerAreas } = useCustomerAreas();
   const { data: customerRouteCities } = useCustomerRouteCities({
@@ -67,14 +69,24 @@ export function CustomerFormBasicSection({}) {
         </ControlGroup>
       </FFormGroup>
 
+      {/*----------- Customer code (auto-generated from Area) -----------*/}
       <FFormGroup
         name={'code'}
-        label={'Customer Code'}
-        helperText="Add a unique account number to identify, reference and search for the contact."
+        label={intl.get('customer_code')}
+        helperText={
+          isNewMode
+            ? intl.get('customer_code_hint_new')
+            : intl.get('customer_code_hint_edit')
+        }
         inline
         fill
       >
-        <FInputGroup name={'code'} fill />
+        <FInputGroup
+          name={'code'}
+          disabled
+          placeholder={isNewMode ? intl.get('customer_code_auto') : ''}
+          fill
+        />
       </FFormGroup>
 
       {/*----------- Company Name -----------*/}
@@ -100,16 +112,6 @@ export function CustomerFormBasicSection({}) {
           popoverProps={{ minimal: true }}
           buttonProps={{ fill: true }}
         />
-      </FFormGroup>
-
-      {/*----------- Contact person -----------*/}
-      <FFormGroup
-        name={'contact_person'}
-        label={intl.get('contact_person')}
-        inline
-        fill
-      >
-        <FInputGroup name={'contact_person'} fill />
       </FFormGroup>
 
       <Divider style={{ margin: '20px 0' }} />

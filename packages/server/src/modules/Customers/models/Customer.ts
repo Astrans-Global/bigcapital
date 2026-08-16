@@ -76,7 +76,6 @@ export class Customer extends TenantBaseModel {
 
   areaId?: number;
   routeCityId?: number;
-  contactPerson?: string;
   tinNumber?: string;
   riskCategory: 'A' | 'B' | 'C' | 'D';
 

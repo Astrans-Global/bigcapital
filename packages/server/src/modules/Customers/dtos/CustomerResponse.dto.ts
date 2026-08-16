@@ -134,9 +134,6 @@ export class CustomerResponseDto {
   @ApiProperty({ required: false, example: 1, description: 'The route city ID' })
   routeCityId?: number;
 
-  @ApiProperty({ required: false, example: 'Jane Doe' })
-  contactPerson?: string;
-
   @ApiProperty({ required: false, example: '123456789' })
   tinNumber?: string;
 

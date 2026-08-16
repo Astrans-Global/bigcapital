@@ -36,7 +36,6 @@ export interface ICustomerNewDTO extends IContactAddressDTO {
 
   areaId?: number;
   routeCityId?: number;
-  contactPerson?: string;
   tinNumber?: string;
 }
 
@@ -60,7 +59,6 @@ export interface ICustomerEditDTO extends IContactAddressDTO {
 
   areaId?: number;
   routeCityId?: number;
-  contactPerson?: string;
   tinNumber?: string;
 }
 

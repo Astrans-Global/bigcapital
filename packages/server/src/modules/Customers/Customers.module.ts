@@ -4,6 +4,7 @@ import { TenancyDatabaseModule } from '../Tenancy/TenancyDB/TenancyDB.module';
 import { ActivateCustomer } from './commands/ActivateCustomer.service';
 import { CreateCustomer } from './commands/CreateCustomer.service';
 import { CustomerValidators } from './commands/CustomerValidators.service';
+import { GenerateCustomerCodeService } from './commands/GenerateCustomerCode.service';
 import { EditCustomer } from './commands/EditCustomer.service';
 import { EditOpeningBalanceCustomer } from './commands/EditOpeningBalanceCustomer.service';
 import { GetCustomerService } from './queries/GetCustomer.service';
@@ -36,6 +37,7 @@ import { CustomerWriteGLOpeningBalanceSubscriber } from './subscribers/CustomerG
     ActivateCustomer,
     CreateCustomer,
     CustomerValidators,
+    GenerateCustomerCodeService,
     EditCustomer,
     EditOpeningBalanceCustomer,
     CustomerValidators,

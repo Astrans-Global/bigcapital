@@ -8,6 +8,7 @@ export class CustomerArea extends TenantBaseModel {
   name!: string;
   invoiceNumberCode!: string | null;
   nextInvoiceNumber!: number;
+  nextCustomerNumber!: number;
   userId!: number;
 
   /**

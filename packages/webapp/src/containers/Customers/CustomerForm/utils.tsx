@@ -25,7 +25,6 @@ export const defaultInitialValues = {
 
   area_id: '',
   route_city_id: '',
-  contact_person: '',
   tin_number: '',
 
   billing_address_country: '',

@@ -17,18 +17,18 @@ class CommandCustomerAreaDto {
   @ApiProperty({ example: 'Colombo', description: 'The area name' })
   name: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @Matches(/^[A-Za-z0-9]{2}$/, {
     message: 'invoiceNumberCode must be exactly 2 letters/digits',
   })
   @ApiProperty({
     example: '01',
-    required: false,
+    required: true,
     description:
-      "The 2-character invoice numbering code for this area (the 'QQ' in YYMMM_ASTRANSQQ_XXXXX)",
+      "The 2-character code for this area (the 'QQ' in customer code QQ-0001 and invoice number YYMMM_ASTRANSQQ_XXXXX)",
   })
-  invoiceNumberCode?: string;
+  invoiceNumberCode: string;
 
   @IsOptional()
   @ToNumber()

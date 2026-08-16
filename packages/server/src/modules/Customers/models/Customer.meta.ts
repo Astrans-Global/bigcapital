@@ -264,12 +264,6 @@ export const CustomerMeta = {
       type: 'number',
       printable: false,
     },
-    contactPerson: {
-      name: 'Contact Person',
-      column: 'contact_person',
-      type: 'text',
-      printable: false,
-    },
     tinNumber: {
       name: 'TIN Number',
       column: 'tin_number',

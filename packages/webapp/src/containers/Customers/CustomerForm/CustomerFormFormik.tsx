@@ -28,7 +28,6 @@ type CustomerFormValues = {
 
   area_id?: number | string;
   route_city_id?: number | string;
-  contact_person?: string;
   tin_number?: string;
 
   billing_address_country: string;

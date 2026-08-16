@@ -12,6 +12,7 @@ import {
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CreateCustomerDto } from '../dtos/CreateCustomer.dto';
 import { CustomerValidators } from './CustomerValidators.service';
+import { GenerateCustomerCodeService } from './GenerateCustomerCode.service';
 
 @Injectable()
 export class CreateCustomer {
@@ -26,6 +27,7 @@ export class CreateCustomer {
     private readonly eventPublisher: EventEmitter2,
     private readonly customerDTO: CreateEditCustomerDTO,
     private readonly customerValidators: CustomerValidators,
+    private readonly generateCustomerCode: GenerateCustomerCodeService,
 
     @Inject(Customer.name)
     private readonly customerModel: TenantModelProxy<typeof Customer>,
@@ -55,11 +57,19 @@ export class CreateCustomer {
         trx,
       } as ICustomerEventCreatingPayload);
 
+      // The customer code is always generated internally from the customer's
+      // area (e.g. "QQ-0001") — never accepted from the client.
+      const code = await this.generateCustomerCode.generateCode(
+        trx,
+        customerObj.areaId,
+      );
+
       // Creates a new contact as customer.
       const customer = await this.customerModel()
         .query(trx)
         .insertAndFetch({
           ...customerObj,
+          code,
         });
       // Triggers `onCustomerCreated` event.
       await this.eventPublisher.emitAsync(events.customers.onCreated, {

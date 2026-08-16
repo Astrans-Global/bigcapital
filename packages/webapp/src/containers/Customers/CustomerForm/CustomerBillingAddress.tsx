@@ -78,15 +78,6 @@ export function CustomerBillingAddress() {
       >
         <FInputGroup name={'billing_address_postcode'} fill />
       </FFormGroup>
-
-      <FFormGroup
-        name={'billing_address_phone'}
-        label={intl.get('phone')}
-        inline
-        fill
-      >
-        <FInputGroup name={'billing_address_phone'} fill />
-      </FFormGroup>
     </Box>
   );
 }

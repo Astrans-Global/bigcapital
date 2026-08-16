@@ -195,15 +195,6 @@ export class CreateCustomerDto extends ContactAddressDto {
 
   @ApiProperty({
     required: false,
-    description: 'Contact person name',
-    example: 'Jane Doe',
-  })
-  @IsOptional()
-  @IsString()
-  contactPerson?: string;
-
-  @ApiProperty({
-    required: false,
     description: 'VAT/TIN number (9 digits)',
     example: '123456789',
   })
