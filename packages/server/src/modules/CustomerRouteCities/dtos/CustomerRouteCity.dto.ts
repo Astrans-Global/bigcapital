@@ -1,6 +1,5 @@
-import { IsOptional, ToNumber } from '@/common/decorators/Validators';
+import { ToNumber } from '@/common/decorators/Validators';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsString, MaxLength, Min } from 'class-validator';
 
 class CommandCustomerRouteCityDto {
@@ -10,10 +9,11 @@ class CommandCustomerRouteCityDto {
   @ApiProperty({ example: 'Nugegoda', description: 'The route city name' })
   name: string;
 
-  // `@Expose({ name })` binds this field from the legacy snake_case key
-  // (`area_id`) that the webapp's SDK request middleware sends by default,
-  // mirroring the same pattern used for item subcategories' `category_id`.
-  @Expose({ name: 'area_id' })
+  // The global `SerializeInterceptor` already converts the incoming
+  // request's snake_case keys (e.g. `area_id`) to camelCase before this DTO
+  // is populated, so this property just needs to match that camelCase name
+  // directly - no `@Expose({ name })` alias needed (that would actually look
+  // for the now-nonexistent `area_id` key and silently leave this undefined).
   @ToNumber()
   @IsInt()
   @Min(1)

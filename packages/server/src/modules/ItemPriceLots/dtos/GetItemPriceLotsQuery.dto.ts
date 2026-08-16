@@ -1,13 +1,11 @@
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 import { IsInt, Min } from 'class-validator';
 
 export class GetItemPriceLotsQueryDto {
-  // See ItemSubcategories' GetItemSubcategoriesQuery.dto.ts for why this
-  // snake_case alias is needed (useAuthApiFetcher/query params aren't
-  // camelCase-transformed the way JSON bodies are).
-  @Expose({ name: 'item_id' })
+  // The global `SerializeInterceptor` already converts incoming snake_case
+  // keys (e.g. `item_id`) to camelCase before this DTO is populated, so
+  // these just need to match that camelCase name - no `@Expose({ name })`.
   @ToNumber()
   @IsInt()
   @Min(1)
@@ -15,7 +13,6 @@ export class GetItemPriceLotsQueryDto {
   @ApiPropertyOptional({ example: 12, description: 'Filter lots by item' })
   itemId?: number;
 
-  @Expose({ name: 'warehouse_id' })
   @ToNumber()
   @IsInt()
   @Min(1)
@@ -26,7 +23,6 @@ export class GetItemPriceLotsQueryDto {
   // When editing an invoice that already holds stock aside (Reserved/
   // Invoiced), that invoice's own hold shouldn't count against what it
   // can pick -- see `GetItemPriceLotsService` for how this is applied.
-  @Expose({ name: 'exclude_invoice_id' })
   @ToNumber()
   @IsInt()
   @Min(1)

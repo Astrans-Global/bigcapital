@@ -1,11 +1,10 @@
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 import { IsInt, Min } from 'class-validator';
 
 export class GetCustomerRouteCitiesQueryDto {
-  // See `CustomerRouteCity.dto.ts` for why this alias is needed.
-  @Expose({ name: 'area_id' })
+  // See `CustomerRouteCity.dto.ts` - the global interceptor already
+  // camelCases this before it gets here, so no `@Expose({ name })` alias.
   @ToNumber()
   @IsInt()
   @Min(1)

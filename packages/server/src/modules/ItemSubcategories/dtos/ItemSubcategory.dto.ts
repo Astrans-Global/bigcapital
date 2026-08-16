@@ -1,6 +1,5 @@
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsString, MaxLength, Min } from 'class-validator';
 
 class CommandItemSubcategoryDto {
@@ -22,11 +21,9 @@ class CommandItemSubcategoryDto {
   })
   description?: string;
 
-  // `@Expose({ name })` binds this field from the legacy snake_case key
-  // (`category_id`) that the webapp's SDK request middleware sends by
-  // default, since `plainToInstance` copies plain keys verbatim otherwise
-  // and `category_id` would be silently whitelist-stripped.
-  @Expose({ name: 'category_id' })
+  // The global `SerializeInterceptor` already converts incoming snake_case
+  // keys (e.g. `category_id`) to camelCase before this DTO is populated, so
+  // this just needs to match that camelCase name - no `@Expose({ name })`.
   @ToNumber()
   @IsInt()
   @Min(1)
