@@ -359,6 +359,24 @@ export const SidebarMenu = [
               ability: VendorAction.Create,
             },
           },
+          {
+            text: <T id={'areas'} />,
+            href: '/customers/areas',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.View,
+            },
+          },
+          {
+            text: <T id={'route_cities'} />,
+            href: '/customers/route-cities',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.View,
+            },
+          },
         ],
       },
       {
@@ -381,6 +399,26 @@ export const SidebarMenu = [
             permission: {
               subject: AbilitySubject.Vendor,
               ability: VendorAction.View,
+            },
+          },
+          {
+            text: <T id={'sidebar.new_area'} />,
+            href: '/customers/areas/new',
+            type: ISidebarMenuItemType.Dialog,
+            dialogName: DialogsName.CustomerAreaForm,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.Create,
+            },
+          },
+          {
+            text: <T id={'sidebar.new_route_city'} />,
+            href: '/customers/route-cities/new',
+            type: ISidebarMenuItemType.Dialog,
+            dialogName: DialogsName.CustomerRouteCityForm,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.Create,
             },
           },
         ],

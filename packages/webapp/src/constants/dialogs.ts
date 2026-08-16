@@ -6,6 +6,8 @@ export enum DialogsName {
   ExchangeRateForm = 'exchangeRate-form',
   ItemCategoryForm = 'item-category-form',
   ItemSubcategoryForm = 'item-subcategory-form',
+  CustomerAreaForm = 'customer-area-form',
+  CustomerRouteCityForm = 'customer-route-city-form',
   InventoryAdjustmentForm = 'inventory-adjustment',
   PaymentViaVoucherForm = 'payment-via-voucher',
   KeyboardShortcutForm = 'keyboard-shortcuts',

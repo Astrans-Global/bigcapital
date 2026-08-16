@@ -26,9 +26,15 @@ type CustomerFormValues = {
   note?: string;
   active: boolean | string;
 
+  area_id?: number | string;
+  route_city_id?: number | string;
+  contact_person?: string;
+  tin_number?: string;
+
   billing_address_country: string;
   billing_address1: string;
   billing_address2: string;
+  billing_address3?: string;
   billing_address_city: string;
   billing_address_state: string;
   billing_address_postcode?: string;
@@ -37,6 +43,7 @@ type CustomerFormValues = {
   shipping_address_country: string;
   shipping_address1: string;
   shipping_address2: string;
+  shipping_address3?: string;
   shipping_address_city: string;
   shipping_address_state: string;
   shipping_address_postcode?: string;

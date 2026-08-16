@@ -34,6 +34,8 @@ export * from './contacts';
 export * from './items-categories';
 export * from './items-subcategories';
 export * from './item-price-lots';
+export * from './customer-areas';
+export * from './customer-route-cities';
 export * from './views';
 export * from './transactions-locking';
 export * from './vendor-credits';

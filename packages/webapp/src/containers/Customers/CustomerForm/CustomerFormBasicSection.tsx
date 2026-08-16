@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import intl from 'react-intl-universal';
+import { useFormikContext } from 'formik';
 import {
   ControlGroup,
   Divider,
@@ -16,13 +17,22 @@ import {
   Box,
   Icon,
   Stack,
+  CustomerAreaSelect,
+  CustomerRouteCitySelect,
 } from '@/components';
 import { CustomerTypeRadioField } from './CustomerTypeRadioField';
 import { CustomerFormSectionTitle } from './CustomerFormSectionTitle';
 import { useAutofocus } from '@/hooks';
+import { useCustomerAreas, useCustomerRouteCities } from '@/hooks/query';
 
 export function CustomerFormBasicSection({}) {
   const firstNameFieldRef = useAutofocus();
+  const { values, setFieldValue } = useFormikContext();
+
+  const { data: customerAreas } = useCustomerAreas();
+  const { data: customerRouteCities } = useCustomerRouteCities({
+    areaId: values.area_id || undefined,
+  });
 
   return (
     <Box data-section-id="primary">
@@ -77,10 +87,10 @@ export function CustomerFormBasicSection({}) {
         <FInputGroup name={'company_name'} fill />
       </FFormGroup>
 
-      {/*----------- Display Name -----------*/}
+      {/*----------- Display Name (Call Name) -----------*/}
       <FFormGroup
         name={'display_name'}
-        label={intl.get('display_name')}
+        label={intl.get('call_name')}
         helperText="This is the name that appears on invoices and emails."
         inline
         fill
@@ -90,6 +100,67 @@ export function CustomerFormBasicSection({}) {
           popoverProps={{ minimal: true }}
           buttonProps={{ fill: true }}
         />
+      </FFormGroup>
+
+      {/*----------- Contact person -----------*/}
+      <FFormGroup
+        name={'contact_person'}
+        label={intl.get('contact_person')}
+        inline
+        fill
+      >
+        <FInputGroup name={'contact_person'} fill />
+      </FFormGroup>
+
+      <Divider style={{ margin: '20px 0' }} />
+
+      {/*----------- Area -----------*/}
+      <FFormGroup
+        name={'area_id'}
+        label={intl.get('area')}
+        labelInfo={<FieldRequiredHint />}
+        inline
+        fill
+      >
+        <CustomerAreaSelect
+          name={'area_id'}
+          items={customerAreas || []}
+          fill
+          buttonProps={{ fill: true }}
+          onItemSelect={(area) => {
+            setFieldValue('area_id', area.id);
+            // Route city belongs to an area, reset it whenever the area changes.
+            setFieldValue('route_city_id', '');
+          }}
+        />
+      </FFormGroup>
+
+      {/*----------- Route city -----------*/}
+      <FFormGroup
+        name={'route_city_id'}
+        label={intl.get('route_city')}
+        labelInfo={<FieldRequiredHint />}
+        inline
+        fill
+      >
+        <CustomerRouteCitySelect
+          name={'route_city_id'}
+          items={customerRouteCities || []}
+          areaId={values.area_id}
+          disabled={!values.area_id}
+          fill
+          buttonProps={{ fill: true }}
+        />
+      </FFormGroup>
+
+      {/*----------- VAT / TIN number -----------*/}
+      <FFormGroup
+        name={'tin_number'}
+        label={intl.get('tin_number')}
+        inline
+        fill
+      >
+        <FInputGroup name={'tin_number'} maxLength={9} fill />
       </FFormGroup>
 
       <Divider style={{ margin: '20px 0' }} />
@@ -109,12 +180,12 @@ export function CustomerFormBasicSection({}) {
         <Stack spacing={10}>
           <FInputGroup
             name={'work_phone'}
-            placeholder={intl.get('work')}
+            placeholder={intl.get('phone_number_1')}
             leftIcon="phone"
           />
           <FInputGroup
             name={'personal_phone'}
-            placeholder={intl.get('mobile')}
+            placeholder={intl.get('phone_number_2')}
           />
         </Stack>
       </FFormGroup>

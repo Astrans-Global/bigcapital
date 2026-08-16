@@ -652,6 +652,32 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/customers/areas`,
+    component: lazy(() =>
+      import('@/containers/CustomerAreas/CustomerAreasList').then((m) => ({
+        default: m.CustomerAreasList,
+      })),
+    ),
+    breadcrumb: intl.get('areas'),
+    pageTitle: intl.get('areas'),
+    defaultSearchResource: RESOURCES_TYPES.CUSTOMER,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/customers/route-cities`,
+    component: lazy(() =>
+      import('@/containers/CustomerRouteCities/CustomerRouteCitiesList').then(
+        (m) => ({
+          default: m.CustomerRouteCitiesList,
+        }),
+      ),
+    ),
+    breadcrumb: intl.get('route_cities'),
+    pageTitle: intl.get('route_cities'),
+    defaultSearchResource: RESOURCES_TYPES.CUSTOMER,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/customers/contact_duplicate=/:id`,
     component: lazy(() =>
       import('@/containers/Customers/CustomerForm/CustomerFormPage').then(

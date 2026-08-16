@@ -132,7 +132,7 @@ export function useCustomersTableColumns() {
       },
       {
         id: 'display_name',
-        Header: intl.get('display_name'),
+        Header: intl.get('call_name'),
         accessor: 'display_name',
         className: 'display_name',
         width: 150,

@@ -44,6 +44,15 @@ export function CustomerShippingAddress() {
       </FFormGroup>
 
       <FFormGroup
+        name={'shipping_address3'}
+        label={intl.get('address_line_3')}
+        inline
+        fill
+      >
+        <FTextArea name={'shipping_address3'} fill />
+      </FFormGroup>
+
+      <FFormGroup
         name={'shipping_address_city'}
         label={intl.get('city_town')}
         inline

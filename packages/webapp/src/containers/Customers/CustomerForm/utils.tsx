@@ -23,9 +23,15 @@ export const defaultInitialValues = {
   note: '',
   active: true,
 
+  area_id: '',
+  route_city_id: '',
+  contact_person: '',
+  tin_number: '',
+
   billing_address_country: '',
   billing_address1: '',
   billing_address2: '',
+  billing_address3: '',
   billing_address_city: '',
   billing_address_state: '',
   billing_address_postcode: '',
@@ -34,6 +40,7 @@ export const defaultInitialValues = {
   shipping_address_country: '',
   shipping_address1: '',
   shipping_address2: '',
+  shipping_address3: '',
   shipping_address_city: '',
   shipping_address_state: '',
   shipping_address_postcode: '',

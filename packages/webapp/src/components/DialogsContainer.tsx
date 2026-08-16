@@ -3,6 +3,8 @@ import { index as InviteUserDialog } from '@/containers/Dialogs/InviteUserDialog
 import { index as UserFormDialog } from '@/containers/Dialogs/UserFormDialog';
 import { index as ItemCategoryDialog } from '@/containers/Dialogs/ItemCategoryDialog';
 import { index as ItemSubcategoryDialog } from '@/containers/Dialogs/ItemSubcategoryDialog';
+import { index as CustomerAreaDialog } from '@/containers/Dialogs/CustomerAreaDialog';
+import { index as CustomerRouteCityDialog } from '@/containers/Dialogs/CustomerRouteCityDialog';
 import { index as CurrencyFormDialog } from '@/containers/Dialogs/CurrencyFormDialog';
 import { index as InventoryAdjustmentDialog } from '@/containers/Dialogs/InventoryAdjustmentFormDialog';
 import { index as KeyboardShortcutsDialog } from '@/containers/Dialogs/keyboardShortcutsDialog';
@@ -79,6 +81,8 @@ export default function DialogsContainer() {
       <UserFormDialog dialogName={DialogsName.UserForm} />
       <ItemCategoryDialog dialogName={DialogsName.ItemCategoryForm} />
       <ItemSubcategoryDialog dialogName={DialogsName.ItemSubcategoryForm} />
+      <CustomerAreaDialog dialogName={DialogsName.CustomerAreaForm} />
+      <CustomerRouteCityDialog dialogName={DialogsName.CustomerRouteCityForm} />
       <InventoryAdjustmentDialog
         dialogName={DialogsName.InventoryAdjustmentForm}
       />

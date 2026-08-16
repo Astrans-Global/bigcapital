@@ -11,7 +11,7 @@ const Schema = Yup.object().shape({
   first_name: Yup.string().trim(),
   last_name: Yup.string().trim(),
   company_name: Yup.string().trim(),
-  display_name: Yup.string().trim().required().label(intl.get('display_name_')),
+  display_name: Yup.string().trim().required().label(intl.get('call_name')),
 
   email: Yup.string().email().nullable(),
   work_phone: Yup.string().nullable(),
@@ -21,9 +21,21 @@ const Schema = Yup.object().shape({
   active: Yup.boolean(),
   note: Yup.string().trim(),
 
+  area_id: Yup.number().required().label(intl.get('area')),
+  route_city_id: Yup.number().required().label(intl.get('route_city')),
+  contact_person: Yup.string().trim().nullable(),
+  tin_number: Yup.string()
+    .trim()
+    .matches(/^\d{9}$/, {
+      excludeEmptyString: true,
+      message: intl.get('tin_number_must_be_9_digits'),
+    })
+    .nullable(),
+
   billing_address_country: Yup.string().trim(),
   billing_address1: Yup.string().trim(),
   billing_address2: Yup.string().trim(),
+  billing_address3: Yup.string().trim(),
   billing_address_city: Yup.string().trim(),
   billing_address_state: Yup.string().trim(),
   billing_address_postcode: Yup.string().nullable(),
@@ -32,6 +44,7 @@ const Schema = Yup.object().shape({
   shipping_address_country: Yup.string().trim(),
   shipping_address1: Yup.string().trim(),
   shipping_address2: Yup.string().trim(),
+  shipping_address3: Yup.string().trim(),
   shipping_address_city: Yup.string().trim(),
   shipping_address_state: Yup.string().trim(),
   shipping_address_postcode: Yup.string().nullable(),
