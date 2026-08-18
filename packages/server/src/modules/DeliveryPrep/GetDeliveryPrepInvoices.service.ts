@@ -60,6 +60,11 @@ export class GetDeliveryPrepInvoicesService {
         'contacts.routeCityId',
       )
       .leftJoin('warehouses', 'warehouses.id', 'sales_invoices.warehouseId')
+      // Delivered invoices are done -- this screen is only for what still
+      // needs to go out, so they're excluded unconditionally, not just
+      // whenever the Status tick-box filter happens to omit "Delivered"
+      // (which isn't even an option any more -- see the DTO).
+      .whereNot('sales_invoices.dmsStatus', 'delivered')
       .onBuild((query) => {
         if (filterDto?.warehouseId) {
           query.where('sales_invoices.warehouseId', filterDto.warehouseId);

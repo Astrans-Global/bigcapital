@@ -3,7 +3,12 @@ import { Transform } from 'class-transformer';
 import { IsArray, IsDateString, IsIn, IsInt, Min } from 'class-validator';
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 
-const DMS_STATUSES = ['pending', 'reserved', 'invoiced', 'delivered'] as const;
+// 'delivered' is deliberately excluded -- Delivery Prep is a worklist of
+// what still needs to go out, a Delivered invoice is done and should never
+// show here (this list is also enforced unconditionally in
+// `GetDeliveryPrepInvoices.service.ts`, not just via this filter), see
+// docs/ops/PHASE1.md ("Delivery Prep").
+const DMS_STATUSES = ['pending', 'reserved', 'invoiced'] as const;
 
 /**
  * Splits a comma-separated query-string value into an array -- query
@@ -60,7 +65,7 @@ export class GetDeliveryPrepInvoicesQueryDto {
   @ApiPropertyOptional({
     example: 'pending,reserved',
     description:
-      'Filter by DMS status -- comma-separated (tick-box multi-select). Omit for all statuses.',
+      'Filter by DMS status -- comma-separated (tick-box multi-select), one or more of pending/reserved/invoiced. Omit for all three. "delivered" is never returned by this endpoint regardless of this filter.',
   })
   dmsStatus?: (typeof DMS_STATUSES)[number][];
 

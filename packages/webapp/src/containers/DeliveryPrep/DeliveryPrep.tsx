@@ -44,11 +44,14 @@ const STATUS_INTENT = {
   invoiced: Intent.WARNING,
   delivered: Intent.SUCCESS,
 };
+// Delivered isn't offered as an option -- Delivered invoices are done and
+// are never returned by this screen's endpoint at all (see
+// GetDeliveryPrepInvoices.service.ts), so there's nothing for a "Delivered"
+// tick to do here.
 const STATUS_OPTIONS = [
   { value: 'pending', label: STATUS_LABELS.pending },
   { value: 'reserved', label: STATUS_LABELS.reserved },
   { value: 'invoiced', label: STATUS_LABELS.invoiced },
-  { value: 'delivered', label: STATUS_LABELS.delivered },
 ];
 const DEFAULT_FILTER = { dmsStatus: ['pending', 'reserved'] };
 
