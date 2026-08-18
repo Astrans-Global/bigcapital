@@ -15,7 +15,6 @@ import DashboardProvider from './DashboardProvider';
 import DrawersContainer from '@/components/DrawersContainer';
 import { AlertsContainer } from '@/containers/AlertsContainer';
 import { DashboardSockets } from './DashboardSockets';
-import { ColorThemeToggle } from '@/components/ColorThemeToggle';
 
 /**
  * Dashboard preferences.
@@ -66,7 +65,6 @@ export default function Dashboard() {
       <DialogsContainer />
       <DrawersContainer />
       <AlertsContainer />
-      <ColorThemeToggle />
     </DashboardProvider>
   );
 }

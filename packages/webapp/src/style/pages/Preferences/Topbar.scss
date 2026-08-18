@@ -26,6 +26,7 @@
     display: flex;
     align-items: center;
     margin-right: 14px;
+    gap: 8px;
 
     .bp4-button:not([class*='bp4-intent-']):not(.bp4-minimal) {
       padding: 0;

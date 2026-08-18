@@ -1,3 +1,4 @@
+import { Button, Classes, Position, Tooltip } from '@blueprintjs/core';
 import styled from 'styled-components';
 import { useIsDarkMode } from '@/hooks/useDarkMode';
 
@@ -16,15 +17,30 @@ export function toggleColorTheme() {
 }
 
 /**
- * Fixed bottom-right button to flip between light/dark mode. Rendered on
- * both the auth pages and the authenticated dashboard shell.
+ * Dark/light mode toggle. `placement="topbar"` sits in the dashboard header
+ * (between Quick New and the bell). `placement="floating"` is the login-page
+ * bottom-right button -- authenticated pages no longer use floating, it was
+ * covering report totals.
  */
-export function ColorThemeToggle() {
+export function ColorThemeToggle({ placement = 'floating' }) {
   const isDarkMode = useIsDarkMode();
+  const label = isDarkMode ? 'Light mode' : 'Dark mode';
+
+  if (placement === 'topbar') {
+    return (
+      <Tooltip content={label} position={Position.BOTTOM}>
+        <Button
+          className={Classes.MINIMAL}
+          text={label}
+          onClick={toggleColorTheme}
+        />
+      </Tooltip>
+    );
+  }
 
   return (
     <ColorThemeToggleButton type="button" onClick={toggleColorTheme}>
-      {isDarkMode ? 'Light mode' : 'Dark mode'}
+      {label}
     </ColorThemeToggleButton>
   );
 }

@@ -27,6 +27,7 @@ import { withDashboard } from '@/containers/Dashboard/withDashboard';
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 
 import { QuickNewDropdown } from '@/containers/QuickNewDropdown/QuickNewDropdown';
+import { ColorThemeToggle } from '@/components/ColorThemeToggle';
 import {
   DashboardHamburgerButton,
   DashboardQuickSearchButton,
@@ -120,6 +121,7 @@ function DashboardTopbar({
               onClick={() => openGlobalSearch(true)}
             />
             <QuickNewDropdown />
+            <ColorThemeToggle placement="topbar" />
 
             <Tooltip
               content={<T id={'notifications'} />}

@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { CLASSES } from '@/constants/classes';
 
 import DashboardTopbarUser from '@/components/Dashboard/TopbarUser';
+import { ColorThemeToggle } from '@/components/ColorThemeToggle';
 import { UsersActions } from '@/containers/Preferences/Users/UsersActions';
 import { CurrenciesActions } from '@/containers/Preferences/Currencies/CurrenciesActions';
 import { WarehousesActions } from '@/containers/Preferences/Warehouses/WarehousesActions';
@@ -59,6 +60,7 @@ function PreferencesTopbar({ preferencesPageTitle }) {
       </div>
 
       <div class="preferences-topbar__user">
+        <ColorThemeToggle placement="topbar" />
         <DashboardTopbarUser />
       </div>
     </div>
