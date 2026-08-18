@@ -145,7 +145,6 @@ export class ExportStatutoryInvoiceService {
       fitToWidth: 1,
       fitToHeight: 1,
       paperSize: 9,
-      printGridlines: false,
     };
 
     const invoiceDate = formatMdY(invoice.invoiceDate);

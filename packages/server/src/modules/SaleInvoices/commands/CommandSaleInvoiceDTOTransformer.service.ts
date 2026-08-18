@@ -18,6 +18,10 @@ import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTra
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
 import { computeSaleInvoiceVatAfterDiscount } from '../ComputeSaleInvoiceVat';
 import { DiscountType } from '@/common/types/Discount';
+import {
+  CreateSaleInvoiceDto,
+  EditSaleInvoiceDto,
+} from '../dtos/SaleInvoice.dto';
 
 @Injectable()
 export class CommandSaleInvoiceDTOTransformer {
@@ -89,7 +93,10 @@ export class CommandSaleInvoiceDTOTransformer {
     )(asyncEntries);
 
     const vatRatePercent =
-      Number(entries.find((entry) => entry.taxRate)?.taxRate) || 0;
+      Number(
+        (entries as Array<{ taxRate?: number }>).find((entry) => entry.taxRate)
+          ?.taxRate,
+      ) || 0;
     const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
       entries,
       discount: saleInvoiceDTO.discount,
