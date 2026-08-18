@@ -10,6 +10,7 @@ import { BillWriteItemPriceLotsSubscriber } from './subscribers/BillWriteItemPri
 import { InvoiceLotReservationSyncSubscriber } from './subscribers/InvoiceLotReservationSyncSubscriber';
 import { InvoiceLotReservationService } from './InvoiceLotReservation.service';
 import { InvoiceDmsStatusService } from './InvoiceDmsStatus.service';
+import { GenerateSaleInvoiceNumberService } from './GenerateSaleInvoiceNumber.service';
 import { ItemsEntriesService } from '../Items/ItemsEntries.service';
 
 @Module({
@@ -22,6 +23,7 @@ import { ItemsEntriesService } from '../Items/ItemsEntries.service';
     InvoiceLotReservationSyncSubscriber,
     InvoiceLotReservationService,
     InvoiceDmsStatusService,
+    GenerateSaleInvoiceNumberService,
     ItemsEntriesService,
     ItemPriceLotsApplication,
   ],

@@ -1,94 +1,52 @@
 // @ts-nocheck
 import React from 'react';
-import { Position, ControlGroup } from '@blueprintjs/core';
+import styled from 'styled-components';
+import { FormGroup } from '@blueprintjs/core';
 import { useFormikContext } from 'formik';
-import * as R from 'ramda';
-import {
-  FFormGroup,
-  FormattedMessage as T,
-  FieldRequiredHint,
-  Icon,
-  InputPrependButton,
-  FInputGroup,
-} from '@/components';
-import { DialogsName } from '@/constants/dialogs';
-import { withSettings } from '@/containers/Settings/withSettings';
-import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 import intl from 'react-intl-universal';
 
 /**
- * Invoice number field of invoice form.
+ * Invoice number field of the invoice form.
+ *
+ * Read-only: Astrans DMS assigns a per-area invoice number
+ * (`YYMMM_ASTRANSQQ_XXXXX`) automatically once the invoice reaches the
+ * "Invoiced" DMS status (or "Delivered", if "Invoiced" was skipped) --
+ * see docs/ops/PHASE1.md ("Invoice numbers"). It's intentionally left
+ * blank before that and can no longer be typed in manually.
  */
-export const InvoiceFormInvoiceNumberField = R.compose(
-  withDialogActions,
-  withSettings(({ invoiceSettings }) => ({
-    invoiceAutoIncrement: invoiceSettings?.autoIncrement,
-  })),
-)(({
-  // #withDialogActions
-  openDialog,
-
-  // #withSettings
-  invoiceAutoIncrement,
-}) => {
-  // Formik context.
-  const { values, setFieldValue } = useFormikContext();
-
-  // Handle invoice number changing.
-  const handleInvoiceNumberChange = () => {
-    openDialog(DialogsName.InvoiceNumberSettings);
-  };
-  // Handle invoice no. field blur.
-  const handleInvoiceNoBlur = (event) => {
-    const newValue = event.target.value;
-
-    // Show the confirmation dialog if the value has changed and auto-increment
-    // mode is enabled.
-    if (values.invoice_no !== newValue && invoiceAutoIncrement) {
-      openDialog(DialogsName.InvoiceNumberSettings, {
-        initialFormValues: {
-          onceManualNumber: newValue,
-          incrementMode: 'manual-transaction',
-        },
-      });
-    }
-    // Setting the invoice number to the form will be manually in case
-    // auto-increment is disable.
-    if (!invoiceAutoIncrement) {
-      setFieldValue('invoice_no', newValue);
-      setFieldValue('invoice_no_manually', newValue);
-    }
-  };
+export function InvoiceFormInvoiceNumberField() {
+  const { values } = useFormikContext();
 
   return (
-    <FFormGroup
-      name={'invoice_no'}
-      label={intl.get('invoice_no')}
-      labelInfo={<FieldRequiredHint />}
-      inline={true}
-      fastField={true}
-    >
-      <ControlGroup fill={true}>
-        <FInputGroup
-          name={'invoice_no'}
-          minimal={true}
-          asyncControl={true}
-          onBlur={handleInvoiceNoBlur}
-          onChange={() => {}}
-        />
-        <InputPrependButton
-          buttonProps={{
-            onClick: handleInvoiceNumberChange,
-            icon: <Icon icon={'settings-18'} />,
-          }}
-          tooltip={true}
-          tooltipProps={{
-            content: <T id={'setting_your_auto_generated_invoice_number'} />,
-            position: Position.BOTTOM_LEFT,
-          }}
-        />
-      </ControlGroup>
-    </FFormGroup>
+    <FormGroup label={intl.get('invoice_no')} inline={true}>
+      {values.invoice_no ? (
+        <StaticValue>{values.invoice_no}</StaticValue>
+      ) : (
+        <MutedHint>
+          {intl.get('invoice_no_auto_assigned_hint') ||
+            'Assigned automatically once moved to "Invoiced"'}
+        </MutedHint>
+      )}
+    </FormGroup>
   );
-});
+}
 InvoiceFormInvoiceNumberField.displayName = 'InvoiceFormInvoiceNumberField';
+
+const StaticValue = styled.span`
+  font-size: 13px;
+  color: var(--x-color-text, #1c2126);
+
+  .bp4-dark & {
+    --x-color-text: var(--color-light-gray4);
+  }
+`;
+
+const MutedHint = styled.span`
+  font-size: 12px;
+  font-style: italic;
+  color: var(--x-color-muted, #9ca7b3);
+
+  .bp4-dark & {
+    --x-color-muted: var(--color-gray1);
+  }
+`;

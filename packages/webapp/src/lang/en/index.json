@@ -178,6 +178,7 @@
   "all_warehouses": "All warehouses",
   "all_areas": "All areas",
   "no_delivered_invoices_found_for_this_filter": "No delivered invoices found for this filter.",
+  "invoice_no_auto_assigned_hint": "Assigned automatically once moved to \"Invoiced\"",
   "area_name_exists": "This area name already exists.",
   "the_area_has_been_created_successfully": "The area has been created successfully.",
   "the_area_has_been_edited_successfully": "The area has been edited successfully.",

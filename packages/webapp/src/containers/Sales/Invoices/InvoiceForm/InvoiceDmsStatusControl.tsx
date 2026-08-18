@@ -59,6 +59,12 @@ export function InvoiceDmsStatusControl() {
         const deliveredError = errors.find(
           (e) => e.type === 'INVOICE_ALREADY_DELIVERED',
         );
+        const noAreaError = errors.find(
+          (e) => e.type === 'CUSTOMER_HAS_NO_AREA',
+        );
+        const areaMissingCodeError = errors.find(
+          (e) => e.type === 'AREA_MISSING_INVOICE_CODE',
+        );
 
         if (lotError) {
           AppToaster.show({
@@ -72,6 +78,18 @@ export function InvoiceDmsStatusControl() {
           AppToaster.show({
             message:
               'This invoice is already delivered and posted to the accounts -- its status can no longer be changed here.',
+            intent: Intent.DANGER,
+          });
+        } else if (noAreaError) {
+          AppToaster.show({
+            message:
+              'This customer has no Area assigned, so an invoice number cannot be generated. Set an Area on the customer first.',
+            intent: Intent.DANGER,
+          });
+        } else if (areaMissingCodeError) {
+          AppToaster.show({
+            message:
+              "This customer's Area does not have an area code set up yet, so an invoice number cannot be generated. Set one on the Area first.",
             intent: Intent.DANGER,
           });
         } else {

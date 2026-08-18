@@ -10,7 +10,6 @@ import { WarehouseTransactionDTOTransform } from '@/modules/Warehouses/Integrati
 import { ItemsEntriesService } from '@/modules/Items/ItemsEntries.service';
 import { ItemEntry } from '@/modules/TransactionItemEntry/models/ItemEntry';
 import { CommandSaleInvoiceValidators } from './CommandSaleInvoiceValidators.service';
-import { SaleInvoiceIncrement } from './SaleInvoiceIncrement.service';
 import { BrandingTemplateDTOTransformer } from '@/modules/PdfTemplate/BrandingTemplateDTOTransformer';
 import { SaleInvoice } from '../models/SaleInvoice';
 import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-index';
@@ -29,7 +28,6 @@ export class CommandSaleInvoiceDTOTransformer {
    * @param {WarehouseTransactionDTOTransform} warehouseDTOTransform - Warehouse transaction DTO transformer.
    * @param {ItemsEntriesService} itemsEntriesService - Items entries service.
    * @param {CommandSaleInvoiceValidators} validators - Command sale invoice validators.
-   * @param {SaleInvoiceIncrement} invoiceIncrement - Sale invoice increment.
    * @param {ItemEntriesTaxTransactions} taxDTOTransformer - Item entries tax transactions.
    * @param {BrandingTemplateDTOTransformer} brandingTemplatesTransformer - Branding template DTO transformer.
    * @param {TenancyContext} tenancyContext - Tenancy context.
@@ -40,7 +38,6 @@ export class CommandSaleInvoiceDTOTransformer {
     private warehouseDTOTransform: WarehouseTransactionDTOTransform,
     private itemsEntriesService: ItemsEntriesService,
     private validators: CommandSaleInvoiceValidators,
-    private invoiceIncrement: SaleInvoiceIncrement,
     private taxDTOTransformer: ItemEntriesTaxTransactions,
     private brandingTemplatesTransformer: BrandingTemplateDTOTransformer,
     private tenancyContext: TenancyContext,
@@ -60,18 +57,16 @@ export class CommandSaleInvoiceDTOTransformer {
     const entriesModels = this.transformDTOEntriesToModels(saleInvoiceDTO);
     const amount = this.getDueBalanceItemEntries(entriesModels);
 
-    // Retreive the next invoice number.
-    const autoNextNumber = await this.invoiceIncrement.getNextInvoiceNumber();
-
     // Retrieve the authorized user.
     const authorizedUser = await this.tenancyContext.getSystemUser();
 
-    // Invoice number.
-    const invoiceNo =
-      saleInvoiceDTO.invoiceNo || oldSaleInvoice?.invoiceNo || autoNextNumber;
-
-    // Validate the invoice is required.
-    this.validators.validateInvoiceNoRequire(invoiceNo);
+    // Invoice number is intentionally left empty for new/Pending/Reserved
+    // invoices -- Astrans DMS only stamps a real (per-area) number once
+    // the invoice reaches Invoiced/Delivered, via
+    // `GenerateSaleInvoiceNumberService` -- see docs/ops/PHASE1.md
+    // ("Invoice numbers"). Bigcapital's own auto-increment numbering is
+    // no longer used here.
+    const invoiceNo = saleInvoiceDTO.invoiceNo || oldSaleInvoice?.invoiceNo || null;
 
     const initialEntries = saleInvoiceDTO.entries.map((entry) => ({
       referenceType: 'SaleInvoice',

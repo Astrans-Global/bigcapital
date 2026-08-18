@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { SaleInvoice } from '../SaleInvoices/models/SaleInvoice';
 import { DeliverSaleInvoice } from '../SaleInvoices/commands/DeliverSaleInvoice.service';
 import { InvoiceLotReservationService } from './InvoiceLotReservation.service';
+import { GenerateSaleInvoiceNumberService } from './GenerateSaleInvoiceNumber.service';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { UnitOfWork } from '@/modules/Tenancy/TenancyDB/UnitOfWork.service';
 import { ServiceError } from '@/modules/Items/ServiceError';
@@ -28,6 +29,7 @@ export class InvoiceDmsStatusService {
 
     private readonly reservationService: InvoiceLotReservationService,
     private readonly deliverSaleInvoice: DeliverSaleInvoice,
+    private readonly numberService: GenerateSaleInvoiceNumberService,
     private readonly uow: UnitOfWork,
   ) {}
 
@@ -52,6 +54,15 @@ export class InvoiceDmsStatusService {
       );
     }
 
+    // Reverting out of Invoiced back down to Pending/Reserved burns
+    // whatever number it was carrying -- see docs/ops/PHASE1.md
+    // ("Invoice numbers"). Invoiced -> Invoiced (no-op) and
+    // Invoiced -> Delivered both keep the existing number instead.
+    const isRevertingFromInvoiced =
+      invoice.dmsStatus === 'invoiced' &&
+      targetStatus !== 'invoiced' &&
+      targetStatus !== 'delivered';
+
     if (targetStatus === 'delivered') {
       // Make sure stock is actually held (covers the case of moving
       // straight from Pending to Delivered) before committing to the
@@ -63,13 +74,22 @@ export class InvoiceDmsStatusService {
       // always opens its own (it has no way to accept an outer one), so
       // there's no atomicity to gain by nesting -- only fail-fast value,
       // which holding the reservation check first already gives us.
-      await this.uow.withTransaction((trx) =>
-        this.reservationService.reserveForInvoice(invoiceId, trx),
-      );
+      await this.uow.withTransaction(async (trx) => {
+        await this.reservationService.reserveForInvoice(invoiceId, trx);
+        // Covers skipping straight from Pending/Reserved to Delivered --
+        // an invoice that already reached Invoiced keeps its number.
+        await this.numberService.assignNumberIfMissing(invoiceId, trx);
+      });
       await this.deliverSaleInvoice.deliverSaleInvoice(invoiceId);
     } else if (HOLD_STATUSES.includes(targetStatus)) {
       await this.uow.withTransaction(async (trx) => {
         await this.reservationService.reserveForInvoice(invoiceId, trx);
+
+        if (targetStatus === 'invoiced') {
+          await this.numberService.assignNumberIfMissing(invoiceId, trx);
+        } else if (isRevertingFromInvoiced) {
+          await this.numberService.burnNumber(invoiceId, trx);
+        }
 
         await this.saleInvoiceModel()
           .query(trx)
@@ -79,6 +99,10 @@ export class InvoiceDmsStatusService {
     } else {
       await this.uow.withTransaction(async (trx) => {
         await this.reservationService.releaseForInvoice(invoiceId, trx);
+
+        if (isRevertingFromInvoiced) {
+          await this.numberService.burnNumber(invoiceId, trx);
+        }
 
         await this.saleInvoiceModel()
           .query(trx)
