@@ -103,7 +103,21 @@ export function InvoiceDmsStatusControl() {
     [setDmsStatus, invoiceId],
   );
 
-  if (!invoiceId || !invoice) return null;
+  // Brand-new, never-saved invoices always start out life as "Pending"
+  // automatically -- there's nothing to change yet (no invoice id to call
+  // the status endpoint against), but we still show it as a plain,
+  // non-interactive tag so it's clear from the very first screen that
+  // this invoice will start out Pending. It becomes a real dropdown once
+  // the invoice has been saved at least once.
+  if (!invoiceId || !invoice) {
+    return (
+      <FormGroup label={'Status'} inline style={{ marginRight: 16 }}>
+        <Tag intent={STATUS_INTENT.pending} round>
+          {STATUS_LABELS.pending}
+        </Tag>
+      </FormGroup>
+    );
+  }
 
   const currentStatus = invoice.dms_status || 'pending';
   const isDelivered = currentStatus === 'delivered';

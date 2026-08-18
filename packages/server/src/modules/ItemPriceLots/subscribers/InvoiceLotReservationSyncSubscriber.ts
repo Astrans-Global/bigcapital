@@ -10,20 +10,25 @@ import {
 import { SaleInvoice } from '../../SaleInvoices/models/SaleInvoice';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { InvoiceLotReservationService } from '../InvoiceLotReservation.service';
+import { GenerateSaleInvoiceNumberService } from '../GenerateSaleInvoiceNumber.service';
 
 /**
- * Keeps item price-lot reservations in sync with a sale invoice's own
- * lifecycle -- see docs/ops/PHASE1.md ("Status pipeline"). Handles the
- * two cases the DMS status endpoint itself can't see: editing an invoice
+ * Keeps item price-lot reservations, `dms_status`, and the DMS invoice
+ * number in sync with a sale invoice's own lifecycle -- see
+ * docs/ops/PHASE1.md ("Status pipeline" / "Invoice numbers"). Handles the
+ * cases the DMS status endpoint itself can't see: editing an invoice
  * while it's already holding stock (quantities/lots on its lines may have
- * changed), and deleting an invoice outright (its holds must be released,
- * not just cascade-deleted, since releasing also has to give the quantity
- * back to `item_price_lots.reservedQty`).
+ * changed), Bigcapital's own native "Save and Deliver" action reaching
+ * "delivered" on create *or* edit without ever calling
+ * `InvoiceDmsStatusService`, and deleting an invoice outright (its holds
+ * must be released, not just cascade-deleted, since releasing also has to
+ * give the quantity back to `item_price_lots.reservedQty`).
  */
 @Injectable()
 export class InvoiceLotReservationSyncSubscriber {
   constructor(
     private readonly reservationService: InvoiceLotReservationService,
+    private readonly numberService: GenerateSaleInvoiceNumberService,
 
     @Inject(SaleInvoice.name)
     private readonly saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
@@ -67,6 +72,12 @@ export class InvoiceLotReservationSyncSubscriber {
     saleInvoiceId: number,
     trx: ISaleInvoiceEventDeliveredPayload['trx'],
   ) {
+    // No-ops if a number is already assigned (e.g. it already passed
+    // through "Invoiced" via the DMS status endpoint) -- this is what
+    // gives a delivered invoice its per-area number even when it was
+    // delivered straight from Bigcapital's native action instead of the
+    // DMS status pill. See docs/ops/PHASE1.md ("Invoice numbers").
+    await this.numberService.assignNumberIfMissing(saleInvoiceId, trx);
     await this.reservationService.consumeForInvoice(saleInvoiceId, trx);
 
     await this.saleInvoiceModel()
@@ -78,16 +89,27 @@ export class InvoiceLotReservationSyncSubscriber {
 
   /**
    * Re-derives the invoice's holds from its current entries whenever it's
-   * edited while already Reserved/Invoiced. A no-op for Pending invoices
-   * (nothing held yet) and for Delivered ones (holds are already resolved
-   * into a permanent stock decrease by then).
+   * edited while already Reserved/Invoiced. Also covers Bigcapital's
+   * native "Save and Deliver" action used on an existing invoice -- an
+   * edit that sets `deliveredAt` directly never fires `onDelivered` on
+   * its own, so without this branch the same gaps as the create-time
+   * case would apply (stock never permanently decremented, dms_status/
+   * invoice number never assigned). A no-op for Pending invoices that
+   * stay Pending (nothing held yet) and for already-Delivered ones
+   * (holds are already resolved into a permanent stock decrease by then).
    * @param {ISaleInvoiceEditedPayload} payload -
    */
   @OnEvent(events.saleInvoice.onEdited)
   public async handleResyncingReservation({
     saleInvoice,
+    oldSaleInvoice,
     trx,
   }: ISaleInvoiceEditedPayload) {
+    if (!oldSaleInvoice.deliveredAt && saleInvoice.deliveredAt) {
+      await this.reservationService.reserveForInvoice(saleInvoice.id, trx);
+      await this.syncDeliveredInvoice(saleInvoice.id, trx);
+      return;
+    }
     if (
       saleInvoice.dmsStatus !== 'reserved' &&
       saleInvoice.dmsStatus !== 'invoiced'
