@@ -1,3 +1,4 @@
+export * from './asSelectItems';
 export * from './FormObserver';
 export * from './FormikObserver';
 export * from './FMoneyInputGroup';

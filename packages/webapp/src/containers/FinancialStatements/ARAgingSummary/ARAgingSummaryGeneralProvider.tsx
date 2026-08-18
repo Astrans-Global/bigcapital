@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useCustomers } from '@/hooks/query';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type UseCustomersResult = ReturnType<typeof useCustomers>;
 
@@ -26,7 +27,7 @@ function ARAgingSummaryGeneralProvider({
   const { data: customersData, isLoading: isCustomersLoading } = useCustomers();
 
   const provider: ARAgingSummaryGeneralContextValue = {
-    customers: (customersData as any)?.customers,
+    customers: asSelectItems((customersData as any)?.customers ?? customersData),
     isCustomersLoading,
   };
 

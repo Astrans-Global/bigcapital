@@ -20,8 +20,45 @@ import {
   withFormikSuggest,
   withFormikSelect,
 } from '@blueprintjs-formik/select';
-import { DateInput, TimezoneSelect } from '@blueprintjs-formik/datetime';
+import {
+  DateInput as BPFormikDateInput,
+  TimezoneSelect,
+} from '@blueprintjs-formik/datetime';
 import { FSelect } from './Select';
+import { asSelectItems } from './asSelectItems';
+
+function toDateOrNull(value: unknown): Date | null {
+  if (value == null || value === '') {
+    return null;
+  }
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const parsed = new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function FDateInput(
+  props: React.ComponentProps<typeof BPFormikDateInput>,
+) {
+  return (
+    <BPFormikDateInput
+      {...props}
+      formParseDate={props.formParseDate ?? toDateOrNull}
+      formFormatDate={
+        props.formFormatDate ?? ((date) => date as unknown as string)
+      }
+    />
+  );
+}
+
+export function FMultiSelect(
+  props: React.ComponentProps<typeof FormikMultiSelect>,
+) {
+  return (
+    <FormikMultiSelect {...props} items={asSelectItems(props.items)} />
+  );
+}
 
 export {
   FormGroup as FFormGroup,
@@ -31,11 +68,9 @@ export {
   RadioGroup as FRadioGroup,
   Switch as FSwitch,
   FSelect,
-  FormikMultiSelect as FMultiSelect,
   EditableText as FEditableText,
   FormikSuggest as FSuggest,
   TextArea as FTextArea,
-  DateInput as FDateInput,
   HTMLSelect as FHTMLSelect,
   TimezoneSelect as FTimezoneSelect,
   Suggest,

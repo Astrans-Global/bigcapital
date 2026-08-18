@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
 import { useCustomers } from '@/hooks/query';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 interface CustomersTransactionsGeneralPanelContextValue {
   customers: any;
@@ -30,7 +31,9 @@ function CustomersTransactionsGeneralPanelProvider({
   } = useCustomers();
 
   const provider: CustomersTransactionsGeneralPanelContextValue = {
-    customers: customersData?.data || [],
+    customers: asSelectItems(
+      (customersData as any)?.customers ?? customersData?.data ?? customersData,
+    ),
     isCustomersLoading,
     isCustomersFetching,
   };

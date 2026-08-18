@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useItems } from '@/hooks/query';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 interface InventoryItemDetailsHeaderGeneralContextValue {
   items: Record<string, unknown>[] | undefined;
@@ -38,7 +39,7 @@ function InventoryItemDetailsHeaderGeneralProvider({
   const provider: InventoryItemDetailsHeaderGeneralContextValue = {
     isItemsFetching,
     isItemsLoading,
-    items: (itemsData as any)?.items,
+    items: asSelectItems((itemsData as any)?.items ?? itemsData),
   };
   // Loading state.
   const loading = isItemsLoading;

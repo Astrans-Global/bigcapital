@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useItems } from '@/hooks/query';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type UseItemsResult = ReturnType<typeof useItems>;
 
@@ -39,7 +40,7 @@ function SalesByItemGeneralPanelProvider({
   });
 
   const provider: SalesByItemGeneralPanelContextValue = {
-    items: (itemsData as any)?.items,
+    items: asSelectItems((itemsData as any)?.items ?? itemsData),
     isItemsLoading,
     isItemsFetching,
   };

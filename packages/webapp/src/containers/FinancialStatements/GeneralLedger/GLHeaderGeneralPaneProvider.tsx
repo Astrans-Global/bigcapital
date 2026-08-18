@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 import { useAccounts } from '@/hooks/query';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type GLHeaderGeneralPanelContextValue = {
   accounts: ReturnType<typeof useAccounts>['data'];
@@ -25,7 +26,7 @@ function GLHeaderGeneralPanelProvider({
 
   // Provider
   const provider: GLHeaderGeneralPanelContextValue = {
-    accounts,
+    accounts: asSelectItems(accounts),
     isAccountsLoading,
   };
   const loading = isAccountsLoading;

@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 import { useVendors } from '@/hooks/query';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type UseVendorsResult = ReturnType<typeof useVendors>;
 
@@ -27,7 +28,7 @@ function APAgingSummaryGeneralProvider({
   const { data: vendorsData, isFetching: isVendorsLoading } = useVendors();
 
   const provider: APAgingSummaryGeneralContextValue = {
-    vendors: (vendorsData as any)?.vendors,
+    vendors: asSelectItems((vendorsData as any)?.vendors ?? vendorsData),
     isVendorsLoading,
   };
 

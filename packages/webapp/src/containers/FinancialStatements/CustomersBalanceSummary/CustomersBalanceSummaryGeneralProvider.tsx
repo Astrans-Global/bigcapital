@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
 import { useCustomers } from '@/hooks/query';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type UseCustomersResult = ReturnType<typeof useCustomers>;
 
@@ -32,7 +33,7 @@ function CustomersBalanceSummaryGeneralProvider({
   const provider: CustomersBalanceSummaryGeneralContextValue = {
     isCustomersLoading,
     isCustomersFetching,
-    customers: (customersData as any)?.customers,
+    customers: asSelectItems((customersData as any)?.customers ?? customersData),
   };
 
   return isCustomersLoading ? (

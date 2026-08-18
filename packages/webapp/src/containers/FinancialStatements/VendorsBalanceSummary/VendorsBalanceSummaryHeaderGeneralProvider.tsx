@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
 import { useVendors } from '@/hooks/query';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 interface VendorsBalanceSummaryGeneralPanelContextValue {
   vendors: any;
@@ -30,7 +31,7 @@ function VendorsBalanceSummaryGeneralPanelProvider({
 
   // Provider.
   const provider: VendorsBalanceSummaryGeneralPanelContextValue = {
-    vendors: (vendorsData as any)?.vendors,
+    vendors: asSelectItems((vendorsData as any)?.vendors ?? vendorsData),
     isVendorsFetching,
     isVendorsLoading,
   };

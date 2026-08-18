@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
 import { useItems } from '@/hooks/query';
+import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 interface InventoryValuationGeneralPanelContextValue {
   items: Record<string, unknown>[] | undefined;
@@ -34,7 +35,7 @@ function InventoryValuationGeneralPanelProvider({
 
   // Provider data.
   const provider: InventoryValuationGeneralPanelContextValue = {
-    items: (itemsData as any)?.items,
+    items: asSelectItems((itemsData as any)?.items ?? itemsData),
     isItemsFetching,
     isItemsLoading,
   };
