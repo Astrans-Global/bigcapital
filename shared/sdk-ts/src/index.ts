@@ -37,6 +37,7 @@ export * from './item-price-lots';
 export * from './customer-areas';
 export * from './secondary-pnl';
 export * from './customer-route-cities';
+export * from './delivery-prep';
 export * from './views';
 export * from './transactions-locking';
 export * from './vendor-credits';

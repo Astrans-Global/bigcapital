@@ -899,6 +899,22 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/delivery-prep`,
+    component: lazy(() =>
+      import('@/containers/DeliveryPrep/DeliveryPrep').then((m) => ({
+        default: m.DeliveryPrep,
+      })),
+    ),
+    breadcrumb: intl.get('delivery_prep'),
+    hint:
+      intl.get('delivery_prep_hint') ||
+      'Invoices ready to load onto vans -- tick some to see combined items and litres.',
+    pageTitle: intl.get('delivery_prep'),
+    backLink: true,
+    sidebarExpand: false,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/invoices`,
     component: lazy(() =>
       import('@/containers/Sales/Invoices/InvoicesLanding/InvoicesList').then(

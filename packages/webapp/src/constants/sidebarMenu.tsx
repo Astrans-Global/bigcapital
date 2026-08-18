@@ -184,6 +184,15 @@ export const SidebarMenu = [
             },
           },
           {
+            text: <T id={'sidebar.delivery_prep'} />,
+            href: '/delivery-prep',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Invoice,
+              ability: SaleInvoiceAction.View,
+            },
+          },
+          {
             text: <T id={'sidebar.receipts'} />,
             href: '/receipts',
             type: ISidebarMenuItemType.Link,

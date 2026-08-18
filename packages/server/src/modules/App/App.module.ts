@@ -41,6 +41,7 @@ import { SaleInvoiceVatModule } from '../SaleInvoiceVat/SaleInvoiceVat.module';
 import { SecondaryPnlModule } from '../SecondaryPnl/SecondaryPnl.module';
 import { CustomerAreaModule } from '../CustomerAreas/CustomerArea.module';
 import { CustomerRouteCityModule } from '../CustomerRouteCities/CustomerRouteCity.module';
+import { DeliveryPrepModule } from '../DeliveryPrep/DeliveryPrep.module';
 import { TaxRatesModule } from '../TaxRates/TaxRate.module';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
 import { BranchesModule } from '../Branches/Branches.module';
@@ -213,6 +214,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     SecondaryPnlModule,
     CustomerAreaModule,
     CustomerRouteCityModule,
+    DeliveryPrepModule,
     AccountsModule,
     ExpensesModule,
     TaxRatesModule,
