@@ -38,7 +38,10 @@ const StaticFormGroup = styled(FormGroup)`
 `;
 
 const StaticValue = styled.span`
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 30px;
   color: var(--x-color-text, #1c2126);
 
   .bp4-dark & {

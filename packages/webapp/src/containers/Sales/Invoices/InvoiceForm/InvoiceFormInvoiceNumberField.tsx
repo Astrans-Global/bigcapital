@@ -18,7 +18,7 @@ export function InvoiceFormInvoiceNumberField() {
   const { values } = useFormikContext();
 
   return (
-    <FormGroup label={intl.get('invoice_no')} inline={true}>
+    <NumberFormGroup label={intl.get('invoice_no')} inline={true}>
       {values.invoice_no ? (
         <StaticValue>{values.invoice_no}</StaticValue>
       ) : (
@@ -27,13 +27,28 @@ export function InvoiceFormInvoiceNumberField() {
             'Assigned automatically once moved to "Invoiced"'}
         </MutedHint>
       )}
-    </FormGroup>
+    </NumberFormGroup>
   );
 }
 InvoiceFormInvoiceNumberField.displayName = 'InvoiceFormInvoiceNumberField';
 
+const NumberFormGroup = styled(FormGroup)`
+  &.bp4-inline {
+    align-items: center;
+  }
+
+  .bp4-form-content {
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+  }
+`;
+
 const StaticValue = styled.span`
+  display: inline-flex;
+  align-items: center;
   font-size: 13px;
+  line-height: 30px;
   color: var(--x-color-text, #1c2126);
 
   .bp4-dark & {
@@ -42,7 +57,10 @@ const StaticValue = styled.span`
 `;
 
 const MutedHint = styled.span`
+  display: inline-flex;
+  align-items: center;
   font-size: 12px;
+  line-height: 30px;
   font-style: italic;
   color: var(--x-color-muted, #9ca7b3);
 

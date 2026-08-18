@@ -12,6 +12,12 @@ const inputGroupCss = css`
   & .bp4-input {
     max-width: 110px;
     padding-left: 8px;
+    padding-right: 28px;
+  }
+  & .bp4-input-action {
+    display: flex;
+    align-items: center;
+    height: 100%;
   }
 `;
 const formGroupCss = css`
@@ -56,6 +62,7 @@ export function DiscountTotalLine({
                 <x.span
                   fontSize={12}
                   px={8}
+                  height={'100%'}
                   display={'flex'}
                   alignItems={'center'}
                 >
