@@ -818,6 +818,15 @@ export const SidebarMenu = [
               ability: ReportsAction.READ_SALES_BY_ITEMS,
             },
           },
+          {
+            text: <T id={'warehouse_inventory'} />,
+            href: '/reports/warehouse-inventory',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Report,
+              ability: ReportsAction.READ_INVENTORY_VALUATION_SUMMARY,
+            },
+          },
         ],
       },
     ],

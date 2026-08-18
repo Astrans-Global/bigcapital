@@ -17,6 +17,7 @@ export * from './customer-areas';
 export * from './secondary-pnl';
 export * from './customer-route-cities';
 export * from './delivery-prep';
+export * from './warehouse-inventory';
 export * from './inventory-adjustments';
 export * from './customers';
 export * from './vendors';

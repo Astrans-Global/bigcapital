@@ -42,6 +42,7 @@ import { SecondaryPnlModule } from '../SecondaryPnl/SecondaryPnl.module';
 import { CustomerAreaModule } from '../CustomerAreas/CustomerArea.module';
 import { CustomerRouteCityModule } from '../CustomerRouteCities/CustomerRouteCity.module';
 import { DeliveryPrepModule } from '../DeliveryPrep/DeliveryPrep.module';
+import { WarehouseInventoryModule } from '../WarehouseInventory/WarehouseInventory.module';
 import { TaxRatesModule } from '../TaxRates/TaxRate.module';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
 import { BranchesModule } from '../Branches/Branches.module';
@@ -215,6 +216,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     CustomerAreaModule,
     CustomerRouteCityModule,
     DeliveryPrepModule,
+    WarehouseInventoryModule,
     AccountsModule,
     ExpensesModule,
     TaxRatesModule,

@@ -408,6 +408,24 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/reports/warehouse-inventory`,
+    component: lazy(() =>
+      import('@/containers/WarehouseInventory/WarehouseInventory').then(
+        (m) => ({
+          default: m.WarehouseInventory,
+        }),
+      ),
+    ),
+    breadcrumb: intl.get('warehouse_inventory'),
+    hint:
+      intl.get('warehouse_inventory_hint') ||
+      'Real vs reserved vs invoiced stock per price-lot, with litres and value.',
+    pageTitle: intl.get('warehouse_inventory'),
+    backLink: true,
+    sidebarExpand: false,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/financial-reports/customers-balance-summary`,
     component: lazy(() =>
       import(
