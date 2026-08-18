@@ -796,6 +796,21 @@ export const SidebarMenu = [
           },
         ],
       },
+      {
+        text: 'Astrans DMS',
+        type: ISidebarMenuItemType.Group,
+        children: [
+          {
+            text: <T id={'secondary_pnl'} />,
+            href: '/reports/secondary-pnl',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Report,
+              ability: ReportsAction.READ_SALES_BY_ITEMS,
+            },
+          },
+        ],
+      },
     ],
   },
   {

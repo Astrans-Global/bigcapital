@@ -20,6 +20,7 @@ import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
 import {
   aggregateItemEntriesTaxRates,
   assignEntriesTaxAmount,
+  assignEntriesTaxRate,
   getEntriesTotal,
 } from '@/containers/Entries/utils';
 import { useInvoiceFormContext } from './InvoiceFormProvider';
@@ -59,7 +60,12 @@ export const defaultInvoice = {
   due_date: moment().format('YYYY-MM-DD'),
   delivered: '',
   invoice_no: '',
-  inclusive_exclusive_tax: TaxType.Inclusive,
+  // Invoices are always calculated exclusive-of-tax internally -- see the
+  // "Amounts are" notice in InvoiceFormActions.tsx and docs/ops/PHASE1.md
+  // ("VAT"): every invoice always carries VAT on its subtotal, "Non-VAT
+  // invoice" is purely a print-format choice made later, not a different
+  // internal calculation.
+  inclusive_exclusive_tax: TaxType.Exclusive,
   // Holds the invoice number that entered manually only.
   invoice_no_manually: '',
   reference_no: '',
@@ -77,7 +83,29 @@ export const defaultInvoice = {
   discount: '',
   discount_type: 'amount',
   adjustment: '',
+
+  // Single invoice-wide tax rate (applied to every line under the hood) --
+  // same pattern as the Bill form's `bill_tax_rate_id` (see
+  // docs/ops/PHASE1.md "VAT"). UI-only field, stripped back out of the
+  // request payload in `transformValueToRequest`.
+  invoice_tax_rate_id: '',
 };
+
+/**
+ * Stamps every entry with the single invoice-wide tax rate and recomputes
+ * each entry's tax_rate/tax_amount from it -- mirrors
+ * `applyBillTaxRateToEntries` on the Bill form.
+ */
+export const applyInvoiceTaxRateToEntries = R.curry(
+  (invoiceTaxRateId, taxRates, isInclusiveTax, entries) => {
+    if (!invoiceTaxRateId) return entries;
+
+    return R.compose(
+      assignEntriesTaxAmount(isInclusiveTax),
+      assignEntriesTaxRate(taxRates),
+    )(entries.map((entry) => ({ ...entry, tax_rate_id: invoiceTaxRateId })));
+  },
+);
 
 // Invoice entry request schema.
 export const defaultReqInvoiceEntry = {
@@ -109,11 +137,18 @@ export function transformToEditForm(invoice) {
     updateItemsEntriesTotal,
   )(initialEntries);
 
+  // Reconstruct the invoice-wide tax rate selection from whichever entry
+  // carries one -- every line should share the same tax_rate_id since
+  // it's only ever set via the single invoice-level control.
+  const invoiceTaxRateId =
+    invoice.entries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
+
   return {
     ...transformToForm(invoice, defaultInvoice),
-    inclusive_exclusive_tax: invoice.is_inclusive_tax
-      ? TaxType.Inclusive
-      : TaxType.Exclusive,
+    // Always exclusive-of-tax regardless of what's stored on the invoice --
+    // see the "Amounts are" notice in InvoiceFormActions.tsx.
+    inclusive_exclusive_tax: TaxType.Exclusive,
+    invoice_tax_rate_id: invoiceTaxRateId,
     entries,
     attachments: transformAttachmentsToForm(invoice),
     payment_methods: transformPaymentMethodsToForm(invoice?.payment_methods),
@@ -223,13 +258,17 @@ export function transformValueToRequest(values) {
       'invoice_no',
       'invoice_no_manually',
       'inclusive_exclusive_tax',
+      'invoice_tax_rate_id',
     ]),
     // The `invoice_no_manually` will be presented just if the auto-increment
     // is disable, always both attributes hold the same value in manual mode.
     ...(values.invoice_no_manually && {
       invoice_no: values.invoice_no,
     }),
-    is_inclusive_tax: values.inclusive_exclusive_tax === TaxType.Inclusive,
+    // Invoices are always exclusive-of-tax (see "Amounts are" notice) --
+    // explicit here rather than relying on the server DTO's default, same
+    // reasoning as the Bill form's `is_inclusive_tax: false` override.
+    is_inclusive_tax: false,
     entries: transformEntriesToRequest(values.entries),
     delivered: false,
     attachments: transformAttachmentsToRequest(values),

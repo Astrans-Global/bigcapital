@@ -1,11 +1,8 @@
 // @ts-nocheck
 import React from 'react';
 import styled from 'styled-components';
-import { useFormikContext } from 'formik';
-import { InclusiveButtonOptions } from './constants';
-import { FFormGroup, FSelect } from '@/components';
+import { FormGroup } from '@blueprintjs/core';
 import { EntriesActionsBar } from '@/containers/Entries/EntriesActionBar';
-import { composeEntriesOnEditInclusiveTax } from './utils';
 import { InvoiceDmsStatusControl } from './InvoiceDmsStatusControl';
 
 /**
@@ -16,49 +13,35 @@ export function InvoiceFormActions() {
   return (
     <EntriesActionsBar>
       <InvoiceDmsStatusControl />
-      <InvoiceExclusiveInclusiveSelect />
+      <InvoiceAmountsAreExclusiveNotice />
     </EntriesActionsBar>
   );
 }
 
 /**
- * Invoice exclusive/inclusive select.
- * @returns {React.ReactNode}
+ * Invoices always compute VAT as exclusive-of-tax (see docs/ops/PHASE1.md
+ * "VAT" -- every invoice always carries VAT on its subtotal internally,
+ * "Non-VAT invoice" is purely a print-format choice made later). The
+ * "Amounts are" inclusive/exclusive picker is intentionally not offered
+ * here anymore -- mirrors `BillFormEntriesActions.tsx`'s static notice.
  */
-export function InvoiceExclusiveInclusiveSelect(props) {
-  const { values, setFieldValue } = useFormikContext();
-
-  const handleItemSelect = (item) => {
-    const newEntries = composeEntriesOnEditInclusiveTax(
-      item.key,
-      values.entries,
-    );
-    setFieldValue('inclusive_exclusive_tax', item.key);
-    setFieldValue('entries', newEntries);
-  };
-
+function InvoiceAmountsAreExclusiveNotice() {
   return (
-    <InclusiveFormGroup
-      name={'inclusive_exclusive_tax'}
-      label={'Amounts are'}
-      inline={true}
-    >
-      <FSelect
-        name={'inclusive_exclusive_tax'}
-        items={InclusiveButtonOptions}
-        textAccessor={'label'}
-        labelAccessor={() => ''}
-        valueAccessor={'key'}
-        popoverProps={{ minimal: true, usePortal: true, inline: false }}
-        buttonProps={{ small: true }}
-        onItemSelect={handleItemSelect}
-        filterable={false}
-        {...props}
-      />
-    </InclusiveFormGroup>
+    <StaticFormGroup label={'Amounts are'} inline={true}>
+      <StaticValue>Exclusive of Tax</StaticValue>
+    </StaticFormGroup>
   );
 }
 
-const InclusiveFormGroup = styled(FFormGroup)`
+const StaticFormGroup = styled(FormGroup)`
   margin-left: auto;
+`;
+
+const StaticValue = styled.span`
+  font-size: 12px;
+  color: var(--x-color-text, #1c2126);
+
+  .bp4-dark & {
+    --x-color-text: var(--color-light-gray4);
+  }
 `;

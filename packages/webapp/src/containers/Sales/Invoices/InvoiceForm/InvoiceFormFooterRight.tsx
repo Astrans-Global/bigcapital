@@ -21,6 +21,7 @@ import {
 import { TaxType } from '@/interfaces/TaxRates';
 import { AdjustmentTotalLine } from './AdjustmentTotalLine';
 import { DiscountTotalLine } from './DiscountTotalLine';
+import { InvoiceTaxRateTotalLine } from './InvoiceTaxRateTotalLine';
 
 export function InvoiceFormFooterRight() {
   const {
@@ -51,6 +52,7 @@ export function InvoiceFormFooterRight() {
         currencyCode={currency_code}
         discountAmount={discountAmount}
       />
+      <InvoiceTaxRateTotalLine />
       <AdjustmentTotalLine adjustmentAmount={adjustmentAmount} />
 
       {taxEntries.map((tax, index) => (

@@ -392,6 +392,22 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: `/reports/secondary-pnl`,
+    component: lazy(() =>
+      import('@/containers/SecondaryPnl/SecondaryPnl').then((m) => ({
+        default: m.SecondaryPnl,
+      })),
+    ),
+    breadcrumb: intl.get('secondary_pnl'),
+    hint:
+      intl.get('secondary_pnl_hint') ||
+      'Selling price vs. lot cost variance per Delivered invoice.',
+    pageTitle: intl.get('secondary_pnl'),
+    backLink: true,
+    sidebarExpand: false,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: `/financial-reports/customers-balance-summary`,
     component: lazy(() =>
       import(

@@ -37,6 +37,8 @@ import { ItemCategoryModule } from '../ItemCategories/ItemCategory.module';
 import { ItemSubcategoryModule } from '../ItemSubcategories/ItemSubcategory.module';
 import { ItemPriceLotsModule } from '../ItemPriceLots/ItemPriceLots.module';
 import { GrnVatModule } from '../GrnVat/GrnVat.module';
+import { SaleInvoiceVatModule } from '../SaleInvoiceVat/SaleInvoiceVat.module';
+import { SecondaryPnlModule } from '../SecondaryPnl/SecondaryPnl.module';
 import { CustomerAreaModule } from '../CustomerAreas/CustomerArea.module';
 import { CustomerRouteCityModule } from '../CustomerRouteCities/CustomerRouteCity.module';
 import { TaxRatesModule } from '../TaxRates/TaxRate.module';
@@ -207,6 +209,8 @@ import { AppThrottleModule } from './AppThrottle.module';
     ItemSubcategoryModule,
     ItemPriceLotsModule,
     GrnVatModule,
+    SaleInvoiceVatModule,
+    SecondaryPnlModule,
     CustomerAreaModule,
     CustomerRouteCityModule,
     AccountsModule,
