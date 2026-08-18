@@ -2,13 +2,12 @@
 // Delivery Prep worklist -- new endpoints not present in the generated
 // OpenAPI `paths` schema yet, see docs/ops/PHASE1.md ("Delivery Prep").
 import type { ApiFetcher } from './fetch-utils';
+import type { DmsStatus } from './item-price-lots';
 
 export const DELIVERY_PREP_ROUTES = {
   INVOICES: '/api/delivery-prep/invoices',
   TOTALS: '/api/delivery-prep/totals',
 } as const;
-
-export type DmsStatus = 'pending' | 'reserved' | 'invoiced' | 'delivered';
 
 export interface DeliveryPrepInvoiceRow {
   saleInvoiceId: number;
