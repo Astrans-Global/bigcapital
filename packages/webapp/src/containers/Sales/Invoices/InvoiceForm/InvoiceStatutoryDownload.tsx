@@ -7,9 +7,10 @@ import { useInvoiceFormContext } from './InvoiceFormProvider';
 import { useDownloadStatutoryInvoice } from '@/hooks/query';
 
 /**
- * Download the filled VAT / Non-VAT Excel (or a PDF of that same sheet)
- * once the invoice has a real number (Invoiced or Delivered). Lives next
- * to the DMS status dropdown in the invoice top bar.
+ * VAT / Non-VAT Excel + PDF download. Always visible in the invoice
+ * header (above the outstanding-invoices panel). Clickable only once the
+ * invoice is Invoiced or Delivered and has a number — otherwise the
+ * controls stay on screen but disabled. See docs/ops/PHASE1.md ("VAT").
  */
 export function InvoiceStatutoryDownload() {
   const { invoice, invoiceId, customers } = useInvoiceFormContext();
@@ -39,11 +40,10 @@ export function InvoiceStatutoryDownload() {
     setTemplate(hasTin ? 'vat' : 'non_vat');
   }, [hasTin]);
 
-  if (!canDownload) {
-    return null;
-  }
-
   const handleDownload = async (fileKind) => {
+    if (!canDownload) {
+      return;
+    }
     try {
       await download({
         invoiceId,
@@ -60,12 +60,16 @@ export function InvoiceStatutoryDownload() {
     }
   };
 
+  const disabledHint = canDownload
+    ? undefined
+    : 'Available once this invoice is Invoiced or Delivered.';
+
   return (
-    <Group spacing={8} style={{ marginLeft: 12 }}>
+    <Group spacing={8} title={disabledHint}>
       <HTMLSelect
         value={template}
         onChange={(event) => setTemplate(event.target.value)}
-        disabled={isPending}
+        disabled={!canDownload || isPending}
       >
         <option value="vat">VAT invoice</option>
         <option value="non_vat">Non-VAT invoice</option>
@@ -75,6 +79,7 @@ export function InvoiceStatutoryDownload() {
           small
           intent={Intent.PRIMARY}
           loading={isPending}
+          disabled={!canDownload}
           onClick={() => handleDownload('xlsx')}
         >
           Excel
@@ -82,6 +87,7 @@ export function InvoiceStatutoryDownload() {
         <Button
           small
           loading={isPending}
+          disabled={!canDownload}
           onClick={() => handleDownload('pdf')}
         >
           PDF

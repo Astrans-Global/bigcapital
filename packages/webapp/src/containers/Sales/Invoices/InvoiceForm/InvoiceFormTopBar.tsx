@@ -16,7 +16,6 @@ import { Features } from '@/constants';
 import { useInvoiceFormContext } from './InvoiceFormProvider';
 import { useFeatureCan } from '@/hooks/state';
 import { InvoiceDmsStatusControl } from './InvoiceDmsStatusControl';
-import { InvoiceStatutoryDownload } from './InvoiceStatutoryDownload';
 import {
   BranchSelect,
   FeatureCan,
@@ -62,7 +61,6 @@ export function InvoiceFormTopBar() {
       )}
       <NavbarGroup align={Alignment.RIGHT}>
         <InvoiceDmsStatusControl />
-        <InvoiceStatutoryDownload />
       </NavbarGroup>
     </FormTopbar>
   );

@@ -26,7 +26,7 @@ export function InvoiceFormCustomerDuePanel() {
   );
 
   return (
-    <>
+    <PanelColumn>
       <PanelRoot>
         {!customerId ? (
           <EmptyHint>
@@ -57,7 +57,7 @@ export function InvoiceFormCustomerDuePanel() {
         customerId={customerId}
         riskCategory={data?.riskCategory}
       />
-    </>
+    </PanelColumn>
   );
 }
 
@@ -96,11 +96,16 @@ function ClassDWarningAlert({ customerId, riskCategory }) {
   );
 }
 
+const PanelColumn = styled.div`
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
 const PanelRoot = styled.div`
-  flex: 1 1 280px;
-  min-width: 260px;
-  max-width: 560px;
-  max-height: 220px;
+  flex: 1 1 auto;
+  min-height: 180px;
   overflow: auto;
   padding: 10px 12px;
   border: 1px solid var(--color-invoice-form-header-border, #d2dce2);
