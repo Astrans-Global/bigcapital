@@ -50,6 +50,7 @@ import { organizationKeys } from '../organization/query-keys';
 import { financialReportsKeys } from '../FinancialReports/query-keys';
 import { creditNotesKeys } from '../credit-note/query-keys';
 import { settingsKeys } from '../settings/query-keys';
+import { downloadFile } from '../../useDownloadFile';
 
 function commonInvalidateQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -529,5 +530,51 @@ export function useGetSaleInvoiceBrandingTemplate(
               res.data?.data,
             ) as GetSaleInvoiceBrandingTemplateResponse,
         ),
+  });
+}
+
+/**
+ * Download the Astrans VAT / Non-VAT statutory invoice as Excel or PDF.
+ * Only works for Invoiced/Delivered invoices that already have a number.
+ */
+export function useDownloadStatutoryInvoice() {
+  const apiRequest = useApiRequest();
+
+  return useMutation({
+    mutationFn: ({
+      invoiceId,
+      template,
+      fileKind,
+      invoiceNo,
+    }: {
+      invoiceId: number;
+      template: 'vat' | 'non_vat';
+      fileKind: 'xlsx' | 'pdf';
+      invoiceNo: string;
+    }) => {
+      const accept =
+        fileKind === 'pdf'
+          ? 'application/pdf'
+          : 'application/xlsx';
+      const label = template === 'vat' ? 'TAX_INVOICE' : 'SALES_INVOICE';
+      const extension = fileKind === 'pdf' ? 'pdf' : 'xlsx';
+
+      return apiRequest
+        .get(`/sale-invoices/${invoiceId}/statutory-invoice`, {
+          responseType: 'blob',
+          headers: { accept },
+          params: { template },
+        })
+        .then((res) => {
+          downloadFile(
+            res.data,
+            `${invoiceNo}_${label}.${extension}`,
+            fileKind === 'pdf'
+              ? 'application/pdf'
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
+          return res;
+        });
+    },
   });
 }

@@ -3,11 +3,13 @@ import { ItemEntryDto } from '@/modules/TransactionItemEntry/dto/ItemEntry.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDateString,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -98,6 +100,24 @@ class CommandSaleInvoiceDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
+    description:
+      'Additional information printed on the statutory invoice (distinct from Narration / invoiceMessage)',
+    required: false,
+  })
+  note?: string;
+
+  @IsOptional()
+  @IsIn(['CASH', 'BANK', 'CREDIT'])
+  @ApiProperty({
+    description: 'Mode of payment printed on the statutory invoice',
+    required: false,
+    enum: ['CASH', 'BANK', 'CREDIT'],
+  })
+  dmsPaymentMode?: 'CASH' | 'BANK' | 'CREDIT';
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
     description: 'Terms and conditions',
     required: false,
     example: 'Payment due within 14 days',
@@ -147,10 +167,13 @@ class CommandSaleInvoiceDto {
   @ValidateNested({ each: true })
   @Type(() => ItemEntryDto)
   @ArrayMinSize(1)
+  @ArrayMaxSize(9)
   @ApiProperty({
-    description: 'Invoice line items',
+    description:
+      'Invoice line items. Astrans statutory templates have 9 item rows, so the form is capped at 9.',
     type: [ItemEntryDto],
     minItems: 1,
+    maxItems: 9,
   })
   entries: ItemEntryDto[];
 

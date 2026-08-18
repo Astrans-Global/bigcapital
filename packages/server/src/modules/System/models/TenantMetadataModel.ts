@@ -18,6 +18,7 @@ export class TenantMetadata extends BaseModel {
   public primaryColor!: string;
   public logoKey!: string;
   public logoUri!: string;
+  public taxNumber?: string;
   public address!: Record<string, any>;
 
   /**

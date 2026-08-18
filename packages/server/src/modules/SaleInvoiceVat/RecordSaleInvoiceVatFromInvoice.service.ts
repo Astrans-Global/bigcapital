@@ -6,13 +6,10 @@ import { SaleInvoiceVatRecord } from './models/SaleInvoiceVatRecord.model';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { SETTINGS_PROVIDER } from '../Settings/Settings.types';
 import { SettingsStore } from '../Settings/SettingsStore';
-import { computeItemPriceLotUnitCosts } from '../ItemPriceLots/ComputeItemPriceLotCost';
+import { computeSaleInvoiceVatAfterDiscount } from '../SaleInvoices/ComputeSaleInvoiceVat';
 
 // See docs/ops/PHASE1.md: "Settings: VAT % (default 18)".
 const DEFAULT_VAT_RATE_PERCENT_FALLBACK = 18;
-
-const round2 = (value: number) =>
-  Math.round((value + Number.EPSILON) * 100) / 100;
 
 /**
  * Snapshots the (output) VAT carried by a Delivered sales invoice into
@@ -81,38 +78,17 @@ export class RecordSaleInvoiceVatFromInvoiceService {
       .findById(invoice.customerId);
 
     const defaultVatRatePercent = await this.getDefaultVatRatePercent();
+    const vatRatePercent =
+      Number(invoice.entries.find((entry) => entry.taxRate)?.taxRate) ||
+      defaultVatRatePercent;
 
-    // Same discount-allocation math as the item price-lot cost calculator
-    // (single source of truth for "what VAT amount did this invoice
-    // actually carry"), applied across all lines.
-    const lineCosts = computeItemPriceLotUnitCosts(
-      {
-        discount: invoice.discount,
-        discountType: invoice.discountType,
-        entries: invoice.entries.map((entry) => ({
-          quantity: entry.quantity,
-          rate: entry.rate,
-          discount: entry.discount,
-          discountType: entry.discountType,
-        })),
-      },
-      defaultVatRatePercent,
-    );
-
-    let taxableAmount = 0;
-    let vatAmount = 0;
-
-    invoice.entries.forEach((entry, index) => {
-      const { listPriceExclVat, discountPercent, unitCostNet } = lineCosts[
-        index
-      ];
-      const netExVatPerUnit = listPriceExclVat * (1 - discountPercent / 100);
-
-      const lineNetTotal = entry.quantity * netExVatPerUnit;
-      const lineGrossTotal = entry.quantity * unitCostNet;
-
-      taxableAmount += lineNetTotal;
-      vatAmount += lineGrossTotal - lineNetTotal;
+    // Same after-header-discount VAT as the invoice form, GL, and statutory
+    // Excel template -- see ComputeSaleInvoiceVat / docs/ops/PHASE1.md.
+    const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
+      entries: invoice.entries,
+      discount: invoice.discount,
+      discountType: invoice.discountType,
+      vatRatePercent,
     });
 
     const record = {
@@ -121,9 +97,9 @@ export class RecordSaleInvoiceVatFromInvoiceService {
       invoiceDate: invoice.invoiceDate ?? null,
       customerId: invoice.customerId,
       isVatCustomer: Boolean(customer?.tinNumber),
-      vatRatePercent: defaultVatRatePercent,
-      taxableAmount: round2(taxableAmount),
-      vatAmount: round2(vatAmount),
+      vatRatePercent,
+      taxableAmount: vatAfterDiscount.taxableAmount,
+      vatAmount: vatAfterDiscount.vatAmount,
     } as Partial<SaleInvoiceVatRecord>;
 
     const existing = await this.saleInvoiceVatRecordModel()

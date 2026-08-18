@@ -708,13 +708,17 @@ export const amountPaymentEntries = (amount, entries) => {
   });
 };
 
-export const updateAutoAddNewLine = (defaultEntry, props) => (entries) => {
-  const newEntries = [...entries];
-  const lastEntry = _.last(newEntries);
-  const newLine = props.filter((entryKey) => !isBlank(lastEntry[entryKey]));
+export const updateAutoAddNewLine =
+  (defaultEntry, props, maxLines) => (entries) => {
+    if (maxLines && entries.length >= maxLines) {
+      return [...entries];
+    }
+    const newEntries = [...entries];
+    const lastEntry = _.last(newEntries);
+    const newLine = props.filter((entryKey) => !isBlank(lastEntry[entryKey]));
 
-  return newLine.length > 0 ? [...entries, defaultEntry] : [...entries];
-};
+    return newLine.length > 0 ? [...entries, defaultEntry] : [...entries];
+  };
 
 /**
  * Ensure min entries lines.

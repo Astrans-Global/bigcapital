@@ -64,6 +64,20 @@ export class SaleInvoiceResponseDto {
   invoiceMessage?: string;
 
   @ApiProperty({
+    description:
+      'Additional information printed on the statutory invoice (distinct from Narration / invoiceMessage)',
+    required: false,
+  })
+  note?: string;
+
+  @ApiProperty({
+    description: 'Mode of payment printed on the statutory invoice',
+    required: false,
+    enum: ['CASH', 'BANK', 'CREDIT'],
+  })
+  dmsPaymentMode?: 'CASH' | 'BANK' | 'CREDIT';
+
+  @ApiProperty({
     description: 'Terms and conditions of the invoice',
     example: 'Payment due within 14 days',
     required: false,

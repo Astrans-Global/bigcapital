@@ -26,6 +26,7 @@ interface ItemsEntriesTableProps {
   onChange?: (entries: ItemEntry[]) => void;
   taxRates?: any[];
   minLinesNumber?: number;
+  maxLinesNumber?: number;
   enableTaxRates?: boolean;
 }
 
@@ -161,5 +162,6 @@ ItemsEntriesTable.defaultProps = {
   items: [],
   linesNumber: 1,
   minLinesNumber: 1,
+  maxLinesNumber: undefined,
   enableTaxRates: true,
 };

@@ -25,6 +25,11 @@ import {
 import { GenerateShareLink } from './commands/GenerateInvoicePaymentLink.service';
 import { BulkDeleteSaleInvoicesService } from './BulkDeleteSaleInvoices.service';
 import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleInvoices.service';
+import { ExportStatutoryInvoiceService } from './queries/ExportStatutoryInvoice.service';
+import type {
+  StatutoryInvoiceFileKind,
+  StatutoryInvoiceTemplate,
+} from './queries/ExportStatutoryInvoice.service';
 
 @Injectable()
 export class SaleInvoiceApplication {
@@ -45,6 +50,7 @@ export class SaleInvoiceApplication {
     private generateShareLinkService: GenerateShareLink,
     private bulkDeleteSaleInvoicesService: BulkDeleteSaleInvoicesService,
     private validateBulkDeleteSaleInvoicesService: ValidateBulkDeleteSaleInvoicesService,
+    private exportStatutoryInvoiceService: ExportStatutoryInvoiceService,
   ) {}
 
   /**
@@ -250,6 +256,21 @@ export class SaleInvoiceApplication {
       saleInvoiceId,
       publicity,
       expiryTime,
+    );
+  }
+
+  /**
+   * Downloads the Astrans VAT / Non-VAT statutory invoice as Excel or PDF.
+   */
+  public exportStatutoryInvoice(
+    saleInvoiceId: number,
+    template: StatutoryInvoiceTemplate,
+    fileKind: StatutoryInvoiceFileKind,
+  ) {
+    return this.exportStatutoryInvoiceService.export(
+      saleInvoiceId,
+      template,
+      fileKind,
     );
   }
 }

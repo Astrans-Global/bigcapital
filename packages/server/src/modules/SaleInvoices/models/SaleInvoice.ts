@@ -40,6 +40,14 @@ export class SaleInvoice extends TenantBaseModel {
   // layered on top of `deliveredAt` -- see docs/ops/PHASE1.md
   // ("Status pipeline") and the creating migration's header comment.
   public dmsStatus: 'pending' | 'reserved' | 'invoiced' | 'delivered';
+  // CASH / BANK / CREDIT -- printed as Mode of Payment on the statutory
+  // invoice. Replaces the unused Stripe payment-options picker.
+  public dmsPaymentMode: 'CASH' | 'BANK' | 'CREDIT' | null;
+  // "Additional Information if any" on the statutory invoice. Distinct from
+  // `invoiceMessage`, which is labelled Narration on the form.
+  public note: string | null;
+  public invoiceMessage: string;
+  public termsConditions: string;
   public currencyCode: string;
   public invoiceDate: Date;
 
@@ -69,6 +77,8 @@ export class SaleInvoice extends TenantBaseModel {
   public attachments!: Document[];
   public writtenoffExpenseAccount!: Account;
   public paymentMethods!: TransactionPaymentServiceEntry[];
+  public customer?: any;
+  public warehouse?: any;
   /**
    * Table name
    */
@@ -211,16 +221,21 @@ export class SaleInvoice extends TenantBaseModel {
 
   /**
    * Invoice total. (Tax included)
+   *
+   * Astrans invoices are always exclusive-of-tax internally, so VAT
+   * (`taxAmountWithheld`, itself computed *after* the header % discount --
+   * see ComputeSaleInvoiceVat) must be added here. Stock Bigcapital only
+   * added tax when *inclusive*, which left AR short of VAT. Bills/GRN are
+   * unchanged (they use Bill.total).
    * @returns {number}
    */
   get total() {
     const adjustmentAmount = defaultTo(this.adjustment, 0);
+    const taxAmount = this.isInclusiveTax
+      ? 0
+      : defaultTo(this.taxAmountWithheld, 0);
 
-    return R.compose(
-      R.add(adjustmentAmount),
-      R.subtract(R.__, this.discountAmount),
-      R.when(R.always(this.isInclusiveTax), R.add(this.taxAmountWithheld)),
-    )(this.subtotal);
+    return this.subtotal - this.discountAmount + taxAmount + adjustmentAmount;
   }
 
   /**

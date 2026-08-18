@@ -26,7 +26,6 @@ import {
 import { useInvoiceFormContext } from './InvoiceFormProvider';
 import {
   updateItemsEntriesTotal,
-  ensureEntriesHaveEmptyLine,
 } from '@/containers/Entries/utils';
 import { TaxType } from '@/interfaces/TaxRates';
 import {
@@ -36,6 +35,9 @@ import {
 import { convertBrandingTemplatesToOptions } from '@/containers/BrandingTemplates/BrandingTemplatesSelectFields';
 
 export const MIN_LINES_NUMBER = 1;
+// Statutory Excel templates have 9 item rows (22-30). The invoice form
+// cannot exceed that -- see docs/ops/PHASE1.md ("VAT / Non-VAT invoice download").
+export const MAX_INVOICE_LINES = 9;
 
 // Default invoice entry object.
 export const defaultInvoiceEntry = {
@@ -70,6 +72,7 @@ export const defaultInvoice = {
   invoice_no_manually: '',
   reference_no: '',
   invoice_message: '',
+  note: '',
   terms_conditions: '',
   exchange_rate: '1',
   currency_code: '',
@@ -80,8 +83,9 @@ export const defaultInvoice = {
   entries: [...repeatValue(defaultInvoiceEntry, MIN_LINES_NUMBER)],
   attachments: [],
   payment_methods: {},
+  dms_payment_mode: '',
   discount: '',
-  discount_type: 'amount',
+  discount_type: 'percentage',
   adjustment: '',
 
   // Single invoice-wide tax rate (applied to every line under the hood) --
@@ -131,11 +135,15 @@ export function transformToEditForm(invoice) {
       defaultInvoiceEntry,
       Math.max(MIN_LINES_NUMBER - invoice.entries.length, 0),
     ),
-  ];
-  const entries = compose(
-    ensureEntriesHaveEmptyLine(defaultInvoiceEntry),
-    updateItemsEntriesTotal,
-  )(initialEntries);
+  ].slice(0, MAX_INVOICE_LINES);
+  const filledEntries = compose(updateItemsEntriesTotal)(initialEntries);
+  const lastFilled = filledEntries[filledEntries.length - 1];
+  const entries =
+    filledEntries.length < MAX_INVOICE_LINES &&
+    lastFilled &&
+    lastFilled.item_id
+      ? [...filledEntries, defaultInvoiceEntry]
+      : filledEntries;
 
   // Reconstruct the invoice-wide tax rate selection from whichever entry
   // carries one -- every line should share the same tax_rate_id since
@@ -143,12 +151,23 @@ export function transformToEditForm(invoice) {
   const invoiceTaxRateId =
     invoice.entries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
 
+  const subtotal = getEntriesTotal(filledEntries);
+  const storedDiscountType =
+    invoice.discount_type || invoice.discountType || 'percentage';
+  const storedDiscount = toSafeNumber(invoice.discount);
+  const discountPercent =
+    storedDiscountType === 'amount' && subtotal > 0
+      ? (storedDiscount / subtotal) * 100
+      : storedDiscount;
+
   return {
     ...transformToForm(invoice, defaultInvoice),
     // Always exclusive-of-tax regardless of what's stored on the invoice --
     // see the "Amounts are" notice in InvoiceFormActions.tsx.
     inclusive_exclusive_tax: TaxType.Exclusive,
     invoice_tax_rate_id: invoiceTaxRateId,
+    discount: discountPercent === 0 ? '' : discountPercent,
+    discount_type: 'percentage',
     entries,
     attachments: transformAttachmentsToForm(invoice),
     payment_methods: transformPaymentMethodsToForm(invoice?.payment_methods),
@@ -272,7 +291,10 @@ export function transformValueToRequest(values) {
     entries: transformEntriesToRequest(values.entries),
     delivered: false,
     attachments: transformAttachmentsToRequest(values),
-    payment_methods: transformPaymentMethodsToRequest(values?.payment_methods),
+    payment_methods: [],
+    discount_type: 'percentage',
+    dms_payment_mode: values.dms_payment_mode || null,
+    note: values.note || '',
   };
 }
 
@@ -477,11 +499,18 @@ export const useInvoiceAggregatedTaxRates = () => {
  */
 export const useInvoiceTotalTaxAmount = () => {
   const { values } = useFormikContext();
+  const { taxRates } = useInvoiceFormContext();
+  const subtotal = useInvoiceSubtotal();
+  const discountAmount = useInvoiceDiscountAmount();
 
   return React.useMemo(() => {
-    const filteredEntries = values.entries.filter((entry) => entry.tax_amount);
-    return sumBy(filteredEntries, 'tax_amount');
-  }, [values.entries]);
+    const selected = (taxRates || []).find(
+      (taxRate) => taxRate.id === values.invoice_tax_rate_id,
+    );
+    const rate = toSafeNumber(selected?.rate);
+    const taxable = Math.max(subtotal - discountAmount, 0);
+    return (taxable * rate) / 100;
+  }, [taxRates, values.invoice_tax_rate_id, subtotal, discountAmount]);
 };
 
 /**

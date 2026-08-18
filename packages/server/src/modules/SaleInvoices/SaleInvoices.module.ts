@@ -63,6 +63,7 @@ import { SaleInvoicesImportable } from './commands/SaleInvoicesImportable';
 import { PaymentLinksModule } from '../PaymentLinks/PaymentLinks.module';
 import { BulkDeleteSaleInvoicesService } from './BulkDeleteSaleInvoices.service';
 import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleInvoices.service';
+import { ExportStatutoryInvoiceService } from './queries/ExportStatutoryInvoice.service';
 
 @Module({
   imports: [
@@ -134,6 +135,7 @@ import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleI
     SaleInvoicesImportable,
     BulkDeleteSaleInvoicesService,
     ValidateBulkDeleteSaleInvoicesService,
+    ExportStatutoryInvoiceService,
   ],
   exports: [
     GetSaleInvoice,

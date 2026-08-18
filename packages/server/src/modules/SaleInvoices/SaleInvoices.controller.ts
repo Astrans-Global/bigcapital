@@ -419,4 +419,47 @@ export class SaleInvoicesController {
   generateSaleInvoiceSharableLink(@Param('id', ParseIntPipe) id: number) {
     return this.saleInvoiceApplication.generateSaleInvoiceSharableLink(id);
   }
+
+  @Get(':id/statutory-invoice')
+  @RequirePermission(SaleInvoiceAction.View, AbilitySubject.SaleInvoice)
+  @ApiOperation({
+    summary:
+      'Download the Astrans VAT or Non-VAT statutory invoice as Excel or PDF. Only Invoiced/Delivered invoices with a number.',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: Number,
+    description: 'The sale invoice id',
+  })
+  @ApiQuery({
+    name: 'template',
+    required: false,
+    enum: ['vat', 'non_vat'],
+    description:
+      'vat = TAX INVOICE (default when omitted). non_vat = SALES INVOICE.',
+  })
+  async downloadStatutoryInvoice(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('template') template: string,
+    @Headers('accept') acceptHeader: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const kind = template === 'non_vat' ? 'non_vat' : 'vat';
+    const fileKind = acceptHeader?.includes(AcceptType.ApplicationPdf)
+      ? 'pdf'
+      : 'xlsx';
+    const result = await this.saleInvoiceApplication.exportStatutoryInvoice(
+      id,
+      kind,
+      fileKind,
+    );
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${result.filename}`,
+    );
+    res.setHeader('Content-Type', result.contentType);
+    res.send(result.buffer);
+  }
 }

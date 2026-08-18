@@ -1,6 +1,7 @@
 import { PageProperties, PdfFormat } from '@/libs/chromiumly/_types';
 import { ChromiumlyHtmlConvert } from './ChromiumlyHtmlConvert.service';
 import { Injectable } from '@nestjs/common';
+import { LibreOfficeConverter } from '@/libs/chromiumly/LibreOfficeConvert';
 
 @Injectable()
 export class ChromiumlyTenancy {
@@ -23,5 +24,13 @@ export class ChromiumlyTenancy {
       ...properties,
     };
     return this.htmlConvert.convert(content, parsedProperties, pdfFormat);
+  }
+
+  /**
+   * Converts a filled xlsx workbook to PDF via Gotenberg LibreOffice so
+   * the PDF keeps the spreadsheet layout (borders, merges, print area).
+   */
+  public convertXlsxToPdf(buffer: Buffer, filename?: string): Promise<Buffer> {
+    return new LibreOfficeConverter().convertXlsx(buffer, filename);
   }
 }

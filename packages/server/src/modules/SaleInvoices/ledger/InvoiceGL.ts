@@ -124,23 +124,26 @@ export class InvoiceGL {
   );
 
   /**
-   * Retreives the GL entry of tax payable.
-   * @param {ItemEntry} entry - Item entry.
-   * @param {number} index - Index.
-   * @returns {ILedgerEntry}
+   * Single VAT payable credit for the invoice, using taxAmountWithheld
+   * (VAT after the header % discount). Astrans invoices share one tax rate
+   * across every line, so posting per-line pre-discount tax would overstate
+   * output VAT versus the statutory invoice.
    */
-  private getInvoiceTaxEntry(entry: ItemEntry, index: number): ILedgerEntry {
+  private get invoiceTaxEntry(): ILedgerEntry {
     const commonEntry = this.invoiceGLCommonEntry;
+    const taxedEntry = this.saleInvoice.entries.find(
+      (entry) => entry.taxRateId || entry.taxRate,
+    );
 
     return {
       ...commonEntry,
-      credit: entry.taxAmount,
+      credit: this.saleInvoice.taxAmountWithheld,
       accountId: this.taxPayableAccountId,
-      index: index + 1,
+      index: 1,
       indexGroup: 30,
       accountNormal: AccountNormal.CREDIT,
-      taxRateId: entry.taxRateId,
-      taxRate: entry.taxRate,
+      taxRateId: taxedEntry?.taxRateId,
+      taxRate: taxedEntry?.taxRate,
     };
   }
 
@@ -186,9 +189,8 @@ export class InvoiceGL {
     const creditEntries = this.saleInvoice.entries.map((entry, index) =>
       this.getInvoiceItemEntry(entry, index),
     );
-    const taxEntries = this.saleInvoice.entries
-      .filter((entry) => entry.taxAmount > 0)
-      .map((entry, index) => this.getInvoiceTaxEntry(entry, index));
+    const taxEntries =
+      this.saleInvoice.taxAmountWithheld > 0 ? [this.invoiceTaxEntry] : [];
 
     return [
       this.invoiceReceivableEntry,

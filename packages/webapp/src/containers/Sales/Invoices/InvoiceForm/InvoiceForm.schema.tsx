@@ -43,26 +43,28 @@ const getSchema = () =>
     branch_id: Yup.string(),
     warehouse_id: Yup.string(),
     project_id: Yup.string(),
-    entries: Yup.array().of(
-      Yup.object().shape({
-        quantity: Yup.number()
-          .nullable()
-          .max(DATATYPES_LENGTH.INT_10)
-          .when(['rate'], {
-            is: (rate) => rate,
-            then: Yup.number().required(),
-          }),
-        rate: Yup.number().nullable().max(DATATYPES_LENGTH.INT_10),
-        item_id: Yup.number()
-          .nullable()
-          .when(['quantity', 'rate'], {
-            is: (quantity, rate) => !isBlank(quantity) && !isBlank(rate),
-            then: Yup.number().required(),
-          }),
-        discount: Yup.number().nullable().min(0).max(100),
-        description: Yup.string().nullable().max(DATATYPES_LENGTH.TEXT),
-      }),
-    ),
+    entries: Yup.array()
+      .of(
+        Yup.object().shape({
+          quantity: Yup.number()
+            .nullable()
+            .max(DATATYPES_LENGTH.INT_10)
+            .when(['rate'], {
+              is: (rate) => rate,
+              then: Yup.number().required(),
+            }),
+          rate: Yup.number().nullable().max(DATATYPES_LENGTH.INT_10),
+          item_id: Yup.number()
+            .nullable()
+            .when(['quantity', 'rate'], {
+              is: (quantity, rate) => !isBlank(quantity) && !isBlank(rate),
+              then: Yup.number().required(),
+            }),
+          discount: Yup.number().nullable().min(0).max(100),
+          description: Yup.string().nullable().max(DATATYPES_LENGTH.TEXT),
+        }),
+      )
+      .max(9),
   });
 
 export const getCreateInvoiceFormSchema = getSchema;

@@ -249,7 +249,7 @@ export const getExlusiveTaxAmount = (amount: number, taxRate: number) => {
  * @returns {Function}
  */
 export const useComposeRowsOnEditTableCell = () => {
-  const { taxRates, isInclusiveTax, localValue, defaultEntry } =
+  const { taxRates, isInclusiveTax, localValue, defaultEntry, maxLinesNumber } =
     useItemEntriesTableContext();
 
   return useCallback(
@@ -258,12 +258,12 @@ export const useComposeRowsOnEditTableCell = () => {
         assignEntriesTaxAmount(isInclusiveTax),
         assignEntriesTaxRate(taxRates),
         orderingLinesIndexes,
-        updateAutoAddNewLine(defaultEntry, ['item_id']),
+        updateAutoAddNewLine(defaultEntry, ['item_id'], maxLinesNumber),
         updateItemsEntriesTotal,
         updateTableCell(rowIndex, columnId, value),
       )(localValue);
     },
-    [taxRates, isInclusiveTax, localValue, defaultEntry],
+    [taxRates, isInclusiveTax, localValue, defaultEntry, maxLinesNumber],
   );
 };
 

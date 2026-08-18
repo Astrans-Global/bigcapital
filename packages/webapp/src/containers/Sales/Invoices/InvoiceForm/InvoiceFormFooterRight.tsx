@@ -11,30 +11,38 @@ import {
 } from '@/components';
 import {
   useInvoiceAdjustmentAmountFormatted,
-  useInvoiceAggregatedTaxRates,
   useInvoiceDiscountAmountFormatted,
   useInvoiceDueAmountFormatted,
   useInvoicePaidAmountFormatted,
   useInvoiceSubtotalFormatted,
   useInvoiceTotalFormatted,
+  useInvoiceTotalTaxAmount,
 } from './utils';
 import { TaxType } from '@/interfaces/TaxRates';
 import { AdjustmentTotalLine } from './AdjustmentTotalLine';
 import { DiscountTotalLine } from './DiscountTotalLine';
 import { InvoiceTaxRateTotalLine } from './InvoiceTaxRateTotalLine';
+import { formattedAmount } from '@/utils';
+import { useInvoiceFormContext } from './InvoiceFormProvider';
 
 export function InvoiceFormFooterRight() {
   const {
-    values: { inclusive_exclusive_tax, currency_code },
+    values: { inclusive_exclusive_tax, currency_code, invoice_tax_rate_id },
   } = useFormikContext();
+  const { taxRates } = useInvoiceFormContext();
 
-  const taxEntries = useInvoiceAggregatedTaxRates();
   const adjustmentAmount = useInvoiceAdjustmentAmountFormatted();
   const discountAmount = useInvoiceDiscountAmountFormatted();
   const totalFormatted = useInvoiceTotalFormatted();
   const subtotalFormatted = useInvoiceSubtotalFormatted();
   const paidAmountFormatted = useInvoicePaidAmountFormatted();
   const dueAmountFormatted = useInvoiceDueAmountFormatted();
+  const taxAmount = useInvoiceTotalTaxAmount();
+  const selectedTaxRate = (taxRates || []).find(
+    (taxRate) => taxRate.id === invoice_tax_rate_id,
+  );
+  const taxAmountFormatted = formattedAmount(taxAmount, currency_code);
+  const vatRate = selectedTaxRate?.rate;
 
   return (
     <InvoiceTotalLines labelColWidth={'180px'} amountColWidth={'180px'}>
@@ -48,21 +56,19 @@ export function InvoiceFormFooterRight() {
         }
         value={subtotalFormatted}
       />
-      <DiscountTotalLine
-        currencyCode={currency_code}
-        discountAmount={discountAmount}
-      />
+      <DiscountTotalLine discountAmount={discountAmount} />
       <InvoiceTaxRateTotalLine />
+      <TotalLine
+        title={
+          vatRate
+            ? `VAT Amount (Total Value of Supply @${vatRate}%)`
+            : 'VAT Amount'
+        }
+        value={taxAmountFormatted}
+        borderStyle={TotalLineBorderStyle.None}
+      />
       <AdjustmentTotalLine adjustmentAmount={adjustmentAmount} />
 
-      {taxEntries.map((tax, index) => (
-        <TotalLine
-          key={index}
-          title={tax.label}
-          value={tax.taxAmountFormatted}
-          borderStyle={TotalLineBorderStyle.None}
-        />
-      ))}
       <TotalLine
         title={`Total (${currency_code})`}
         value={totalFormatted}

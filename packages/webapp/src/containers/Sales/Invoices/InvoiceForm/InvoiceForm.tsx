@@ -32,6 +32,7 @@ import {
   transformErrors,
   transformValueToRequest,
   resetFormState,
+  MAX_INVOICE_LINES,
 } from './utils';
 import {
   InvoiceExchangeRateSync,
@@ -97,6 +98,14 @@ function InvoiceFormRoot({
     const entries = values.entries.filter(
       (item) => item.item_id && item.quantity,
     );
+    if (entries.length > MAX_INVOICE_LINES) {
+      AppToaster.show({
+        message: `An invoice can have at most ${MAX_INVOICE_LINES} item lines.`,
+        intent: Intent.DANGER,
+      });
+      setSubmitting(false);
+      return;
+    }
     const totalQuantity = sumBy(entries, (entry) => parseInt(entry.quantity));
 
     // Throw danger toaster in case total quantity equals zero.

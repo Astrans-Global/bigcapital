@@ -4,10 +4,8 @@ import { x } from '@xstyled/emotion';
 import {
   FFormGroup,
   FInputGroup,
-  FSelect,
   TotalLinePrimitive,
 } from '@/components';
-import { Button } from '@blueprintjs/core';
 import { useIsDarkMode } from '@/hooks/useDarkMode';
 
 const inputGroupCss = css`
@@ -26,28 +24,8 @@ interface DiscountTotalLineProps {
 }
 
 export function DiscountTotalLine({
-  currencyCode,
   discountAmount,
 }: DiscountTotalLineProps) {
-  const discountButtonInput = ({ text }) => (
-    <Button
-      small
-      minimal
-      className={css`
-        &.bp4-small {
-          font-size: 12px;
-        }
-      `}
-    >
-      {text}
-    </Button>
-  );
-
-  const discountTypeItems = [
-    { text: currencyCode, value: 'amount', label: 'Fixed Amount' },
-    { text: '%', value: 'percentage', label: 'Percentage' },
-  ];
-
   const isDarkMode = useIsDarkMode();
 
   return (
@@ -65,7 +43,7 @@ export function DiscountTotalLine({
           alignItems={'center'}
           justifyContent={'space-between'}
         >
-          <x.span pr={2}>Discount</x.span>
+          <x.span pr={2}>Discount %</x.span>
           <FFormGroup
             name={'discount'}
             className={formGroupCss}
@@ -75,12 +53,14 @@ export function DiscountTotalLine({
             <FInputGroup
               name={'discount'}
               rightElement={
-                <FSelect
-                  name={'discount_type'}
-                  items={discountTypeItems}
-                  input={discountButtonInput}
-                  filterable={false}
-                />
+                <x.span
+                  fontSize={12}
+                  px={8}
+                  display={'flex'}
+                  alignItems={'center'}
+                >
+                  %
+                </x.span>
               }
               fastField
               className={inputGroupCss}

@@ -7,6 +7,7 @@ import { useInvoiceFormContext } from './InvoiceFormProvider';
 import {
   entriesFieldShouldUpdate,
   applyInvoiceTaxRateToEntries,
+  MAX_INVOICE_LINES,
 } from './utils';
 import { TaxType } from '@/interfaces/TaxRates';
 import { ITEM_TYPE } from '@/containers/Entries/utils';
@@ -64,6 +65,8 @@ export function InvoiceItemsEntriesEditorField() {
           enablePriceLots
           warehouseId={values.warehouse_id}
           excludeInvoiceId={invoiceId}
+          minLinesNumber={1}
+          maxLinesNumber={MAX_INVOICE_LINES}
         />
       )}
     </FastField>

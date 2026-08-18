@@ -16,10 +16,8 @@ import { assocItemEntriesDefaultIndex } from '@/utils/associate-item-entries-ind
 import { formatDateFields } from '@/utils/format-date-fields';
 import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTransactions.service';
 import { TenancyContext } from '@/modules/Tenancy/TenancyContext.service';
-import {
-  CreateSaleInvoiceDto,
-  EditSaleInvoiceDto,
-} from '../dtos/SaleInvoice.dto';
+import { computeSaleInvoiceVatAfterDiscount } from '../ComputeSaleInvoiceVat';
+import { DiscountType } from '@/common/types/Discount';
 
 @Injectable()
 export class CommandSaleInvoiceDTOTransformer {
@@ -90,6 +88,15 @@ export class CommandSaleInvoiceDTOTransformer {
       assocItemEntriesDefaultIndex,
     )(asyncEntries);
 
+    const vatRatePercent =
+      Number(entries.find((entry) => entry.taxRate)?.taxRate) || 0;
+    const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
+      entries,
+      discount: saleInvoiceDTO.discount,
+      discountType: saleInvoiceDTO.discountType || DiscountType.Percentage,
+      vatRatePercent,
+    });
+
     const initialDTO = {
       ...formatDateFields(
         omit(saleInvoiceDTO, [
@@ -113,6 +120,7 @@ export class CommandSaleInvoiceDTOTransformer {
       ...(invoiceNo ? { invoiceNo } : {}),
       entries,
       userId: authorizedUser.id,
+      taxAmountWithheld: vatAfterDiscount.vatAmount,
     } as SaleInvoice;
 
     const initialAsyncDTO = await composeAsync(
@@ -125,9 +133,10 @@ export class CommandSaleInvoiceDTOTransformer {
       ),
     )(initialDTO);
 
-    return R.compose(this.taxDTOTransformer.assocTaxAmountWithheldFromEntries)(
-      initialAsyncDTO,
-    );
+    // VAT is computed after the header % discount (see
+    // ComputeSaleInvoiceVat / docs/ops/PHASE1.md). Do not fall back to
+    // Bigcapital's line-level pre-discount tax sum.
+    return initialAsyncDTO;
   }
 
   /**
@@ -152,6 +161,9 @@ export class CommandSaleInvoiceDTOTransformer {
    * @returns {number}
    */
   private getDueBalanceItemEntries = (entries: ItemEntry[]) => {
-    return sumBy(entries, (e) => e.amount);
+    // Line-net (qty × rate × (1 − line discount %)), matching the form
+    // subtotal and the Excel statutory template. Stock Bigcapital stored
+    // qty × rate before line discount, which desynced AR from the invoice.
+    return sumBy(entries, (entry) => ItemEntry.calcAmount(entry));
   };
 }
