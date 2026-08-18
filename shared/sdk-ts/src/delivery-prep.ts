@@ -22,6 +22,15 @@ export interface DeliveryPrepInvoiceRow {
   areaName: string | null;
   routeCityId: number | null;
   routeCityName: string | null;
+  customerRiskCategory: 'A' | 'B' | 'C' | 'D';
+  customerDueTotal: number;
+  dueInvoices: Array<{
+    saleInvoiceId: number;
+    invoiceNo: string | null;
+    invoiceDate: string;
+    dueAmount: number;
+    daysDue: number;
+  }>;
 }
 
 export interface DeliveryPrepInvoicesQuery {

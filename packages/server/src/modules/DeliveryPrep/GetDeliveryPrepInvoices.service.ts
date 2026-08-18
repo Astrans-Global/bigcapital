@@ -2,6 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { SaleInvoice } from '../SaleInvoices/models/SaleInvoice';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { GetDeliveryPrepInvoicesQueryDto } from './dtos/GetDeliveryPrepInvoicesQuery.dto';
+import {
+  CustomerDueInvoicesService,
+  CustomerDueInvoiceRow,
+} from '../Customers/queries/CustomerDueInvoices.service';
+import { CustomerRiskCategory } from '../Customers/risk/computeCustomerRiskCategory';
 
 export interface IDeliveryPrepInvoiceRow {
   saleInvoiceId: number;
@@ -16,6 +21,9 @@ export interface IDeliveryPrepInvoiceRow {
   areaName: string | null;
   routeCityId: number | null;
   routeCityName: string | null;
+  customerRiskCategory: CustomerRiskCategory;
+  customerDueTotal: number;
+  dueInvoices: CustomerDueInvoiceRow[];
 }
 
 /**
@@ -31,6 +39,7 @@ export class GetDeliveryPrepInvoicesService {
   constructor(
     @Inject(SaleInvoice.name)
     private readonly saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
+    private readonly customerDueInvoices: CustomerDueInvoicesService,
   ) {}
 
   public async getInvoices(
@@ -87,19 +96,29 @@ export class GetDeliveryPrepInvoicesService {
       })
       .orderBy('sales_invoices.invoiceDate', 'desc');
 
-    return (rows as any[]).map((row) => ({
-      saleInvoiceId: row.saleInvoiceId,
-      invoiceNo: row.invoiceNo ?? null,
-      invoiceDate: row.invoiceDate,
-      dmsStatus: row.dmsStatus ?? 'pending',
-      warehouseId: row.warehouseId ?? null,
-      warehouseName: row.warehouseName ?? null,
-      customerId: row.customerId,
-      customerName: row.customerName,
-      areaId: row.areaId ?? null,
-      areaName: row.areaName ?? null,
-      routeCityId: row.routeCityId ?? null,
-      routeCityName: row.routeCityName ?? null,
-    }));
+    const snapshots = await this.customerDueInvoices.getForCustomers(
+      (rows as any[]).map((row) => row.customerId),
+    );
+
+    return (rows as any[]).map((row) => {
+      const due = snapshots.get(row.customerId);
+      return {
+        saleInvoiceId: row.saleInvoiceId,
+        invoiceNo: row.invoiceNo ?? null,
+        invoiceDate: row.invoiceDate,
+        dmsStatus: row.dmsStatus ?? 'pending',
+        warehouseId: row.warehouseId ?? null,
+        warehouseName: row.warehouseName ?? null,
+        customerId: row.customerId,
+        customerName: row.customerName,
+        areaId: row.areaId ?? null,
+        areaName: row.areaName ?? null,
+        routeCityId: row.routeCityId ?? null,
+        routeCityName: row.routeCityName ?? null,
+        customerRiskCategory: due?.riskCategory ?? 'A',
+        customerDueTotal: due?.dueTotal ?? 0,
+        dueInvoices: due?.invoices ?? [],
+      };
+    });
   }
 }

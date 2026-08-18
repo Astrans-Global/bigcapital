@@ -63,7 +63,7 @@ export function InvoiceFormHeaderFields() {
   const invoiceFieldsClassName = getInvoiceFieldsStyle(theme);
 
   return (
-    <Stack spacing={18} flex={1} className={invoiceFieldsClassName}>
+    <Stack spacing={18} className={invoiceFieldsClassName} style={{ flex: '0 0 auto', maxWidth: 480 }}>
       {/* ----------- Customer name ----------- */}
       <InvoiceFormCustomerSelect />
 

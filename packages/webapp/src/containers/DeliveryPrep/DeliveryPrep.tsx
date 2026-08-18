@@ -12,6 +12,7 @@ import {
   Tag,
   Intent,
   Classes,
+  Alert,
 } from '@blueprintjs/core';
 
 import {
@@ -31,6 +32,9 @@ import {
   useDeliveryPrepTotals,
 } from '@/hooks/query';
 import { CheckboxMultiSelectFilter } from './components';
+import { CustomerRiskTag } from '@/containers/Customers/CustomerRisk/CustomerRiskTag';
+import { CustomerDueInvoicesTable } from '@/containers/Customers/CustomerRisk/CustomerDueInvoicesTable';
+import TableRow from '@/components/Datatable/TableRow';
 
 const STATUS_LABELS = {
   pending: 'Pending',
@@ -203,8 +207,13 @@ function useDeliveryPrepColumns() {
       {
         id: 'customerName',
         Header: intl.get('customer_name') || 'Customer',
-        accessor: 'customerName',
-        width: 170,
+        Cell: ({ row: { original } }) => (
+          <CustomerCell>
+            <span>{original.customerName}</span>
+            <CustomerRiskTag category={original.customerRiskCategory} />
+          </CustomerCell>
+        ),
+        width: 200,
       },
       {
         id: 'areaName',
@@ -253,6 +262,109 @@ const UnassignedHint = styled.span`
   font-style: italic;
   opacity: 0.6;
 `;
+
+const CustomerCell = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+/**
+ * Extra strip under each Delivery Prep row: that customer's outstanding
+ * delivered invoices + live risk grade. See docs/ops/PHASE1.md ("Customers").
+ */
+function DeliveryPrepTableRow(props) {
+  const original = props.row?.original;
+  return (
+    <>
+      <TableRow {...props} />
+      <DueStrip>
+        <DueStripLabel>
+          {intl.get('customer.due_invoices.title') || 'Outstanding invoices'}
+        </DueStripLabel>
+        <CustomerDueInvoicesTable
+          invoices={original?.dueInvoices}
+          currencyCode="LKR"
+        />
+      </DueStrip>
+    </>
+  );
+}
+
+const DueStrip = styled.div`
+  width: 100%;
+  padding: 8px 16px 12px 52px;
+  border-bottom: 1px solid var(--x-border-color, rgb(210, 221, 226));
+  background: var(--x-strip-bg, rgba(16, 22, 26, 0.03));
+
+  .bp4-dark & {
+    --x-border-color: rgba(255, 255, 255, 0.08);
+    --x-strip-bg: rgba(255, 255, 255, 0.03);
+  }
+`;
+
+const DueStripLabel = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  opacity: 0.85;
+`;
+
+function DeliveryPrepClassDWarning({ invoices }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const classDIds = useMemo(() => {
+    const ids = (invoices || [])
+      .filter((row) => row.customerRiskCategory === 'D')
+      .map((row) => row.customerId);
+    return [...new Set(ids)].sort((a, b) => a - b);
+  }, [invoices]);
+  const signature = classDIds.join(',');
+  const warned = React.useRef('');
+
+  React.useEffect(() => {
+    if (!signature || signature === warned.current) {
+      return;
+    }
+    warned.current = signature;
+    setIsOpen(true);
+  }, [signature]);
+
+  const names = useMemo(() => {
+    const seen = new Set();
+    const unique = [];
+    (invoices || []).forEach((row) => {
+      if (row.customerRiskCategory !== 'D' || seen.has(row.customerId)) {
+        return;
+      }
+      seen.add(row.customerId);
+      unique.push(row.customerName);
+    });
+    return unique.join(', ');
+  }, [invoices]);
+
+  return (
+    <Alert
+      isOpen={isOpen}
+      intent={Intent.DANGER}
+      confirmButtonText={
+        intl.get('customer.risk.class_d.proceed') || 'Proceed'
+      }
+      onConfirm={() => setIsOpen(false)}
+      onClose={() => setIsOpen(false)}
+      canEscapeKeyCancel
+      canOutsideClickCancel
+    >
+      <p>
+        {intl.get('customer.risk.class_d.delivery_prep', { names }) ||
+          `Class D customer(s) on this list: ${names}. At least one invoice is more than 90 days old and total due is over SLRs 1,000,000.`}
+      </p>
+    </Alert>
+  );
+}
 
 /**
  * Live totals panel for the currently-ticked invoices -- quantity per item
@@ -434,12 +546,15 @@ export function DeliveryPrep() {
             selectionColumn={true}
             onSelectedRowsChange={handleSelectedRowsChange}
             TableLoadingRenderer={TableSkeletonRows}
+            TableRowRenderer={DeliveryPrepTableRow}
             noResults={
               intl.get('no_invoices_found_for_this_filter') ||
               'No invoices found for this filter.'
             }
           />
         </DashboardContentTable>
+
+        <DeliveryPrepClassDWarning invoices={invoices || []} />
 
         <DeliveryPrepTotalsPanel selectedIds={selectedIds} />
       </DashboardPageContent>

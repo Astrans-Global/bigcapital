@@ -2,6 +2,7 @@ import React from 'react';
 import intl from 'react-intl-universal';
 import { Group, PageFormBigNumber } from '@/components';
 import { InvoiceFormHeaderFields } from './InvoiceFormHeaderFields';
+import { InvoiceFormCustomerDuePanel } from './InvoiceFormCustomerDuePanel';
 import { useInvoiceTotalFormatted } from './utils';
 import styles from './InvoiceFormHeader.module.scss';
 
@@ -13,10 +14,12 @@ export function InvoiceFormHeader() {
     <Group
       position="apart"
       align={'flex-start'}
+      noWrap
       p="25px 32px"
       className={styles.root}
     >
       <InvoiceFormHeaderFields />
+      <InvoiceFormCustomerDuePanel />
       <InvoiceFormBigTotal />
     </Group>
   );
@@ -31,6 +34,8 @@ function InvoiceFormBigTotal() {
   const totalFormatted = useInvoiceTotalFormatted();
 
   return (
-    <PageFormBigNumber label={intl.get('due_amount')} amount={totalFormatted} />
+    <div style={{ flexShrink: 0 }}>
+      <PageFormBigNumber label={intl.get('due_amount')} amount={totalFormatted} />
+    </div>
   );
 }

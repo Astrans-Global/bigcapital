@@ -23,6 +23,9 @@ import { AccountsModule } from '../Accounts/Accounts.module';
 import { CustomerGLEntries } from './CustomerGLEntries';
 import { CustomerGLEntriesStorage } from './CustomerGLEntriesStorage';
 import { CustomerWriteGLOpeningBalanceSubscriber } from './subscribers/CustomerGLEntriesSubscriber';
+import { CustomerDueInvoicesService } from './queries/CustomerDueInvoices.service';
+import { RecalculateCustomerRiskService } from './commands/RecalculateCustomerRisk.service';
+import { RecalculateCustomerRiskJob } from './jobs/RecalculateCustomerRiskJob';
 
 @Module({
   imports: [
@@ -54,6 +57,10 @@ import { CustomerWriteGLOpeningBalanceSubscriber } from './subscribers/CustomerG
     CustomerGLEntries,
     CustomerGLEntriesStorage,
     CustomerWriteGLOpeningBalanceSubscriber,
+    CustomerDueInvoicesService,
+    RecalculateCustomerRiskService,
+    RecalculateCustomerRiskJob,
   ],
+  exports: [CustomerDueInvoicesService],
 })
 export class CustomersModule {}

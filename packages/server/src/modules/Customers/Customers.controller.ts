@@ -33,6 +33,7 @@ import { PermissionGuard } from '@/modules/Roles/Permission.guard';
 import { AuthorizationGuard } from '@/modules/Roles/Authorization.guard';
 import { AbilitySubject } from '@/modules/Roles/Roles.types';
 import { CustomerAction } from './types/Customers.types';
+import { GetCustomerDueInvoicesQueryDto } from './dtos/GetCustomerDueInvoicesQuery.dto';
 
 @Controller('customers')
 @ApiTags('Customers')
@@ -43,6 +44,22 @@ import { CustomerAction } from './types/Customers.types';
 @UseGuards(AuthorizationGuard, PermissionGuard)
 export class CustomersController {
   constructor(private customersApplication: CustomersApplication) {}
+
+  @Get(':id/due-invoices')
+  @RequirePermission(CustomerAction.View, AbilitySubject.Customer)
+  @ApiOperation({
+    summary:
+      'Outstanding delivered invoices and live A/B/C/D risk grade for a customer. See docs/ops/PHASE1.md ("Customers").',
+  })
+  getCustomerDueInvoices(
+    @Param('id') customerId: number,
+    @Query() query: GetCustomerDueInvoicesQueryDto,
+  ) {
+    return this.customersApplication.getCustomerDueInvoices(
+      customerId,
+      query.excludeInvoiceId,
+    );
+  }
 
   @Get(':id')
   @RequirePermission(CustomerAction.View, AbilitySubject.Customer)

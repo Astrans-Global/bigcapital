@@ -7,6 +7,10 @@ export const customersKeys = {
   all: () => [CUSTOMERS] as const,
   list: (query?: Record<string, unknown>) => [CUSTOMERS, query] as const,
   detail: (id: number | null | undefined) => [CUSTOMER, id] as const,
+  dueInvoices: (
+    id: number | null | undefined,
+    query?: Record<string, unknown>,
+  ) => [CUSTOMER, id, 'due-invoices', query] as const,
 };
 
 // Grouped object for use in components/hooks

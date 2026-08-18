@@ -275,6 +275,7 @@ export const CustomerMeta = {
       column: 'risk_category',
       type: 'text',
       printable: false,
+      importable: false,
     },
   },
   fields2: {

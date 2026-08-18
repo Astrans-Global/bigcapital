@@ -11,6 +11,7 @@ import { GetCustomers } from './queries/GetCustomers.service';
 import { GetCustomersQueryDto } from './dtos/GetCustomersQuery.dto';
 import { BulkDeleteCustomersService } from './BulkDeleteCustomers.service';
 import { ValidateBulkDeleteCustomersService } from './ValidateBulkDeleteCustomers.service';
+import { CustomerDueInvoicesService } from './queries/CustomerDueInvoices.service';
 
 @Injectable()
 export class CustomersApplication {
@@ -23,6 +24,7 @@ export class CustomersApplication {
     private readonly getCustomersService: GetCustomers,
     private readonly bulkDeleteCustomersService: BulkDeleteCustomersService,
     private readonly validateBulkDeleteCustomersService: ValidateBulkDeleteCustomersService,
+    private readonly customerDueInvoicesService: CustomerDueInvoicesService,
   ) {}
 
   /**
@@ -98,6 +100,19 @@ export class CustomersApplication {
   public validateBulkDeleteCustomers = (customerIds: number[]) => {
     return this.validateBulkDeleteCustomersService.validateBulkDeleteCustomers(
       customerIds,
+    );
+  };
+
+  /**
+   * Outstanding delivered invoices + live A/B/C/D grade for a customer.
+   */
+  public getCustomerDueInvoices = (
+    customerId: number,
+    excludeInvoiceId?: number,
+  ) => {
+    return this.customerDueInvoicesService.getForCustomer(
+      customerId,
+      excludeInvoiceId,
     );
   };
 }
