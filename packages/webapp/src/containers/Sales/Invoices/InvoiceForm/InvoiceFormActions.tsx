@@ -3,16 +3,16 @@ import React from 'react';
 import styled from 'styled-components';
 import { FormGroup } from '@blueprintjs/core';
 import { EntriesActionsBar } from '@/containers/Entries/EntriesActionBar';
-import { InvoiceDmsStatusControl } from './InvoiceDmsStatusControl';
 
 /**
- * Invoice form actions.
+ * Invoice form actions. The DMS status control itself now lives in
+ * `InvoiceFormTopBar` (top-right, always visible) so it's easier to find --
+ * see docs/ops/PHASE1.md ("Status pipeline").
  * @returns {React.ReactNode}
  */
 export function InvoiceFormActions() {
   return (
     <EntriesActionsBar>
-      <InvoiceDmsStatusControl />
       <InvoiceAmountsAreExclusiveNotice />
     </EntriesActionsBar>
   );

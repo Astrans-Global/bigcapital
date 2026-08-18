@@ -8,6 +8,9 @@ import {
   MenuDivider,
   Intent,
   Classes,
+  Popover,
+  Position,
+  Button,
 } from '@blueprintjs/core';
 
 import { Icon, If } from '@/components';
@@ -82,6 +85,10 @@ export function WarehousesGridItemBox({
   email,
   phoneNumber,
   primary,
+  onEditClick,
+  onDeleteClick,
+  onMarkPrimary,
+  warehouse,
 }) {
   return (
     <WarehouseBoxRoot>
@@ -90,9 +97,25 @@ export function WarehousesGridItemBox({
           {title} {primary ? <Icon icon={'star-18dp'} iconSize={16} /> : null}
         </WarehouseTitle>
         <WarehouseCode>{code}</WarehouseCode>
-        <WarehouseIcon>
-          <Icon icon="warehouse-16" iconSize={20} />
-        </WarehouseIcon>
+        {/* Visible edit/delete/make-primary menu -- right-click (ContextMenu2
+            on the outer box) still works too, but a lot of users never
+            discover that, so this button makes it obvious. */}
+        <WarehouseMenuButton>
+          <Popover
+            minimal
+            position={Position.BOTTOM_RIGHT}
+            content={
+              <WarehouseContextMenu
+                warehouse={warehouse}
+                onEditClick={onEditClick}
+                onDeleteClick={onDeleteClick}
+                onMarkPrimary={onMarkPrimary}
+              />
+            }
+          >
+            <Button minimal small icon={<Icon icon="ellipsis-h" iconSize={14} />} />
+          </Popover>
+        </WarehouseMenuButton>
       </WarehouseHeader>
       <WarehouseContent>
         {city && <WarehouseItem>{city}</WarehouseItem>}
@@ -186,11 +209,17 @@ const WarehouseCode = styled.div`
   margin-top: 4px;
 `;
 
-const WarehouseIcon = styled.div`
+const WarehouseMenuButton = styled.div`
   position: absolute;
-  top: 0;
+  top: -6px;
   color: #abb3bb;
-  right: 0;
+  right: -6px;
+
+  .bp4-button {
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0;
+  }
 `;
 
 const WarehouseContent = styled.div`

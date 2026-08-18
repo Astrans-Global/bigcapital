@@ -1,14 +1,6 @@
 // @ts-nocheck
 import React, { useCallback } from 'react';
-import {
-  FormGroup,
-  Intent,
-  Menu,
-  MenuItem,
-  Popover,
-  Position,
-  Tag,
-} from '@blueprintjs/core';
+import { Button, Intent, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { AppToaster } from '@/components';
 import { useInvoiceFormContext } from './InvoiceFormProvider';
 import { useSetSaleInvoiceDmsStatus } from '@/hooks/query';
@@ -105,17 +97,19 @@ export function InvoiceDmsStatusControl() {
 
   // Brand-new, never-saved invoices always start out life as "Pending"
   // automatically -- there's nothing to change yet (no invoice id to call
-  // the status endpoint against), but we still show it as a plain,
-  // non-interactive tag so it's clear from the very first screen that
-  // this invoice will start out Pending. It becomes a real dropdown once
-  // the invoice has been saved at least once.
+  // the status endpoint against), but we still show a plain, non-interactive
+  // button so it's clear from the very first screen that this invoice will
+  // start out Pending. It becomes a real dropdown once the invoice has been
+  // saved (or "Saved and Delivered") at least once.
   if (!invoiceId || !invoice) {
     return (
-      <FormGroup label={'Status'} inline style={{ marginRight: 16 }}>
-        <Tag intent={STATUS_INTENT.pending} round>
-          {STATUS_LABELS.pending}
-        </Tag>
-      </FormGroup>
+      <Button
+        text={`Status: ${STATUS_LABELS.pending}`}
+        minimal
+        small
+        disabled
+        icon={'full-circle'}
+      />
     );
   }
 
@@ -123,34 +117,33 @@ export function InvoiceDmsStatusControl() {
   const isDelivered = currentStatus === 'delivered';
 
   return (
-    <FormGroup label={'Status'} inline style={{ marginRight: 16 }}>
-      <Popover
+    <Popover
+      minimal
+      disabled={isDelivered || isPending}
+      position={Position.BOTTOM_RIGHT}
+      content={
+        <Menu>
+          {STATUS_ORDER.map((status) => (
+            <MenuItem
+              key={status}
+              text={STATUS_LABELS[status]}
+              active={status === currentStatus}
+              disabled={status === currentStatus}
+              onClick={() => handleStatusSelect(status)}
+            />
+          ))}
+        </Menu>
+      }
+    >
+      <Button
+        text={`Status: ${STATUS_LABELS[currentStatus]}`}
         minimal
-        disabled={isDelivered || isPending}
-        position={Position.BOTTOM_LEFT}
-        content={
-          <Menu>
-            {STATUS_ORDER.map((status) => (
-              <MenuItem
-                key={status}
-                text={STATUS_LABELS[status]}
-                active={status === currentStatus}
-                disabled={status === currentStatus}
-                onClick={() => handleStatusSelect(status)}
-              />
-            ))}
-          </Menu>
-        }
-      >
-        <Tag
-          interactive={!isDelivered}
-          intent={STATUS_INTENT[currentStatus]}
-          round
-          rightIcon={!isDelivered ? 'caret-down' : undefined}
-        >
-          {STATUS_LABELS[currentStatus]}
-        </Tag>
-      </Popover>
-    </FormGroup>
+        small
+        intent={STATUS_INTENT[currentStatus]}
+        loading={isPending}
+        disabled={isDelivered}
+        rightIcon={!isDelivered ? 'caret-down' : undefined}
+      />
+    </Popover>
   );
 }

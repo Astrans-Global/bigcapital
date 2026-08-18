@@ -64,6 +64,10 @@ function WarehouseGridItem({
         email={warehouse.email}
         phoneNumber={warehouse.phone_number}
         primary={warehouse.primary}
+        warehouse={warehouse}
+        onEditClick={handleEditWarehouse}
+        onDeleteClick={handleDeleteWarehouse}
+        onMarkPrimary={handleMarkWarehouseAsPrimary}
       />
     </ContextMenu2>
   );

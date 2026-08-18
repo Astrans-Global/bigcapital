@@ -2,7 +2,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { Position, Classes } from '@blueprintjs/core';
+import { Position, Classes, FormGroup, HTMLSelect } from '@blueprintjs/core';
 import { useFormikContext } from 'formik';
 import { css } from '@emotion/css';
 import { Theme, useTheme } from '@emotion/react';
@@ -23,6 +23,7 @@ import { customerNameFieldShouldUpdate } from './utils';
 
 import { useInvoiceFormContext } from './InvoiceFormProvider';
 import { useCustomerUpdateExRate } from '@/containers/Entries/withExRateItemEntriesPriceRecalc';
+import { useCustomerAreas } from '@/hooks/query';
 import {
   InvoiceExchangeRateInputField,
   InvoiceProjectSelectButton,
@@ -154,14 +155,63 @@ export function InvoiceFormHeaderFields() {
 }
 
 /**
+ * Area filter for the customer select below -- this is a webapp-only
+ * convenience, it narrows down the customer list to a single area so it's
+ * quicker to find the right customer on a long list. It is NOT saved on the
+ * invoice itself -- the invoice's area is always resolved from whichever
+ * customer ends up selected (see docs/ops/PHASE1.md, "Areas & Route
+ * Cities").
+ */
+function InvoiceFormAreaFilter({ areaId, onAreaIdChange }) {
+  const { data: areas } = useCustomerAreas();
+
+  const handleChange = (event) => {
+    onAreaIdChange(event.target.value ? Number(event.target.value) : '');
+  };
+
+  return (
+    <FormGroup
+      label={intl.get('area') || 'Area'}
+      inline={true}
+      helperText={
+        intl.get('invoice.area_filter.hint') ||
+        'Filters the customer list below -- not saved on the invoice.'
+      }
+    >
+      <HTMLSelect fill value={areaId} onChange={handleChange}>
+        <option value="">{intl.get('all_areas') || 'All areas'}</option>
+        {(areas || []).map((area) => (
+          <option key={area.id} value={area.id}>
+            {area.name}
+          </option>
+        ))}
+      </HTMLSelect>
+    </FormGroup>
+  );
+}
+
+/**
  * Customer select field of the invoice form.
  * @returns {React.ReactNode}
  */
 function InvoiceFormCustomerSelect() {
   const { values, setFieldValue } = useFormikContext();
   const { customers } = useInvoiceFormContext();
+  const [areaId, setAreaId] = React.useState('');
 
   const updateEntries = useCustomerUpdateExRate();
+
+  const filteredCustomers = React.useMemo(() => {
+    if (!areaId) {
+      return customers;
+    }
+    // `useCustomers` (InvoiceFormProvider) fetches without camelCase
+    // transform, so the raw customer records are snake_case here --
+    // `area_id`, not `areaId`. Check both just in case that ever changes.
+    return customers.filter(
+      (customer) => (customer.area_id ?? customer.areaId) === areaId,
+    );
+  }, [customers, areaId]);
 
   // Handles the customer item change.
   const handleItemChange = (customer) => {
@@ -174,31 +224,35 @@ function InvoiceFormCustomerSelect() {
   };
 
   return (
-    <FFormGroup
-      name={'customer_id'}
-      label={intl.get('customer_name')}
-      inline={true}
-      labelInfo={<FieldRequiredHint />}
-      fastField={true}
-      shouldUpdate={customerNameFieldShouldUpdate}
-      shouldUpdateDeps={{ items: customers }}
-    >
-      <CustomersSelect
+    <>
+      <InvoiceFormAreaFilter areaId={areaId} onAreaIdChange={setAreaId} />
+
+      <FFormGroup
         name={'customer_id'}
-        items={customers}
-        placeholder={<T id={'select_customer_account'} />}
-        onItemChange={handleItemChange}
-        allowCreate={true}
+        label={intl.get('customer_name')}
+        inline={true}
+        labelInfo={<FieldRequiredHint />}
         fastField={true}
         shouldUpdate={customerNameFieldShouldUpdate}
-        shouldUpdateDeps={{ items: customers }}
-      />
-      {values.customer_id && (
-        <CustomerButtonLink customerId={values.customer_id}>
-          <T id={'view_customer_details'} />
-        </CustomerButtonLink>
-      )}
-    </FFormGroup>
+        shouldUpdateDeps={{ items: filteredCustomers }}
+      >
+        <CustomersSelect
+          name={'customer_id'}
+          items={filteredCustomers}
+          placeholder={<T id={'select_customer_account'} />}
+          onItemChange={handleItemChange}
+          allowCreate={true}
+          fastField={true}
+          shouldUpdate={customerNameFieldShouldUpdate}
+          shouldUpdateDeps={{ items: filteredCustomers }}
+        />
+        {values.customer_id && (
+          <CustomerButtonLink customerId={values.customer_id}>
+            <T id={'view_customer_details'} />
+          </CustomerButtonLink>
+        )}
+      </FFormGroup>
+    </>
   );
 }
 

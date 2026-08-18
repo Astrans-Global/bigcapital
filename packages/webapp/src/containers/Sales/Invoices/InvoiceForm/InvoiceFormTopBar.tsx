@@ -15,6 +15,7 @@ import {
 import { Features } from '@/constants';
 import { useInvoiceFormContext } from './InvoiceFormProvider';
 import { useFeatureCan } from '@/hooks/state';
+import { InvoiceDmsStatusControl } from './InvoiceDmsStatusControl';
 import {
   BranchSelect,
   FeatureCan,
@@ -25,7 +26,10 @@ import {
 } from '@/components';
 
 /**
- * Invoice form topbar .
+ * Invoice form topbar -- always shows the Astrans DMS status control
+ * (Pending/Reserved/Invoiced/Delivered, see docs/ops/PHASE1.md, "Status
+ * pipeline") on the right so it's in the same obvious place regardless of
+ * whether the Warehouses/Branches features are on.
  * @returns {JSX.Element}
  */
 export function InvoiceFormTopBar() {
@@ -38,22 +42,25 @@ export function InvoiceFormTopBar() {
   // Sets the primary branch to form.
   useSetPrimaryBranchToForm();
 
-  // Can't display the navigation bar if warehouses or branches feature is not enabled.
-  if (!featureCan(Features.Warehouses) && !featureCan(Features.Branches)) {
-    return null;
-  }
+  const showLeftGroup =
+    featureCan(Features.Warehouses) || featureCan(Features.Branches);
+
   return (
     <FormTopbar>
-      <NavbarGroup align={Alignment.LEFT}>
-        <FeatureCan feature={Features.Branches}>
-          <InvoiceFormSelectBranch />
-        </FeatureCan>
-        {featureCan(Features.Warehouses) && featureCan(Features.Branches) && (
-          <NavbarDivider />
-        )}
-        <FeatureCan feature={Features.Warehouses}>
-          <InvoiceFormSelectWarehouse />
-        </FeatureCan>
+      {showLeftGroup && (
+        <NavbarGroup align={Alignment.LEFT}>
+          <FeatureCan feature={Features.Branches}>
+            <InvoiceFormSelectBranch />
+          </FeatureCan>
+          {featureCan(Features.Warehouses) &&
+            featureCan(Features.Branches) && <NavbarDivider />}
+          <FeatureCan feature={Features.Warehouses}>
+            <InvoiceFormSelectWarehouse />
+          </FeatureCan>
+        </NavbarGroup>
+      )}
+      <NavbarGroup align={Alignment.RIGHT}>
+        <InvoiceDmsStatusControl />
       </NavbarGroup>
     </FormTopbar>
   );
