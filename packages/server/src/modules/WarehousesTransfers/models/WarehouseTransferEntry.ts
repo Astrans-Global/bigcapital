@@ -8,6 +8,7 @@ export class WarehouseTransferEntry extends TenantBaseModel {
   public itemId!: number;
   public quantity!: number;
   public cost!: number;
+  public itemPriceLotId!: number | null;
 
   public warehouseTransfer!: WarehouseTransfer;
   public item!: Item;

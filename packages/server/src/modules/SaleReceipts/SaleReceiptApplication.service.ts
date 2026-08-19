@@ -24,6 +24,11 @@ import {
 import { GetSaleReceiptMailStateService } from './queries/GetSaleReceiptMailState.service';
 import { BulkDeleteSaleReceiptsService } from './BulkDeleteSaleReceipts.service';
 import { ValidateBulkDeleteSaleReceiptsService } from './ValidateBulkDeleteSaleReceipts.service';
+import { ExportStatutoryReceiptService } from './queries/ExportStatutoryReceipt.service';
+import {
+  StatutoryInvoiceFileKind,
+  StatutoryInvoiceTemplate,
+} from '@/modules/SaleInvoices/queries/ExportStatutoryInvoice.service';
 
 @Injectable()
 export class SaleReceiptApplication {
@@ -40,6 +45,7 @@ export class SaleReceiptApplication {
     private getSaleReceiptMailStateService: GetSaleReceiptMailStateService,
     private bulkDeleteSaleReceiptsService: BulkDeleteSaleReceiptsService,
     private validateBulkDeleteSaleReceiptsService: ValidateBulkDeleteSaleReceiptsService,
+    private exportStatutoryReceiptService: ExportStatutoryReceiptService,
   ) {}
 
   /**
@@ -184,5 +190,21 @@ export class SaleReceiptApplication {
    */
   public getSaleReceiptMail(saleReceiptId: number): Promise<ISaleReceiptState> {
     return this.getSaleReceiptMailStateService.getMailState(saleReceiptId);
+  }
+
+  /**
+   * Downloads the Astrans VAT / Non-VAT statutory invoice for a closed
+   * sale receipt. Due date on the sheet is the receipt date.
+   */
+  public exportStatutoryReceipt(
+    saleReceiptId: number,
+    template: StatutoryInvoiceTemplate,
+    fileKind: StatutoryInvoiceFileKind,
+  ) {
+    return this.exportStatutoryReceiptService.export(
+      saleReceiptId,
+      template,
+      fileKind,
+    );
   }
 }

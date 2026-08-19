@@ -13,6 +13,7 @@ import {
 } from '@blueprintjs/core';
 
 import { Can, Icon, Money, If, AvatarCell } from '@/components';
+import { CustomerRiskTag } from '@/containers/Customers/CustomerRisk/CustomerRiskTag';
 import { CustomerAction, AbilitySubject } from '@/constants/abilityOption';
 import { safeCallback } from '@/utils';
 import { CLASSES } from '@/constants';
@@ -137,6 +138,15 @@ export function useCustomersTableColumns() {
         className: 'display_name',
         width: 150,
         clickable: true,
+      },
+      {
+        id: 'risk_category',
+        Header: 'Class',
+        accessor: (row) => row.risk_category || row.riskCategory,
+        Cell: ({ value }) => <CustomerRiskTag category={value} />,
+        width: 90,
+        clickable: true,
+        disableSortBy: true,
       },
       {
         id: 'company_name',

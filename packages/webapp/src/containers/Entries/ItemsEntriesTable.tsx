@@ -67,6 +67,7 @@ function ItemEntriesTableRoot() {
     enablePriceLots,
     warehouseId,
     excludeInvoiceId,
+    includeZeroQty,
   } = useItemEntriesTableContext();
 
   // Editiable items entries columns.
@@ -141,6 +142,7 @@ function ItemEntriesTableRoot() {
               updateItemPriceLot: handleUpdateItemPriceLot,
               warehouseId,
               excludeInvoiceId,
+              includeZeroQty,
             }
           : {}),
       }}
@@ -156,6 +158,7 @@ ItemsEntriesTable.defaultProps = {
     quantity: '',
     rate: '',
     discount: '',
+    item_price_lot_id: '',
   },
   initialEntries: [],
   taxRates: [],

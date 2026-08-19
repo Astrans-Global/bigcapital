@@ -10,6 +10,7 @@ export class SaleReceiptGL {
   private saleReceipt: SaleReceipt;
   private discountAccountId: number;
   private otherChargesAccountId: number;
+  private taxPayableAccountId: number;
 
   /**
    * Constructor method.
@@ -25,6 +26,15 @@ export class SaleReceiptGL {
    */
   setDiscountAccountId(discountAccountId: number) {
     this.discountAccountId = discountAccountId;
+    return this;
+  }
+
+  /**
+   * Sets the VAT payable account id.
+   * @param {number} taxPayableAccountId - Tax payable account id.
+   */
+  setTaxPayableAccountId(taxPayableAccountId: number) {
+    this.taxPayableAccountId = taxPayableAccountId;
     return this;
   }
 
@@ -105,6 +115,27 @@ export class SaleReceiptGL {
   };
 
   /**
+   * Single VAT payable credit, using taxAmountWithheld (VAT after the
+   * header % discount) — same as sale invoices.
+   */
+  private getReceiptTaxEntry = (): ILedgerEntry => {
+    const commonEntry = this.getIncomeGLCommonEntry();
+    const taxedEntry = this.saleReceipt.entries.find(
+      (entry) => entry.taxRateId || entry.taxRate,
+    );
+
+    return {
+      ...commonEntry,
+      credit: this.saleReceipt.taxAmountWithheld,
+      accountId: this.taxPayableAccountId,
+      index: 1,
+      accountNormal: AccountNormal.CREDIT,
+      taxRateId: taxedEntry?.taxRateId,
+      taxRate: taxedEntry?.taxRate,
+    };
+  };
+
+  /**
    * Retrieves the discount GL entry.
    * @returns {ILedgerEntry}
    */
@@ -151,8 +182,16 @@ export class SaleReceiptGL {
     const depositEntry = this.getReceiptDepositEntry();
     const discountEntry = this.getDiscountEntry();
     const adjustmentEntry = this.getAdjustmentEntry();
+    const taxEntries =
+      this.saleReceipt.taxAmountWithheld > 0 ? [this.getReceiptTaxEntry()] : [];
 
-    return [depositEntry, ...creditEntries, discountEntry, adjustmentEntry];
+    return [
+      depositEntry,
+      ...creditEntries,
+      ...taxEntries,
+      discountEntry,
+      adjustmentEntry,
+    ];
   };
 
   /**

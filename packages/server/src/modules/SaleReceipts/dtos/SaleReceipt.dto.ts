@@ -3,12 +3,13 @@ import { ItemEntryDto } from '@/modules/TransactionItemEntry/dto/ItemEntry.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
-  IsDate,
   IsDateString,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -109,8 +110,10 @@ export class CommandSaleReceiptDto {
   @ValidateNested({ each: true })
   @Type(() => SaleReceiptEntryDto)
   @ArrayMinSize(1)
+  @ArrayMaxSize(9)
   @ApiProperty({
-    description: 'The entries of the sale receipt',
+    description:
+      'The entries of the sale receipt. Same 9-line statutory cap as sale invoices.',
     example: [{ key: '123456' }],
   })
   entries: SaleReceiptEntryDto[];
@@ -122,6 +125,22 @@ export class CommandSaleReceiptDto {
     example: '123456',
   })
   receiptMessage?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description:
+      'Additional information printed on the statutory invoice (distinct from Narration / receiptMessage)',
+  })
+  note?: string;
+
+  @IsOptional()
+  @IsIn(['CASH', 'BANK'])
+  @ApiProperty({
+    description: 'Mode of payment printed on the statutory invoice. CREDIT is not allowed on cash sales.',
+    enum: ['CASH', 'BANK'],
+  })
+  dmsPaymentMode?: 'CASH' | 'BANK';
 
   @IsOptional()
   @IsString()

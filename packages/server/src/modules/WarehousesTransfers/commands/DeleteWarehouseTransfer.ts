@@ -45,6 +45,7 @@ export class DeleteWarehouseTransfer {
     const oldWarehouseTransfer = await this.warehouseTransferModel()
       .query()
       .findById(warehouseTransferId)
+      .withGraphFetched('entries')
       .throwIfNotFound();
 
     // Deletes the warehouse transfer under unit-of-work envirement.

@@ -32,19 +32,23 @@ export function ItemPriceLotSuggestInputCell({
     warehouseId,
     excludeInvoiceId,
     currencyCode,
+    includeZeroQty,
   },
 }) {
   const error = errors?.[index]?.[id];
   const itemId = original?.item_id;
 
   const { data: lots = [], isFetching } = useItemPriceLots(
-    { itemId, warehouseId, excludeInvoiceId },
+    { itemId, warehouseId, excludeInvoiceId, includeZeroQty },
     { enabled: !!itemId },
   );
 
   const availableLots = useMemo(
-    () => lots.filter((lot) => lot.floatQty > 0 || lot.id === cellValue),
-    [lots, cellValue],
+    () =>
+      includeZeroQty
+        ? lots
+        : lots.filter((lot) => lot.floatQty > 0 || lot.id === cellValue),
+    [lots, cellValue, includeZeroQty],
   );
 
   const handleLotSelected = useCallback(

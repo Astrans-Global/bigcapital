@@ -15,9 +15,11 @@ import { CreditNoteAutoIncrementService } from './CreditNoteAutoIncrement.servic
 import { CreditNote } from '../models/CreditNote';
 import {
   CreateCreditNoteDto,
-  CreditNoteEntryDto,
   EditCreditNoteDto,
 } from '../dtos/CreditNote.dto';
+import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTransactions.service';
+import { computeSaleInvoiceVatAfterDiscount } from '@/modules/SaleInvoices/ComputeSaleInvoiceVat';
+import { DiscountType } from '@/common/types/Discount';
 
 @Injectable()
 export class CommandCreditNoteDTOTransform {
@@ -34,6 +36,7 @@ export class CommandCreditNoteDTOTransform {
     private readonly warehouseDTOTransform: WarehouseTransactionDTOTransform,
     private readonly brandingTemplatesTransformer: BrandingTemplateDTOTransformer,
     private readonly creditNoteAutoIncrement: CreditNoteAutoIncrementService,
+    private readonly taxDTOTransformer: ItemEntriesTaxTransactions,
   ) {}
 
   /**
@@ -50,16 +53,32 @@ export class CommandCreditNoteDTOTransform {
     const amount = this.itemsEntriesService.getTotalItemsEntries(
       creditNoteDTO.entries,
     );
-    const entries = R.compose(
-      // Associate the default index to each item entry.
-      assocItemEntriesDefaultIndex,
+    const initialEntries = creditNoteDTO.entries.map((entry) => ({
+      ...entry,
+      referenceType: 'CreditNote',
+      isInclusiveTax: false,
+    }));
+    const asyncEntries = await composeAsync(
+      this.taxDTOTransformer.assocTaxRateFromTaxIdToEntries,
+      this.taxDTOTransformer.assocTaxRateIdFromCodeToEntries,
+    )(initialEntries);
 
-      // Associate the reference type to credit note entries.
-      R.map((entry: CreditNoteEntryDto) => ({
-        ...entry,
-        referenceType: 'CreditNote',
-      })),
-    )(creditNoteDTO.entries);
+    const entries = R.compose(
+      R.map(R.omit(['taxCode'])),
+      assocItemEntriesDefaultIndex,
+    )(asyncEntries);
+
+    const vatRatePercent =
+      Number(
+        (entries as Array<{ taxRate?: number }>).find((entry) => entry.taxRate)
+          ?.taxRate,
+      ) || 0;
+    const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
+      entries,
+      discount: creditNoteDTO.discount,
+      discountType: creditNoteDTO.discountType || DiscountType.Percentage,
+      vatRatePercent,
+    });
 
     // Retrieves the next credit note number.
     const autoNextNumber = this.creditNoteAutoIncrement.getNextCreditNumber();
@@ -71,11 +90,12 @@ export class CommandCreditNoteDTOTransform {
       autoNextNumber;
 
     const initialDTO = {
-      ...formatDateFields(omit(creditNoteDTO, ['open', 'attachments']), [
+      ...formatDateFields(omit(creditNoteDTO, ['open', 'attachments', 'entries']), [
         'creditNoteDate',
       ]),
       creditNoteNumber,
       amount,
+      taxAmountWithheld: vatAfterDiscount.vatAmount,
       currencyCode: customerCurrencyCode,
       exchangeRate: creditNoteDTO.exchangeRate || 1,
       entries,

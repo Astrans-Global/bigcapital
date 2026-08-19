@@ -2,7 +2,7 @@
 import React from 'react';
 import moment from 'moment';
 import * as R from 'ramda';
-import { first } from 'lodash';
+import { first, omit } from 'lodash';
 
 import {
   defaultFastFieldShouldUpdate,
@@ -26,8 +26,12 @@ import {
   transformAttachmentsToRequest,
 } from '@/containers/Attachments/utils';
 import { convertBrandingTemplatesToOptions } from '@/containers/BrandingTemplates/BrandingTemplatesSelectFields';
+import { applyInvoiceTaxRateToEntries } from '../../Invoices/InvoiceForm/utils';
+
+export { applyInvoiceTaxRateToEntries };
 
 export const MIN_LINES_NUMBER = 1;
+export const MAX_CREDIT_NOTE_LINES = 9;
 
 // Default entry object.
 export const defaultCreditNoteEntry = {
@@ -37,7 +41,21 @@ export const defaultCreditNoteEntry = {
   discount: '',
   quantity: '',
   description: '',
-  amount: '',
+  tax_rate_id: '',
+  tax_rate: '',
+  tax_amount: '',
+  item_price_lot_id: '',
+};
+
+const defaultCreditNoteEntryReq = {
+  index: 0,
+  item_id: '',
+  rate: '',
+  discount: '',
+  quantity: '',
+  description: '',
+  tax_rate_id: '',
+  item_price_lot_id: '',
 };
 
 // Default credit note object.
@@ -59,8 +77,11 @@ export const defaultCreditNote = {
   attachments: [],
   pdf_template_id: '',
   discount: '',
-  discount_type: 'amount',
+  discount_type: 'percentage',
   adjustment: '',
+  credit_note_message: '',
+  credit_note_tax_rate_id: '',
+  due_date: moment(new Date()).format('YYYY-MM-DD'),
 };
 
 /**
@@ -82,9 +103,13 @@ export function transformToEditForm(creditNote) {
   )(initialEntries);
 
   const attachment = transformAttachmentsToForm(creditNote);
+  const creditNoteTaxRateId =
+    creditNote.entries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
 
   return {
     ...transformToForm(creditNote, defaultCreditNote),
+    due_date: creditNote.credit_note_date,
+    credit_note_tax_rate_id: creditNoteTaxRateId,
     entries,
     attachment,
   };
@@ -96,7 +121,7 @@ export function transformToEditForm(creditNote) {
 export const transformEntriesToSubmit = (entries) => {
   const transformCreditNoteEntry = R.compose(
     R.omit(['amount']),
-    R.curry(transformToForm)(R.__, defaultCreditNoteEntry),
+    R.curry(transformToForm)(R.__, defaultCreditNoteEntryReq),
   );
   return R.compose(
     orderingLinesIndexes,
@@ -119,10 +144,13 @@ export const transformFormValuesToRequest = (values) => {
   const attachments = transformAttachmentsToRequest(values);
 
   return {
-    ...values,
+    ...omit(values, ['credit_note_tax_rate_id', 'due_date']),
     entries: transformEntriesToSubmit(entries),
     open: false,
     attachments,
+    discount_type: 'percentage',
+    note: values.note || '',
+    credit_note_message: values.credit_note_message || '',
   };
 };
 
@@ -256,6 +284,25 @@ export const useCreditNoteAdjustmentFormatted = () => {
 };
 
 /**
+ * Retrieves the credit note total tax amount (VAT after header %).
+ */
+export const useCreditNoteTotalTaxAmount = () => {
+  const { values } = useFormikContext();
+  const { taxRates } = useCreditNoteFormContext();
+  const subtotal = useCreditNoteSubtotal();
+  const discountAmount = useCreditNoteDiscountAmount();
+
+  return React.useMemo(() => {
+    const selected = (taxRates || []).find(
+      (taxRate) => taxRate.id === values.credit_note_tax_rate_id,
+    );
+    const rate = toSafeNumber(selected?.rate);
+    const taxable = Math.max(subtotal - discountAmount, 0);
+    return (taxable * rate) / 100;
+  }, [taxRates, values.credit_note_tax_rate_id, subtotal, discountAmount]);
+};
+
+/**
  * Retrieves the credit note total.
  * @returns {number}
  */
@@ -263,8 +310,10 @@ export const useCreditNoteTotal = () => {
   const subtotal = useCreditNoteSubtotal();
   const discountAmount = useCreditNoteDiscountAmount();
   const adjustmentAmount = useCreditNoteAdjustmentAmount();
+  const totalTaxAmount = useCreditNoteTotalTaxAmount();
 
   return R.compose(
+    R.add(totalTaxAmount),
     R.subtract(R.__, discountAmount),
     R.add(R.__, adjustmentAmount),
   )(subtotal);

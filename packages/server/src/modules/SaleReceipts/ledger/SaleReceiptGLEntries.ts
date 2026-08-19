@@ -37,10 +37,14 @@ export class SaleReceiptGLEntries {
     const otherChargesAccount =
       await this.accountRepository.findOrCreateOtherChargesAccount({}, trx);
 
+    const taxPayableAccount =
+      await this.accountRepository.findOrCreateTaxPayable({}, trx);
+
     // Retrieves the income ledger.
     const incomeLedger = new SaleReceiptGL(saleReceipt)
       .setDiscountAccountId(discountAccount.id)
       .setOtherChargesAccountId(otherChargesAccount.id)
+      .setTaxPayableAccountId(taxPayableAccount.id)
       .getIncomeLedger();
 
     // Commits the ledger entries to the storage.

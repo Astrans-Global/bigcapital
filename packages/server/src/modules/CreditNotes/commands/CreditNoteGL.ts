@@ -9,6 +9,7 @@ export class CreditNoteGL {
   ARAccountId: number;
   discountAccountId: number;
   adjustmentAccountId: number;
+  taxPayableAccountId: number;
 
   /**
    * @param {CreditNote} creditNoteModel - Credit note model.
@@ -41,6 +42,15 @@ export class CreditNoteGL {
    */
   public setAdjustmentAccountId(adjustmentAccountId: number) {
     this.adjustmentAccountId = adjustmentAccountId;
+    return this;
+  }
+
+  /**
+   * Sets the VAT payable account id (debited — reverse of the invoice credit).
+   * @param {number} taxPayableAccountId - Tax payable account id.
+   */
+  public setTaxPayableAccountId(taxPayableAccountId: number) {
+    this.taxPayableAccountId = taxPayableAccountId;
     return this;
   }
 
@@ -116,6 +126,27 @@ export class CreditNoteGL {
   }
 
   /**
+   * Single VAT payable debit, using taxAmountWithheld (VAT after the
+   * header % discount) — reverse of sale invoices.
+   */
+  private get taxEntry(): ILedgerEntry {
+    const commonEntry = this.creditNoteCommonEntry;
+    const taxedEntry = this.creditNoteModel.entries.find(
+      (entry) => entry.taxRateId || entry.taxRate,
+    );
+
+    return {
+      ...commonEntry,
+      debit: this.creditNoteModel.taxAmountWithheld,
+      accountId: this.taxPayableAccountId,
+      index: 1,
+      accountNormal: AccountNormal.CREDIT,
+      taxRateId: taxedEntry?.taxRateId,
+      taxRate: taxedEntry?.taxRate,
+    };
+  }
+
+  /**
    * Retrieves the credit note discount entry.
    * @param {ICreditNote} creditNote
    * @param {number} discountAccountId
@@ -167,8 +198,10 @@ export class CreditNoteGL {
     );
     const discountEntry = this.discountEntry;
     const adjustmentEntry = this.adjustmentEntry;
+    const taxEntries =
+      this.creditNoteModel.taxAmountWithheld > 0 ? [this.taxEntry] : [];
 
-    return [AREntry, discountEntry, adjustmentEntry, ...itemsEntries];
+    return [AREntry, discountEntry, adjustmentEntry, ...taxEntries, ...itemsEntries];
   }
 
   /**

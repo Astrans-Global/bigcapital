@@ -33,6 +33,12 @@ export class WarehouseTransferEntryDto {
   quantity: number;
 
   @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @IsPositive()
+  itemPriceLotId?: number;
+
+  @IsOptional()
   @IsDecimal()
   cost?: number;
 }

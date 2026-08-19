@@ -32,6 +32,7 @@ import {
   handleErrors,
   transformFormValuesToRequest,
   resetFormState,
+  MAX_RECEIPT_LINES,
 } from './utils';
 import {
   ReceiptSyncAutoExRateToForm,
@@ -95,6 +96,14 @@ function ReceiptFormRoot({
     const entries = values.entries.filter(
       (item) => item.item_id && item.quantity,
     );
+    if (entries.length > MAX_RECEIPT_LINES) {
+      AppToaster.show({
+        message: `A receipt can have at most ${MAX_RECEIPT_LINES} item lines.`,
+        intent: Intent.DANGER,
+      });
+      setSubmitting(false);
+      return;
+    }
     const totalQuantity = sumBy(entries, (entry) => parseInt(entry.quantity));
 
     if (totalQuantity === 0) {

@@ -51,12 +51,16 @@ export class CreditNoteGLEntries {
       await this.accountRepository.findOrCreateDiscountAccount({});
 
     const adjustmentAccount =
-      await this.accountRepository.findOrCreateOtherChargesAccount({});
+      await this.accountRepository.findOrCreateOtherChargesAccount({}, trx);
+
+    const taxPayableAccount =
+      await this.accountRepository.findOrCreateTaxPayable({}, trx);
 
     const creditNoteLedger = new CreditNoteGL(creditNoteWithItems)
       .setARAccountId(ARAccount.id)
       .setDiscountAccountId(discountAccount.id)
       .setAdjustmentAccountId(adjustmentAccount.id)
+      .setTaxPayableAccountId(taxPayableAccount.id)
       .getCreditNoteLedger();
 
     // Saves the credit note GL entries.

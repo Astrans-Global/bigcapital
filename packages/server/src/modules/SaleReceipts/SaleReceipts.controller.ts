@@ -17,6 +17,7 @@ import {
   ApiExtraModels,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -145,6 +146,48 @@ export class SaleReceiptsController {
     @Body() saleReceiptDTO: EditSaleReceiptDto,
   ) {
     return this.saleReceiptApplication.editSaleReceipt(id, saleReceiptDTO);
+  }
+
+  @Get(':id/statutory-invoice')
+  @ApiOperation({
+    summary:
+      'Download the Astrans VAT or Non-VAT statutory invoice for a closed sale receipt as Excel or PDF. Due date on the sheet is the receipt date.',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: Number,
+    description: 'The sale receipt id',
+  })
+  @ApiQuery({
+    name: 'template',
+    required: false,
+    enum: ['vat', 'non_vat'],
+    description:
+      'vat = TAX INVOICE (default when omitted). non_vat = SALES INVOICE.',
+  })
+  async downloadStatutoryInvoice(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('template') template: string,
+    @Headers('accept') acceptHeader: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const kind = template === 'non_vat' ? 'non_vat' : 'vat';
+    const fileKind = acceptHeader?.includes(AcceptType.ApplicationPdf)
+      ? 'pdf'
+      : 'xlsx';
+    const result = await this.saleReceiptApplication.exportStatutoryReceipt(
+      id,
+      kind,
+      fileKind,
+    );
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${result.filename}`,
+    );
+    res.setHeader('Content-Type', result.contentType);
+    res.send(result.buffer);
   }
 
   @Get(':id')

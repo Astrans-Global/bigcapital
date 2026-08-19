@@ -1,6 +1,7 @@
 import { IsOptional, ToNumber } from '@/common/decorators/Validators';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsInt, Min } from 'class-validator';
 
 export class GetItemPriceLotsQueryDto {
   // The global `SerializeInterceptor` already converts incoming snake_case
@@ -33,4 +34,16 @@ export class GetItemPriceLotsQueryDto {
       "Adds this invoice's own active holds back into each lot's float quantity",
   })
   excludeInvoiceId?: number;
+
+  // Credit-note restock picker: show lots even at zero float so the user
+  // can put returned stock back onto the original (or any) batch.
+  @Transform(({ value }) => value === true || value === 'true' || value === '1')
+  @IsBoolean()
+  @IsOptional()
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'When true, the picker should still list lots with zero float quantity',
+  })
+  includeZeroQty?: boolean;
 }

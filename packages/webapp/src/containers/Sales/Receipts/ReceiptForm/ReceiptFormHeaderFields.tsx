@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useFormikContext } from 'formik';
-import { Position, Classes } from '@blueprintjs/core';
+import { Position, Classes, FormGroup, HTMLSelect } from '@blueprintjs/core';
 import { css } from '@emotion/css';
 import { Theme, useTheme } from '@emotion/react';
 
@@ -31,6 +31,7 @@ import {
 } from './components';
 import { ReceiptFormReceiptNumberField } from './ReceiptFormReceiptNumberField';
 import { useCustomerUpdateExRate } from '@/containers/Entries/withExRateItemEntriesPriceRecalc';
+import { useCustomerAreas } from '@/hooks/query';
 import intl from 'react-intl-universal';
 
 const getEstimateFieldsStyle = (theme: Theme) => css`
@@ -113,6 +114,9 @@ export function ReceiptFormHeader() {
         />
       </FFormGroup>
 
+      {/* ----------- Due date (always the receipt date — cash sale) ----------- */}
+      <ReceiptDueDateField />
+
       {/* ----------- Receipt number ----------- */}
       <ReceiptFormReceiptNumberField />
 
@@ -146,50 +150,118 @@ export function ReceiptFormHeader() {
 }
 
 /**
+ * Due date is always the receipt date on a cash sale — shown so the
+ * statutory invoice has the field, but not editable.
+ */
+function ReceiptDueDateField() {
+  const { values, setFieldValue } = useFormikContext();
+
+  React.useEffect(() => {
+    if (values.receipt_date && values.due_date !== values.receipt_date) {
+      setFieldValue('due_date', values.receipt_date);
+    }
+  }, [values.receipt_date, values.due_date, setFieldValue]);
+
+  return (
+    <FFormGroup name={'due_date'} label={intl.get('due_date')} inline>
+      <FDateInput
+        name={'due_date'}
+        formatDate={(date) => date.toLocaleDateString()}
+        parseDate={(str) => new Date(str)}
+        popoverProps={{ position: Position.BOTTOM_LEFT, minimal: true }}
+        inputProps={{
+          leftIcon: <Icon icon={'date-range'} />,
+          fill: true,
+          disabled: true,
+        }}
+        disabled
+        fill
+      />
+    </FFormGroup>
+  );
+}
+
+function ReceiptFormAreaFilter({ areaId, onAreaIdChange }) {
+  const { data: areas } = useCustomerAreas();
+
+  const handleChange = (event) => {
+    onAreaIdChange(event.target.value ? Number(event.target.value) : '');
+  };
+
+  return (
+    <FormGroup
+      label={intl.get('area') || 'Area'}
+      inline={true}
+      helperText={'Filters the customer list below -- not saved on the receipt.'}
+    >
+      <HTMLSelect fill value={areaId} onChange={handleChange}>
+        <option value="">{intl.get('all_areas') || 'All areas'}</option>
+        {(areas || []).map((area) => (
+          <option key={area.id} value={area.id}>
+            {area.name}
+          </option>
+        ))}
+      </HTMLSelect>
+    </FormGroup>
+  );
+}
+
+/**
  * Customer select field of receipt form.
  * @returns {React.ReactNode}
  */
 function ReceiptFormCustomerSelect() {
   const { setFieldValue, values } = useFormikContext();
   const { customers } = useReceiptFormContext();
+  const [areaId, setAreaId] = React.useState('');
 
   const updateEntries = useCustomerUpdateExRate();
 
-  // Handles the customer item change.
+  const filteredCustomers = React.useMemo(() => {
+    if (!areaId) {
+      return customers;
+    }
+    return customers.filter(
+      (customer) => (customer.area_id ?? customer.areaId) === areaId,
+    );
+  }, [customers, areaId]);
+
   const handleItemChange = (customer) => {
     setFieldValue('customer_id', customer.id);
     setFieldValue('currency_code', customer?.currency_code);
-
     updateEntries(customer);
   };
 
   return (
-    <FFormGroup
-      name={'customer_id'}
-      label={intl.get('customer_name')}
-      labelInfo={<FieldRequiredHint />}
-      inline={true}
-      fastField={true}
-      shouldUpdate={customersFieldShouldUpdate}
-      shouldUpdateDeps={{ items: customers }}
-    >
-      <CustomersSelect
+    <>
+      <ReceiptFormAreaFilter areaId={areaId} onAreaIdChange={setAreaId} />
+      <FFormGroup
         name={'customer_id'}
-        items={customers}
-        placeholder={<T id={'select_customer_account'} />}
-        onItemChange={handleItemChange}
-        popoverFill={true}
-        allowCreate={true}
+        label={intl.get('customer_name')}
+        labelInfo={<FieldRequiredHint />}
+        inline={true}
         fastField={true}
         shouldUpdate={customersFieldShouldUpdate}
-        shouldUpdateDeps={{ items: customers }}
-      />
-      {values.customer_id && (
-        <CustomerButtonLink customerId={values.customer_id}>
-          <T id={'view_customer_details'} />
-        </CustomerButtonLink>
-      )}
-    </FFormGroup>
+        shouldUpdateDeps={{ items: filteredCustomers }}
+      >
+        <CustomersSelect
+          name={'customer_id'}
+          items={filteredCustomers}
+          placeholder={<T id={'select_customer_account'} />}
+          onItemChange={handleItemChange}
+          popoverFill={true}
+          allowCreate={true}
+          fastField={true}
+          shouldUpdate={customersFieldShouldUpdate}
+          shouldUpdateDeps={{ items: filteredCustomers }}
+        />
+        {values.customer_id && (
+          <CustomerButtonLink customerId={values.customer_id}>
+            <T id={'view_customer_details'} />
+          </CustomerButtonLink>
+        )}
+      </FFormGroup>
+    </>
   );
 }
 

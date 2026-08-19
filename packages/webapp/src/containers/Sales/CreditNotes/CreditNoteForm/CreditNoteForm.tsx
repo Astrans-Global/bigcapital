@@ -27,6 +27,7 @@ import {
   transformToEditForm,
   transformFormValuesToRequest,
   defaultCreditNote,
+  MAX_CREDIT_NOTE_LINES,
 } from './utils';
 
 import {
@@ -97,6 +98,14 @@ function CreditNoteFormInner({
     { setSubmitting, setErrors, resetForm },
   ) => {
     const entries = filterNonZeroEntries(values.entries);
+    if (entries.length > MAX_CREDIT_NOTE_LINES) {
+      AppToaster.show({
+        message: `A credit note can have at most ${MAX_CREDIT_NOTE_LINES} item lines.`,
+        intent: Intent.DANGER,
+      });
+      setSubmitting(false);
+      return;
+    }
     const totalQuantity = safeSumBy(entries, 'quantity');
 
     if (totalQuantity === 0) {

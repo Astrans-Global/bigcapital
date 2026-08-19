@@ -271,10 +271,10 @@ export const CustomerMeta = {
       printable: false,
     },
     riskCategory: {
-      name: 'Risk Category',
+      name: 'Class',
       column: 'risk_category',
       type: 'text',
-      printable: false,
+      printable: true,
       importable: false,
     },
   },

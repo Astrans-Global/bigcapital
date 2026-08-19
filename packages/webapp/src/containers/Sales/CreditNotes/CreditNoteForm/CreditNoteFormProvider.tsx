@@ -28,6 +28,7 @@ import {
   useGetCreditNoteState,
 } from '@/hooks/query';
 import { useGetPdfTemplates } from '@/hooks/query/pdf-templates';
+import { useTaxRates } from '@/hooks/query/tax-rates';
 
 type CreditNoteFormSubmitPayload = {
   redirect?: boolean;
@@ -56,6 +57,8 @@ type CreditNoteFormContextValue = {
   isBrandingTemplatesLoading: boolean;
   isCreditNoteStateLoading: boolean;
   isBootLoading: boolean;
+  taxRates: any[];
+  creditNoteId?: number;
 
   createCreditNoteMutate: (values: CreateCreditNoteBody) => Promise<void>;
   editCreditNoteMutate: (args: [number, EditCreditNoteBody]) => Promise<void>;
@@ -130,6 +133,8 @@ function CreditNoteFormProvider({
   const { data: creditNoteState, isLoading: isCreditNoteStateLoading } =
     useGetCreditNoteState();
 
+  const { data: taxRates, isLoading: isTaxRatesLoading } = useTaxRates();
+
   // Handle fetching settings.
   useSettingsCreditNotes();
 
@@ -150,7 +155,14 @@ function CreditNoteFormProvider({
 
   const newCreditNote = !isEmpty(invoice)
     ? transformToEditForm({
-        ...pick(invoice, ['customer_id', 'currency_code', 'entries']),
+        ...pick(invoice, [
+          'customer_id',
+          'currency_code',
+          'entries',
+          'warehouse_id',
+          'discount',
+          'discount_type',
+        ]),
       })
     : ([] as []);
 
@@ -159,11 +171,13 @@ function CreditNoteFormProvider({
     isCustomersLoading ||
     isCreditNoteLoading ||
     isInvoiceLoading ||
-    isBrandingTemplatesLoading;
+    isBrandingTemplatesLoading ||
+    isTaxRatesLoading;
 
   // Provider payload.
   const provider: CreditNoteFormContextValue = {
     creditNote,
+    creditNoteId,
     items: itemsData?.data ?? [],
     customers: customersData?.data ?? [],
     branches: branches ?? [],
@@ -195,6 +209,7 @@ function CreditNoteFormProvider({
     setSubmitPayload,
 
     creditNoteState,
+    taxRates: taxRates ?? [],
   };
 
   return <CreditNoteFormContext.Provider value={provider} {...props} />;

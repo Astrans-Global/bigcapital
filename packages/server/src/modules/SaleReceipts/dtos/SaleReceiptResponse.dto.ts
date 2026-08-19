@@ -79,6 +79,27 @@ export class SaleReceiptResponseDto {
   })
   statement?: string;
 
+  @ApiProperty({
+    description:
+      'Additional information printed on the statutory invoice (distinct from Narration / receiptMessage)',
+    required: false,
+  })
+  note?: string;
+
+  @ApiProperty({
+    description: 'Mode of payment printed on the statutory invoice. CREDIT is not allowed on cash sales.',
+    enum: ['CASH', 'BANK'],
+    required: false,
+  })
+  dmsPaymentMode?: 'CASH' | 'BANK';
+
+  @ApiProperty({
+    description: 'VAT after header % discount, posted on Close.',
+    example: 0,
+    required: false,
+  })
+  taxAmountWithheld?: number;
+
   @ApiProperty({ description: 'Whether the receipt is closed', example: false })
   closed: boolean;
 

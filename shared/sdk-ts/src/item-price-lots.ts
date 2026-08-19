@@ -37,6 +37,7 @@ export interface ItemPriceLotsListQuery {
   // Adds the invoice's own active holds back into each lot's float
   // quantity -- pass when editing an invoice that already reserved stock.
   excludeInvoiceId?: number;
+  includeZeroQty?: boolean;
 }
 
 export type DmsStatus = 'pending' | 'reserved' | 'invoiced' | 'delivered';

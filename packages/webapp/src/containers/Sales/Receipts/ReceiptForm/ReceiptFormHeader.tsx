@@ -1,16 +1,18 @@
 // @ts-nocheck
 import React from 'react';
 import intl from 'react-intl-universal';
+import styled from 'styled-components';
 import { Group, PageFormBigNumber } from '@/components';
 import { ReceiptFormHeader as ReceiptFormHeaderFields } from './ReceiptFormHeaderFields';
+import { ReceiptStatutoryDownload } from './ReceiptStatutoryDownload';
 import { useReceiptTotalFormatted } from './utils';
 import { useIsDarkMode } from '@/hooks/useDarkMode';
 
 /**
- * Receipt form header section.
+ * Receipt form header: customer/date fields on the left, statutory
+ * download in the middle, total on the right.
  */
 export function ReceiptFormHeader({
-  // #ownProps
   onReceiptNumberChanged,
 }) {
   const isDarkMode = useIsDarkMode();
@@ -18,7 +20,8 @@ export function ReceiptFormHeader({
   return (
     <Group
       position="apart"
-      align={'flex-start'}
+      align={'stretch'}
+      noWrap
       display="flex"
       p="25px 32px"
       bg="var(--x-header-background)"
@@ -35,19 +38,28 @@ export function ReceiptFormHeader({
       <ReceiptFormHeaderFields
         onReceiptNumberChanged={onReceiptNumberChanged}
       />
+      <HeaderPreviewColumn>
+        <ReceiptStatutoryDownload />
+      </HeaderPreviewColumn>
       <ReceiptFormHeaderBigTotal />
     </Group>
   );
 }
 
-/**
- * The big total amount of receipt form.
- * @returns {React.ReactNode}
- */
+const HeaderPreviewColumn = styled.div`
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
 function ReceiptFormHeaderBigTotal() {
   const totalFormatted = useReceiptTotalFormatted();
 
   return (
-    <PageFormBigNumber label={intl.get('due_amount')} amount={totalFormatted} />
+    <div style={{ flexShrink: 0, alignSelf: 'flex-start' }}>
+      <PageFormBigNumber label={intl.get('total')} amount={totalFormatted} />
+    </div>
   );
 }

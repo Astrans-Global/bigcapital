@@ -16,23 +16,32 @@ import {
   useReceiptPaidAmountFormatted,
   useReceiptSubtotalFormatted,
   useReceiptTotalFormatted,
+  useReceiptTotalTaxAmount,
 } from './utils';
 import { DiscountTotalLine } from '../../Invoices/InvoiceForm/DiscountTotalLine';
 import { AdjustmentTotalLine } from '../../Invoices/InvoiceForm/AdjustmentTotalLine';
+import { ReceiptTaxRateTotalLine } from './ReceiptTaxRateTotalLine';
+import { formattedAmount } from '@/utils';
+import { useReceiptFormContext } from './ReceiptFormProvider';
 
 export function ReceiptFormFooterRight() {
   const {
-    values: { currency_code },
+    values: { currency_code, receipt_tax_rate_id },
   } = useFormikContext();
+  const { taxRates } = useReceiptFormContext();
 
   const paidAmountFormatted = useReceiptPaidAmountFormatted();
   const dueAmountFormatted = useReceiptDueAmountFormatted();
-
   const subtotalFormatted = useReceiptSubtotalFormatted();
   const totalFormatted = useReceiptTotalFormatted();
-
   const discountAmount = useReceiptDiscountAmountFormatted();
   const adjustmentAmount = useReceiptAdjustmentFormatted();
+  const taxAmount = useReceiptTotalTaxAmount();
+  const selectedTaxRate = (taxRates || []).find(
+    (taxRate) => taxRate.id === receipt_tax_rate_id,
+  );
+  const taxAmountFormatted = formattedAmount(taxAmount, currency_code);
+  const vatRate = selectedTaxRate?.rate;
 
   return (
     <ReceiptTotalLines labelColWidth={'180px'} amountColWidth={'180px'}>
@@ -43,6 +52,16 @@ export function ReceiptFormFooterRight() {
       <DiscountTotalLine
         currencyCode={currency_code}
         discountAmount={discountAmount}
+      />
+      <ReceiptTaxRateTotalLine />
+      <TotalLine
+        title={
+          vatRate
+            ? `VAT Amount (Total Value of Supply @${vatRate}%)`
+            : 'VAT Amount'
+        }
+        value={taxAmountFormatted}
+        borderStyle={TotalLineBorderStyle.None}
       />
       <AdjustmentTotalLine adjustmentAmount={adjustmentAmount} />
       <TotalLine

@@ -50,6 +50,9 @@ export class SaleReceipt extends ExtendedModel {
   public discountType!: DiscountType;
   public discount!: number;
   public adjustment!: number;
+  public taxAmountWithheld!: number;
+  public note!: string | null;
+  public dmsPaymentMode!: 'CASH' | 'BANK' | null;
 
   public branchId!: number;
   public warehouseId!: number;
@@ -159,13 +162,15 @@ export class SaleReceipt extends ExtendedModel {
   }
 
   /**
-   * Receipt total.
+   * Receipt total (VAT included after header discount).
+   * Same exclusive-of-tax + VAT-after-discount as sale invoices.
    * @returns {number}
    */
   get total(): number {
     const adjustmentAmount = defaultTo(this.adjustment, 0);
+    const taxAmount = defaultTo(this.taxAmountWithheld, 0);
 
-    return this.subtotal - this.discountAmount + adjustmentAmount;
+    return this.subtotal - this.discountAmount + taxAmount + adjustmentAmount;
   }
 
   /**

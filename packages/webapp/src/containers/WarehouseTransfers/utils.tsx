@@ -12,6 +12,7 @@ import {
   ItemsListCell,
   InputGroupCell,
 } from '@/components';
+import { ItemPriceLotSuggestInputCell } from '@/components/DataTableCells';
 
 /**
  * Actions cell renderer component.
@@ -84,6 +85,15 @@ export const useWarehouseTransferTableColumns = () => {
         width: 130,
         className: 'item',
         fieldProps: { allowCreate: true },
+      },
+      {
+        id: 'item_price_lot_id',
+        Header: 'Price lot',
+        accessor: 'item_price_lot_id',
+        Cell: ItemPriceLotSuggestInputCell,
+        disableSortBy: true,
+        width: 160,
+        className: 'item-price-lot',
       },
       {
         Header: intl.get('description'),

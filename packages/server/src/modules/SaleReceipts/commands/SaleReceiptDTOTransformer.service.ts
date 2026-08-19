@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import { sumBy, omit } from 'lodash';
 import * as composeAsync from 'async/compose';
 import * as moment from 'moment';
+import '../../../utils/moment-mysql';
 import { SaleReceiptIncrement } from './SaleReceiptIncrement.service';
 import { ItemsEntriesService } from '@/modules/Items/ItemsEntries.service';
 import { BranchTransactionDTOTransformer } from '@/modules/Branches/integrations/BranchTransactionDTOTransform';
@@ -19,6 +20,9 @@ import {
   CreateSaleReceiptDto,
   EditSaleReceiptDto,
 } from '../dtos/SaleReceipt.dto';
+import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTransactions.service';
+import { computeSaleInvoiceVatAfterDiscount } from '@/modules/SaleInvoices/ComputeSaleInvoiceVat';
+import { DiscountType } from '@/common/types/Discount';
 
 @Injectable()
 export class SaleReceiptDTOTransformer {
@@ -38,6 +42,7 @@ export class SaleReceiptDTOTransformer {
     private readonly validators: SaleReceiptValidators,
     private readonly receiptIncrement: SaleReceiptIncrement,
     private readonly brandingTemplatesTransformer: BrandingTemplateDTOTransformer,
+    private readonly taxDTOTransformer: ItemEntriesTaxTransactions,
 
     @Inject(ItemEntry.name)
     private readonly itemEntryModel: TenantModelProxy<typeof ItemEntry>,
@@ -71,17 +76,31 @@ export class SaleReceiptDTOTransformer {
 
     const initialEntries = saleReceiptDTO.entries.map((entry) => ({
       reference_type: 'SaleReceipt',
+      isInclusiveTax: false,
       ...entry,
     }));
     const asyncEntries = await composeAsync(
-      // Sets default cost and sell account to receipt items entries.
+      this.taxDTOTransformer.assocTaxRateFromTaxIdToEntries,
+      this.taxDTOTransformer.assocTaxRateIdFromCodeToEntries,
       this.itemsEntriesService.setItemsEntriesDefaultAccounts,
     )(initialEntries);
 
     const entries = R.compose(
-      // Associate the default index for each item entry.
+      R.map(R.omit(['taxCode'])),
       assocItemEntriesDefaultIndex,
     )(asyncEntries);
+
+    const vatRatePercent =
+      Number(
+        (entries as Array<{ taxRate?: number }>).find((entry) => entry.taxRate)
+          ?.taxRate,
+      ) || 0;
+    const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
+      entries,
+      discount: saleReceiptDTO.discount,
+      discountType: saleReceiptDTO.discountType || DiscountType.Percentage,
+      vatRatePercent,
+    });
 
     const initialDTO = {
       amount,
@@ -92,6 +111,7 @@ export class SaleReceiptDTOTransformer {
       currencyCode: paymentCustomer.currencyCode,
       exchangeRate: saleReceiptDTO.exchangeRate || 1,
       receiptNumber,
+      taxAmountWithheld: vatAfterDiscount.vatAmount,
       // Avoid rewrite the deliver date in edit mode when already published.
       ...(saleReceiptDTO.closed &&
         !oldSaleReceipt?.closedAt && {

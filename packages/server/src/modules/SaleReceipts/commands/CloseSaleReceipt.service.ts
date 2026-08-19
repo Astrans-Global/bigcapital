@@ -54,11 +54,19 @@ export class CloseSaleReceipt {
       } as ISaleReceiptEventClosingPayload);
 
       // Mark the sale receipt as closed on the storage.
-      const saleReceipt = await this.saleReceiptModel()
+      await this.saleReceiptModel()
         .query(trx)
-        .patchAndFetchById(saleReceiptId, {
+        .findById(saleReceiptId)
+        .patch({
           closedAt: moment().toMySqlDateTime(),
         });
+
+      // Reload with entries so onClosed listeners (GL, lots, inventory)
+      // have the line items. patchAndFetchById does not load relations.
+      const saleReceipt = await this.saleReceiptModel()
+        .query(trx)
+        .findById(saleReceiptId)
+        .withGraphFetched('entries');
 
       // Triggers `onSaleReceiptClosed` event.
       await this.eventEmitter.emitAsync(events.saleReceipt.onClosed, {

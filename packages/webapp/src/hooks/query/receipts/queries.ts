@@ -34,6 +34,7 @@ import {
   fetchSaleReceiptHtmlContent,
 } from '@bigcapital/sdk-ts';
 import useApiRequest, { useApiFetcher } from '../../useRequest';
+import { downloadFile } from '../../useDownloadFile';
 import { useRequestPdf } from '../../useRequestPdf';
 import { useRequestQuery } from '../../useQueryRequest';
 import { receiptsKeys } from './query-keys';
@@ -289,5 +290,49 @@ export function useGetSaleReceiptHtml(
     ...options,
     queryKey: receiptsKeys.html(receiptId),
     queryFn: () => fetchSaleReceiptHtmlContent(fetcher, receiptId),
+  });
+}
+
+/**
+ * Download the Astrans VAT / Non-VAT statutory invoice for a closed
+ * sale receipt as Excel or PDF. Due date on the sheet is the receipt date.
+ */
+export function useDownloadStatutoryReceipt() {
+  const apiRequest = useApiRequest();
+
+  return useMutation({
+    mutationFn: ({
+      receiptId,
+      template,
+      fileKind,
+      receiptNo,
+    }: {
+      receiptId: number;
+      template: 'vat' | 'non_vat';
+      fileKind: 'xlsx' | 'pdf';
+      receiptNo: string;
+    }) => {
+      const accept =
+        fileKind === 'pdf' ? 'application/pdf' : 'application/xlsx';
+      const label = template === 'vat' ? 'TAX_INVOICE' : 'SALES_INVOICE';
+      const extension = fileKind === 'pdf' ? 'pdf' : 'xlsx';
+
+      return apiRequest
+        .get(`/sale-receipts/${receiptId}/statutory-invoice`, {
+          responseType: 'blob',
+          headers: { accept },
+          params: { template },
+        })
+        .then((res) => {
+          downloadFile(
+            res.data,
+            `${receiptNo}_${label}.${extension}`,
+            fileKind === 'pdf'
+              ? 'application/pdf'
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
+          return res;
+        });
+    },
   });
 }

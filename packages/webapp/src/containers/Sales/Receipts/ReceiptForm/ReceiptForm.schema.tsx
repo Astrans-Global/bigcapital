@@ -48,7 +48,7 @@ const Schema = Yup.object().shape({
       discount: Yup.number().nullable().min(0).max(DATATYPES_LENGTH.INT_10),
       description: Yup.string().nullable().max(DATATYPES_LENGTH.TEXT),
     }),
-  ),
+  ).max(9),
 });
 
 const CreateReceiptFormSchema = Schema;

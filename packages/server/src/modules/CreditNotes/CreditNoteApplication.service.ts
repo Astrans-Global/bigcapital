@@ -11,6 +11,11 @@ import { GetCreditNoteState } from './queries/GetCreditNoteState.service';
 import { GetCreditNoteService } from './queries/GetCreditNote.service';
 import { BulkDeleteCreditNotesService } from './BulkDeleteCreditNotes.service';
 import { ValidateBulkDeleteCreditNotesService } from './ValidateBulkDeleteCreditNotes.service';
+import { ExportStatutoryCreditNoteService } from './queries/ExportStatutoryCreditNote.service';
+import {
+  StatutoryInvoiceFileKind,
+  StatutoryInvoiceTemplate,
+} from '@/modules/SaleInvoices/queries/ExportStatutoryInvoice.service';
 
 @Injectable()
 export class CreditNoteApplication {
@@ -25,6 +30,7 @@ export class CreditNoteApplication {
     private readonly getCreditNoteService: GetCreditNoteService,
     private readonly bulkDeleteCreditNotesService: BulkDeleteCreditNotesService,
     private readonly validateBulkDeleteCreditNotesService: ValidateBulkDeleteCreditNotesService,
+    private readonly exportStatutoryCreditNoteService: ExportStatutoryCreditNoteService,
   ) {}
 
   /**
@@ -125,6 +131,21 @@ export class CreditNoteApplication {
   validateBulkDeleteCreditNotes(creditNoteIds: number[]) {
     return this.validateBulkDeleteCreditNotesService.validateBulkDeleteCreditNotes(
       creditNoteIds,
+    );
+  }
+
+  /**
+   * Download the Astrans VAT / Non-VAT statutory credit note.
+   */
+  exportStatutoryCreditNote(
+    creditNoteId: number,
+    template: StatutoryInvoiceTemplate,
+    fileKind: StatutoryInvoiceFileKind,
+  ) {
+    return this.exportStatutoryCreditNoteService.export(
+      creditNoteId,
+      template,
+      fileKind,
     );
   }
 }

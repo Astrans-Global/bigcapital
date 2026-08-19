@@ -24,8 +24,13 @@ import {
   transformAttachmentsToRequest,
 } from '@/containers/Attachments/utils';
 import { convertBrandingTemplatesToOptions } from '@/containers/BrandingTemplates/BrandingTemplatesSelectFields';
+import { applyInvoiceTaxRateToEntries } from '../../Invoices/InvoiceForm/utils';
+import { TaxType } from '@/interfaces/TaxRates';
+
+export { applyInvoiceTaxRateToEntries };
 
 export const MIN_LINES_NUMBER = 1;
+export const MAX_RECEIPT_LINES = 9;
 
 export const defaultReceiptEntry = {
   index: 0,
@@ -35,6 +40,10 @@ export const defaultReceiptEntry = {
   quantity: '',
   description: '',
   amount: '',
+  tax_rate_id: '',
+  tax_rate: '',
+  tax_amount: '',
+  item_price_lot_id: '',
 };
 
 const defaultReceiptEntryReq = {
@@ -44,6 +53,8 @@ const defaultReceiptEntryReq = {
   discount: '',
   quantity: '',
   description: '',
+  tax_rate_id: '',
+  item_price_lot_id: '',
 };
 
 export const defaultReceipt = {
@@ -65,8 +76,12 @@ export const defaultReceipt = {
   attachments: [],
   pdf_template_id: '',
   discount: '',
-  discount_type: 'amount',
+  discount_type: 'percentage',
   adjustment: '',
+  note: '',
+  dms_payment_mode: '',
+  receipt_tax_rate_id: '',
+  due_date: moment(new Date()).format('YYYY-MM-DD'),
 };
 
 const ERRORS = {
@@ -93,9 +108,13 @@ export const transformToEditForm = (receipt) => {
   )(initialEntries);
 
   const attachments = transformAttachmentsToForm(receipt);
+  const receiptTaxRateId =
+    receipt.entries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
 
   return {
     ...transformToForm(receipt, defaultReceipt),
+    due_date: receipt.receipt_date,
+    receipt_tax_rate_id: receiptTaxRateId,
     entries,
     attachments,
   };
@@ -159,7 +178,12 @@ export const transformFormValuesToRequest = (values) => {
   const attachments = transformAttachmentsToRequest(values);
 
   return {
-    ...omit(values, ['receipt_number_manually', 'receipt_number']),
+    ...omit(values, [
+      'receipt_number_manually',
+      'receipt_number',
+      'receipt_tax_rate_id',
+      'due_date',
+    ]),
     ...(values.receipt_number_manually && {
       receipt_number: values.receipt_number,
     }),
@@ -168,6 +192,9 @@ export const transformFormValuesToRequest = (values) => {
     })),
     closed: false,
     attachments,
+    discount_type: 'percentage',
+    dms_payment_mode: values.dms_payment_mode || null,
+    note: values.note || '',
   };
 };
 
@@ -277,6 +304,25 @@ export const useReceiptAdjustmentFormatted = () => {
 };
 
 /**
+ * Retrieves the receipt total tax amount (VAT after header %).
+ */
+export const useReceiptTotalTaxAmount = () => {
+  const { values } = useFormikContext();
+  const { taxRates } = useReceiptFormContext();
+  const subtotal = useReceiptSubtotal();
+  const discountAmount = useReceiptDiscountAmount();
+
+  return React.useMemo(() => {
+    const selected = (taxRates || []).find(
+      (taxRate) => taxRate.id === values.receipt_tax_rate_id,
+    );
+    const rate = toSafeNumber(selected?.rate);
+    const taxable = Math.max(subtotal - discountAmount, 0);
+    return (taxable * rate) / 100;
+  }, [taxRates, values.receipt_tax_rate_id, subtotal, discountAmount]);
+};
+
+/**
  * Retrieves the receipt total.
  * @returns {number}
  */
@@ -284,8 +330,10 @@ export const useReceiptTotal = () => {
   const subtotal = useReceiptSubtotal();
   const adjustmentAmount = useReceiptAdjustmentAmount();
   const discountAmount = useReceiptDiscountAmount();
+  const totalTaxAmount = useReceiptTotalTaxAmount();
 
   return R.compose(
+    R.add(totalTaxAmount),
     R.add(R.__, adjustmentAmount),
     R.subtract(R.__, discountAmount),
   )(subtotal);
@@ -307,7 +355,7 @@ export const useReceiptTotalFormatted = () => {
  * @returns {number}
  */
 export const useReceiptPaidAmount = () => {
-  return toSafeNumber(0);
+  return useReceiptTotal();
 };
 
 /**

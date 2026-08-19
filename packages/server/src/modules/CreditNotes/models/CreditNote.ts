@@ -1,4 +1,5 @@
 import { Model, raw } from 'objection';
+import { defaultTo } from 'lodash';
 import { DiscountType } from '@/common/types/Discount';
 import { Branch } from '@/modules/Branches/models/Branch.model';
 import { Customer } from '@/modules/Customers/models/Customer';
@@ -26,6 +27,7 @@ export class CreditNote extends TenantBaseModel {
   public discount: number;
   public discountType: DiscountType;
   public adjustment: number;
+  public taxAmountWithheld: number;
   public refundedAmount: number;
   public invoicesAmount: number;
   public creditNoteDate: Date;
@@ -33,6 +35,9 @@ export class CreditNote extends TenantBaseModel {
   public referenceNo: string;
   public currencyCode: string;
   public customerId: number;
+  public note: string | null;
+  public creditNoteMessage: string | null;
+  public termsConditions: string | null;
 
   public userId: number;
 
@@ -149,11 +154,15 @@ export class CreditNote extends TenantBaseModel {
   }
 
   /**
-   * Credit note total.
+   * Credit note total (VAT included after header discount).
+   * Reverse of the sale invoice: Cr AR for this amount.
    * @returns {number}
    */
   get total() {
-    return this.subtotal - this.discountAmount + this.adjustment;
+    const adjustmentAmount = defaultTo(this.adjustment, 0);
+    const taxAmount = defaultTo(this.taxAmountWithheld, 0);
+
+    return this.subtotal - this.discountAmount + taxAmount + adjustmentAmount;
   }
 
   /**
@@ -197,10 +206,11 @@ export class CreditNote extends TenantBaseModel {
   }
 
   /**
-   * Retrieve the credits remaining.
+   * Retrieve the credits remaining (VAT-inclusive total, same amount
+   * credited to AR).
    */
   get creditsRemaining() {
-    return Math.max(this.amount - this.refundedAmount - this.invoicesAmount, 0);
+    return Math.max(this.total - this.refundedAmount - this.invoicesAmount, 0);
   }
 
   /**

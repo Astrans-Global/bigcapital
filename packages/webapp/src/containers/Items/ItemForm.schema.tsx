@@ -18,22 +18,18 @@ const Schema = Yup.object().shape({
     .max(DATATYPES_LENGTH.STRING)
     .label(intl.get('item_type_')),
   code: Yup.string().trim().min(0).max(DATATYPES_LENGTH.STRING),
+  // Buy/sell prices are leftover fallbacks — real prices live on GRN
+  // price lots / invoice lines. Hidden on the form; 0 is fine.
   cost_price: Yup.number()
     .min(0)
     .max(DATATYPES_LENGTH.DECIMAL_13_3)
-    .when(['purchasable'], {
-      is: true,
-      then: Yup.number().required().label(intl.get('cost_price_')),
-      otherwise: Yup.number().nullable(true),
-    }),
+    .nullable(true)
+    .transform((value, original) => (original === '' || original == null ? 0 : value)),
   sell_price: Yup.number()
     .min(0)
     .max(DATATYPES_LENGTH.DECIMAL_13_3)
-    .when(['sellable'], {
-      is: true,
-      then: Yup.number().required().label(intl.get('sell_price_')),
-      otherwise: Yup.number().nullable(true),
-    }),
+    .nullable(true)
+    .transform((value, original) => (original === '' || original == null ? 0 : value)),
   cost_account_id: Yup.number()
     .when(['purchasable'], {
       is: true,

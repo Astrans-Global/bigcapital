@@ -21,6 +21,13 @@ export class WarehouseTransferEntryResponseDto {
   quantity: number;
 
   @ApiProperty({
+    description: 'The source item price-lot being transferred',
+    example: 12,
+    required: false,
+  })
+  itemPriceLotId?: number;
+
+  @ApiProperty({
     description: 'The cost per unit of the item',
     example: 10.5,
   })

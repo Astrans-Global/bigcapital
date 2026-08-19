@@ -38,6 +38,8 @@ export const defaultWarehouseTransferEntry = {
   destination_warehouse: '',
   description: '',
   quantity: '',
+  cost: '',
+  item_price_lot_id: '',
 };
 
 // Default warehouse transfer entry.
@@ -120,7 +122,6 @@ export function transformValueToRequest(values) {
         'warehouses',
         'destination_warehouse',
         'source_warehouse',
-        'cost',
       ]),
     })),
   };
@@ -204,6 +205,11 @@ export function useWatchItemsCostSetCostEntries() {
     if (!isItemsCostSuccess) return;
 
     const newEntries = entries.map((entry) => {
+      // A picked price lot already stamped its own unit cost — don't
+      // overwrite it with the item's average cost.
+      if (entry.item_price_lot_id) {
+        return entry;
+      }
       const costEntry = itemsCostByItemId[entry.item_id];
 
       return entry.item_id

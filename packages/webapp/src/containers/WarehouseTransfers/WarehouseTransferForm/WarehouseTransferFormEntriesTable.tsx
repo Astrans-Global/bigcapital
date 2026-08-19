@@ -42,6 +42,8 @@ export function WarehouseTransferFormEntriesTable({
         warehouses: newRowMeta.warehouses,
         description: '',
         quantity: '',
+        cost: '',
+        item_price_lot_id: '',
       };
       const newRows = mutateTableRow(newRowMeta.rowIndex, newRow, entries);
 
@@ -63,7 +65,15 @@ export function WarehouseTransferFormEntriesTable({
         });
       }
       const editCell = mutateTableCell(rowIndex, columnId, defaultEntry);
-      const newRows = editCell(itemId, entries);
+      let newRows = editCell(itemId, entries);
+      if (columnId === 'item_id') {
+        const clearLot = mutateTableCell(
+          rowIndex,
+          'item_price_lot_id',
+          defaultEntry,
+        );
+        newRows = clearLot('', newRows);
+      }
 
       saveInvoke(onUpdateData, newRows);
     },
@@ -85,6 +95,17 @@ export function WarehouseTransferFormEntriesTable({
     [entries, defaultEntry, onUpdateData],
   );
 
+  const handleUpdateItemPriceLot = React.useCallback(
+    (rowIndex, lot) => {
+      const setLot = mutateTableCell(rowIndex, 'item_price_lot_id', defaultEntry);
+      const setCost = mutateTableCell(rowIndex, 'cost', defaultEntry);
+      const withLot = setLot(lot.id, entries);
+      const withCost = setCost(lot.unitCostNet, withLot);
+      saveInvoke(onUpdateData, withCost);
+    },
+    [entries, defaultEntry, onUpdateData],
+  );
+
   return (
     <DataTableEditable
       columns={columns}
@@ -96,9 +117,10 @@ export function WarehouseTransferFormEntriesTable({
         items,
         errors: errors || [],
         updateData: handleUpdateData,
+        updateItemPriceLot: handleUpdateItemPriceLot,
         removeRow: handleRemoveRow,
         autoFocus: ['item_id', 0],
-
+        warehouseId: sourceWarehouseId,
         sourceWarehouseId,
         destinationWarehouseId,
       }}

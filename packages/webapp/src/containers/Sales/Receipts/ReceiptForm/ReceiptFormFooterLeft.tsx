@@ -2,32 +2,48 @@
 import React from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
-import { FFormGroup, FEditableText } from '@/components';
+import { HTMLSelect } from '@blueprintjs/core';
+import { useFormikContext } from 'formik';
+import { FFormGroup, FEditableText, Stack } from '@/components';
+
+const PAYMENT_MODES = [
+  { value: '', label: 'Select…' },
+  { value: 'CASH', label: 'CASH' },
+  { value: 'BANK', label: 'BANK' },
+];
 
 export function ReceiptFormFooterLeft() {
+  const { values, setFieldValue } = useFormikContext();
+
   return (
-    <React.Fragment>
-      {/* --------- Receipt message --------- */}
-      <ReceiptMsgFormGroup
-        name={'receipt_message'}
-        label={intl.get('receipt_form.label.receipt_message')}
-        hintText={'Will be displayed on the Receipt'}
-      >
+    <Stack spacing={20}>
+      <ReceiptMsgFormGroup name={'note'} label={'Note'}>
         <FEditableText
-          name={'receipt_message'}
-          placeholder={intl.get('receipt_form.receipt_message.placeholder')}
-          multiline
+          name={'note'}
+          placeholder={'Additional information printed on the invoice.'}
           fastField
+          multiline
         />
       </ReceiptMsgFormGroup>
 
-      {/* --------- Terms and conditions --------- */}
+      <ReceiptMsgFormGroup name={'receipt_message'} label={'Narration'}>
+        <FEditableText
+          name={'receipt_message'}
+          placeholder={
+            intl.get('receipt_form.receipt_message.placeholder') ||
+            'This narration will be printed on the invoice.'
+          }
+          fastField
+          multiline
+        />
+      </ReceiptMsgFormGroup>
+
       <TermsConditsFormGroup
         label={intl.get('receipt_form.label.terms_conditions')}
-        name={'terms_conditions'}
+        name={'statement'}
       >
         <FEditableText
-          name={'terms_conditions'}
+          name={'statement'}
           placeholder={intl.get(
             'receipt_form.terms_and_conditions.placeholder',
           )}
@@ -35,14 +51,31 @@ export function ReceiptFormFooterLeft() {
           fastField
         />
       </TermsConditsFormGroup>
-    </React.Fragment>
+
+      <PaymentOptionsFormGroup
+        label={'Mode of Payment'}
+        name={'dms_payment_mode'}
+      >
+        <HTMLSelect
+          fill
+          value={values.dms_payment_mode || ''}
+          onChange={(event) =>
+            setFieldValue('dms_payment_mode', event.target.value)
+          }
+        >
+          {PAYMENT_MODES.map((option) => (
+            <option key={option.value || 'empty'} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </HTMLSelect>
+      </PaymentOptionsFormGroup>
+    </Stack>
   );
 }
 
 const ReceiptMsgFormGroup = styled(FFormGroup)`
   &.bp4-form-group {
-    margin-bottom: 40px;
-
     .bp4-label {
       font-size: 12px;
       margin-bottom: 12px;
@@ -61,6 +94,16 @@ const TermsConditsFormGroup = styled(FFormGroup)`
     }
     .bp4-form-content {
       margin-left: 10px;
+    }
+  }
+`;
+
+const PaymentOptionsFormGroup = styled(FFormGroup)`
+  &.bp4-form-group {
+    .bp4-label {
+      font-weight: 500;
+      font-size: 12px;
+      margin-bottom: 10px;
     }
   }
 `;

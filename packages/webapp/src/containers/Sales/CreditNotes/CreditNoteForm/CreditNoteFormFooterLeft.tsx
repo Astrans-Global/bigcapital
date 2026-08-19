@@ -2,24 +2,29 @@
 import React from 'react';
 import intl from 'react-intl-universal';
 import styled from 'styled-components';
-import { FFormGroup, FEditableText } from '@/components';
+import { FFormGroup, FEditableText, Stack } from '@/components';
 
 export function CreditNoteFormFooterLeft() {
   return (
-    <React.Fragment>
-      {/* --------- Customer notes --------- */}
-      <CreditNoteMsgFormGroup
-        name={'note'}
-        label={intl.get('credit_note.label_customer_note')}
-      >
+    <Stack spacing={20}>
+      <CreditNoteMsgFormGroup name={'note'} label={'Note'}>
         <FEditableText
           name={'note'}
-          placeholder={intl.get('credit_note.label_customer_note.placeholder')}
+          placeholder={'Additional information printed on the credit note.'}
           multiline
           fastField
         />
       </CreditNoteMsgFormGroup>
-      {/* --------- Terms and conditions --------- */}
+
+      <CreditNoteMsgFormGroup name={'credit_note_message'} label={'Narration'}>
+        <FEditableText
+          name={'credit_note_message'}
+          placeholder={'This narration will be printed on the credit note.'}
+          multiline
+          fastField
+        />
+      </CreditNoteMsgFormGroup>
+
       <TermsConditsFormGroup
         label={intl.get('credit_note.label_terms_conditions')}
         name={'terms_conditions'}
@@ -33,14 +38,12 @@ export function CreditNoteFormFooterLeft() {
           fastField
         />
       </TermsConditsFormGroup>
-    </React.Fragment>
+    </Stack>
   );
 }
 
 const CreditNoteMsgFormGroup = styled(FFormGroup)`
   &.bp4-form-group {
-    margin-bottom: 40px;
-
     .bp4-label {
       font-size: 12px;
       margin-bottom: 12px;

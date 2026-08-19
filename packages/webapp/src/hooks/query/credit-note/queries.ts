@@ -35,7 +35,9 @@ import {
   deleteApplyCreditNoteToInvoices,
 } from '@bigcapital/sdk-ts';
 import { useApiFetcher } from '../../useRequest';
+import useApiRequest from '../../useRequest';
 import { useRequestPdf } from '../../useRequestPdf';
+import { downloadFile } from '../../useDownloadFile';
 import { creditNotesKeys } from './query-keys';
 import { itemsKeys } from '../items/query-keys';
 import { customersKeys } from '../customers/query-keys';
@@ -405,5 +407,50 @@ export function useGetCreditNoteState(
     queryKey: creditNotesKeys.state(),
     queryFn: () =>
       fetchCreditNoteState(fetcher) as Promise<CreditNoteStateResponse>,
+  });
+}
+
+/**
+ * Download the Astrans VAT / Non-VAT statutory credit note as Excel or PDF.
+ * Due date on the sheet is the credit-note date.
+ */
+export function useDownloadStatutoryCreditNote() {
+  const apiRequest = useApiRequest();
+
+  return useMutation({
+    mutationFn: ({
+      creditNoteId,
+      template,
+      fileKind,
+      creditNoteNo,
+    }: {
+      creditNoteId: number;
+      template: 'vat' | 'non_vat';
+      fileKind: 'xlsx' | 'pdf';
+      creditNoteNo: string;
+    }) => {
+      const accept =
+        fileKind === 'pdf' ? 'application/pdf' : 'application/xlsx';
+      const label =
+        template === 'vat' ? 'TAX_CREDIT_NOTE' : 'CREDIT_NOTE';
+      const extension = fileKind === 'pdf' ? 'pdf' : 'xlsx';
+
+      return apiRequest
+        .get(`/credit-notes/${creditNoteId}/statutory-invoice`, {
+          responseType: 'blob',
+          headers: { accept },
+          params: { template },
+        })
+        .then((res) => {
+          downloadFile(
+            res.data,
+            `${creditNoteNo}_${label}.${extension}`,
+            fileKind === 'pdf'
+              ? 'application/pdf'
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
+          return res;
+        });
+    },
   });
 }

@@ -3,6 +3,7 @@ import { ItemEntryDto } from '@/modules/TransactionItemEntry/dto/ItemEntry.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
@@ -66,6 +67,14 @@ export class CommandCreditNoteDto {
 
   @IsOptional()
   @IsString()
+  @ApiProperty({
+    description:
+      'Narration printed on the statutory credit note (distinct from Note)',
+  })
+  creditNoteMessage?: string;
+
+  @IsOptional()
+  @IsString()
   @ApiProperty({ example: '123', description: 'The terms and conditions' })
   termsConditions?: string;
 
@@ -89,9 +98,11 @@ export class CommandCreditNoteDto {
   @ValidateNested({ each: true })
   @Type(() => CreditNoteEntryDto)
   @ArrayMinSize(1)
+  @ArrayMaxSize(9)
   @ApiProperty({
     example: [{ itemId: 1, quantity: 1, rate: 10, taxRateId: 1 }],
-    description: 'The credit note entries',
+    description:
+      'The credit note entries. Same 9-line statutory cap as sale invoices.',
   })
   entries: CreditNoteEntryDto[];
 

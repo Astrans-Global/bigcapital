@@ -72,6 +72,37 @@ export class CreditNotesController {
     return this.creditNoteApplication.getCreditNoteState();
   }
 
+  @Get(':id/statutory-invoice')
+  @RequirePermission(CreditNoteAction.View, AbilitySubject.CreditNote)
+  @ApiOperation({
+    summary:
+      'Download the Astrans VAT or Non-VAT statutory credit note as Excel or PDF. Due date on the sheet is the credit-note date. Title is TAX CREDIT NOTE / CREDIT NOTE.',
+  })
+  @ApiParam({ name: 'id', description: 'Credit note ID', type: 'number' })
+  async downloadStatutoryInvoice(
+    @Param('id') creditNoteId: number,
+    @Query('template') template: string,
+    @Headers('accept') acceptHeader: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const kind = template === 'non_vat' ? 'non_vat' : 'vat';
+    const fileKind = acceptHeader?.includes(AcceptType.ApplicationPdf)
+      ? 'pdf'
+      : 'xlsx';
+    const result = await this.creditNoteApplication.exportStatutoryCreditNote(
+      Number(creditNoteId),
+      kind,
+      fileKind,
+    );
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=${result.filename}`,
+    );
+    res.setHeader('Content-Type', result.contentType);
+    res.send(result.buffer);
+  }
+
   @Get(':id')
   @RequirePermission(CreditNoteAction.View, AbilitySubject.CreditNote)
   @ApiOperation({ summary: 'Get a specific credit note by ID' })

@@ -26,7 +26,7 @@ import { SaleReceiptsController } from './SaleReceipts.controller';
 import { SaleReceiptGLEntriesSubscriber } from './subscribers/SaleReceiptGLEntriesSubscriber';
 import { SaleReceiptGLEntries } from './ledger/SaleReceiptGLEntries';
 import { LedgerModule } from '../Ledger/Ledger.module';
-import { AccountsModule } from '../Accounts/Accounts.module';
+import { TaxRatesModule } from '../TaxRates/TaxRate.module';
 import { SaleReceiptInventoryTransactionsSubscriber } from './inventory/SaleReceiptWriteInventoryTransactions';
 import { GetSaleReceiptsService } from './queries/GetSaleReceipts.service';
 import { SaleReceiptMailNotification } from './commands/SaleReceiptMailNotification';
@@ -46,6 +46,8 @@ import { SaleReceiptCostGLEntriesSubscriber } from './subscribers/SaleReceiptCos
 import { SaleReceiptCostGLEntries } from './SaleReceiptCostGLEntries';
 import { BulkDeleteSaleReceiptsService } from './BulkDeleteSaleReceipts.service';
 import { ValidateBulkDeleteSaleReceiptsService } from './ValidateBulkDeleteSaleReceipts.service';
+import { ExportStatutoryReceiptService } from './queries/ExportStatutoryReceipt.service';
+import { AccountsModule } from '../Accounts/Accounts.module';
 
 @Module({
   controllers: [SaleReceiptsController],
@@ -60,6 +62,7 @@ import { ValidateBulkDeleteSaleReceiptsService } from './ValidateBulkDeleteSaleR
     AutoIncrementOrdersModule,
     LedgerModule,
     AccountsModule,
+    TaxRatesModule,
     InventoryCostModule,
     DynamicListModule,
     MailModule,
@@ -99,6 +102,7 @@ import { ValidateBulkDeleteSaleReceiptsService } from './ValidateBulkDeleteSaleR
     SaleReceiptCostGLEntriesSubscriber,
     BulkDeleteSaleReceiptsService,
     ValidateBulkDeleteSaleReceiptsService,
+    ExportStatutoryReceiptService,
   ],
 })
 export class SaleReceiptsModule {}

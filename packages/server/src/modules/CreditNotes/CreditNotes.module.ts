@@ -36,6 +36,9 @@ import { CreditNoteRefundsModule } from '../CreditNoteRefunds/CreditNoteRefunds.
 import { CreditNotesApplyInvoiceModule } from '../CreditNotesApplyInvoice/CreditNotesApplyInvoice.module';
 import { BulkDeleteCreditNotesService } from './BulkDeleteCreditNotes.service';
 import { ValidateBulkDeleteCreditNotesService } from './ValidateBulkDeleteCreditNotes.service';
+import { ExportStatutoryCreditNoteService } from './queries/ExportStatutoryCreditNote.service';
+import { TaxRatesModule } from '../TaxRates/TaxRate.module';
+import { TenancyModule } from '../Tenancy/Tenancy.module';
 
 @Module({
   imports: [
@@ -50,6 +53,8 @@ import { ValidateBulkDeleteCreditNotesService } from './ValidateBulkDeleteCredit
     AccountsModule,
     DynamicListModule,
     InventoryCostModule,
+    TaxRatesModule,
+    TenancyModule,
     forwardRef(() => CreditNoteRefundsModule),
     forwardRef(() => CreditNotesApplyInvoiceModule),
   ],
@@ -77,6 +82,7 @@ import { ValidateBulkDeleteCreditNotesService } from './ValidateBulkDeleteCredit
     CreditNoteAutoSerialSubscriber,
     BulkDeleteCreditNotesService,
     ValidateBulkDeleteCreditNotesService,
+    ExportStatutoryCreditNoteService,
   ],
   exports: [
     CreateCreditNoteService,
