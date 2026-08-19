@@ -47,7 +47,7 @@ export class GetCreditNotesService {
 
     // Dynamic list service.
     const dynamicFilter = await this.dynamicListService.dynamicList(
-      this.creditNoteModel(),
+      this.creditNoteModel() as any,
       filter,
     );
     const { results, pagination } = await this.creditNoteModel()

@@ -1,11 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Knex } from 'knex';
-import { WarehouseTransfer } from '@/modules/WarehousesTransfers/models/WarehouseTransfer';
 import { ItemPriceLot } from './models/ItemPriceLot.model';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { ItemPriceLotStockService } from './ItemPriceLotStock.service';
 import { ServiceError } from '@/modules/Items/ServiceError';
 import { ERRORS } from './ItemPriceLots.constants';
+
+type TransferLotInput = {
+  fromWarehouseId: number;
+  toWarehouseId: number;
+  transferInitiatedAt?: Date | string | null;
+  transferDeliveredAt?: Date | string | null;
+  entries?: Array<{
+    itemPriceLotId?: number | null;
+    itemId?: number;
+    quantity?: number;
+  }>;
+};
 
 /**
  * Moves quantity off the source price lot on Initiate, and onto a matching
@@ -22,7 +33,7 @@ export class WarehouseTransferLotService {
   ) {}
 
   public async applyInitiated(
-    transfer: WarehouseTransfer,
+    transfer: TransferLotInput,
     trx?: Knex.Transaction,
   ): Promise<void> {
     for (const entry of transfer.entries ?? []) {
@@ -43,7 +54,7 @@ export class WarehouseTransferLotService {
   }
 
   public async applyTransferred(
-    transfer: WarehouseTransfer,
+    transfer: TransferLotInput,
     trx?: Knex.Transaction,
   ): Promise<void> {
     for (const entry of transfer.entries ?? []) {
@@ -62,7 +73,7 @@ export class WarehouseTransferLotService {
   }
 
   public async revert(
-    transfer: WarehouseTransfer,
+    transfer: TransferLotInput,
     trx?: Knex.Transaction,
   ): Promise<void> {
     if (transfer.transferDeliveredAt) {
