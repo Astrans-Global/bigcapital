@@ -8,34 +8,20 @@ import { isBlank } from '@/utils';
 const Schema = Yup.object().shape({
   customer_id: Yup.number().label(intl.get('customer_name_')).required(),
   estimate_date: Yup.date().required().label(intl.get('estimate_date_')),
-  expiration_date: Yup.date()
-    .required()
-    .min(Yup.ref('estimate_date'), ({ path, min }) =>
-      intl.get('estimate.validation.expiration_date', {
-        path,
-        min: moment(min).format('YYYY/MM/DD'),
-      }),
-    )
-    .label(intl.get('expiration_date_')),
+  expiration_date: Yup.date().nullable().label(intl.get('expiration_date_')),
   estimate_number: Yup.string()
     .max(DATATYPES_LENGTH.STRING)
     .label(intl.get('estimate_number_')),
   reference: Yup.string().min(1).max(DATATYPES_LENGTH.STRING).nullable(),
-  note: Yup.string()
-    .trim()
-    .min(1)
-    .max(DATATYPES_LENGTH.STRING)
-    .label(intl.get('note')),
-  terms_conditions: Yup.string()
-    .trim()
-    .min(1)
-    .max(DATATYPES_LENGTH.TEXT)
-    .label(intl.get('note')),
+  note: Yup.string().trim().nullable().max(DATATYPES_LENGTH.STRING),
+  terms_conditions: Yup.string().trim().nullable().max(DATATYPES_LENGTH.TEXT),
   delivered: Yup.boolean(),
   branch_id: Yup.string(),
   warehouse_id: Yup.string(),
   exchange_rate: Yup.number(),
-  entries: Yup.array().of(
+  entries: Yup.array()
+    .max(9)
+    .of(
     Yup.object().shape({
       quantity: Yup.number()
         .nullable()

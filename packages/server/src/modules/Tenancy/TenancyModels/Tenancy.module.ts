@@ -23,6 +23,7 @@ import { Warehouse } from '@/modules/Warehouses/models/Warehouse.model';
 import { ItemWarehouseQuantity } from '@/modules/Warehouses/models/ItemWarehouseQuantity';
 import { Branch } from '@/modules/Branches/models/Branch.model';
 import { SaleEstimate } from '@/modules/SaleEstimates/models/SaleEstimate';
+import { SaleQuotation } from '@/modules/SaleQuotations/models/SaleQuotation';
 import { Customer } from '@/modules/Customers/models/Customer';
 import { Contact } from '@/modules/Contacts/models/Contact';
 import { Document } from '@/modules/ChromiumlyTenancy/models/Document';
@@ -73,6 +74,7 @@ const models = [
   ItemWarehouseQuantity,
   Branch,
   SaleEstimate,
+  SaleQuotation,
   Customer,
   Contact,
   Document,

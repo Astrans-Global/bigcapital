@@ -166,6 +166,15 @@ export const SidebarMenu = [
         type: ISidebarMenuItemType.Group,
         children: [
           {
+            text: 'Quotations',
+            href: '/quotations',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Estimate,
+              ability: SaleEstimateAction.View,
+            },
+          },
+          {
             text: <T id={'sidebar.estimates'} />,
             href: '/estimates',
             type: ISidebarMenuItemType.Link,
@@ -221,6 +230,15 @@ export const SidebarMenu = [
         text: <T id={'sidebar.new_tasks'} />,
         type: ISidebarMenuItemType.Group,
         children: [
+          {
+            text: 'New Quotation',
+            href: '/quotations/new',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Estimate,
+              ability: SaleEstimateAction.Create,
+            },
+          },
           {
             text: <T id={'sidebar.new_estimate'} />,
             href: '/estimates/new',

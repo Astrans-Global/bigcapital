@@ -44,6 +44,8 @@ import { SaleEstimateAutoIncrementSubscriber } from './subscribers/SaleEstimateA
 import { BulkDeleteSaleEstimatesService } from './BulkDeleteSaleEstimates.service';
 import { ValidateBulkDeleteSaleEstimatesService } from './ValidateBulkDeleteSaleEstimates.service';
 import { SendSaleEstimateMailProcess } from './processes/SendSaleEstimateMail.process';
+import { TaxRatesModule } from '../TaxRates/TaxRate.module';
+import { ExportStatutoryEstimateService } from './queries/ExportStatutoryEstimate.service';
 
 @Module({
   imports: [
@@ -55,6 +57,7 @@ import { SendSaleEstimateMailProcess } from './processes/SendSaleEstimateMail.pr
     ChromiumlyTenancyModule,
     TemplateInjectableModule,
     PdfTemplatesModule,
+    TaxRatesModule,
     BullModule.registerQueue({ name: SendSaleEstimateMailQueue }),
     BullBoardModule.forFeature({
       name: SendSaleEstimateMailQueue,
@@ -95,6 +98,7 @@ import { SendSaleEstimateMailProcess } from './processes/SendSaleEstimateMail.pr
     BulkDeleteSaleEstimatesService,
     ValidateBulkDeleteSaleEstimatesService,
     SendSaleEstimateMailProcess,
+    ExportStatutoryEstimateService,
   ],
   exports: [
     SaleEstimatesExportable,

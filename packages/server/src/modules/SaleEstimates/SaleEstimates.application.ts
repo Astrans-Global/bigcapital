@@ -21,6 +21,11 @@ import {
 import { GetSaleEstimateMailStateService } from './queries/GetSaleEstimateMailState.service';
 import { BulkDeleteSaleEstimatesService } from './BulkDeleteSaleEstimates.service';
 import { ValidateBulkDeleteSaleEstimatesService } from './ValidateBulkDeleteSaleEstimates.service';
+import { ExportStatutoryEstimateService } from './queries/ExportStatutoryEstimate.service';
+import {
+  StatutoryInvoiceFileKind,
+  StatutoryInvoiceTemplate,
+} from '@/modules/SaleInvoices/queries/ExportStatutoryInvoice.service';
 
 @Injectable()
 export class SaleEstimatesApplication {
@@ -39,6 +44,7 @@ export class SaleEstimatesApplication {
     private readonly getSaleEstimateMailStateService: GetSaleEstimateMailStateService,
     private readonly bulkDeleteSaleEstimatesService: BulkDeleteSaleEstimatesService,
     private readonly validateBulkDeleteSaleEstimatesService: ValidateBulkDeleteSaleEstimatesService,
+    private readonly exportStatutoryEstimateService: ExportStatutoryEstimateService,
   ) {}
 
   /**
@@ -221,5 +227,21 @@ export class SaleEstimatesApplication {
    */
   public getSaleEstimateHtml(saleEstimateId: number) {
     return this.saleEstimatesPdfService.saleEstimateHtml(saleEstimateId);
+  }
+
+  /**
+   * Download the Astrans VAT / Non-VAT statutory estimate. Invoice number
+   * and due date print as N/A. Allowed as soon as the estimate is saved.
+   */
+  public exportStatutoryEstimate(
+    estimateId: number,
+    template: StatutoryInvoiceTemplate,
+    fileKind: StatutoryInvoiceFileKind,
+  ) {
+    return this.exportStatutoryEstimateService.export(
+      estimateId,
+      template,
+      fileKind,
+    );
   }
 }

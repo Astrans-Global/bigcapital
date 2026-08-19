@@ -12,8 +12,9 @@ import type {
   PdfTemplateResponse,
   GetPaymentServicesResponse,
 } from '@bigcapital/sdk-ts';
-import { isEmpty, pick } from 'lodash';
+import { isEmpty } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import moment from 'moment';
 import { Features } from '@/constants';
 import { useFeatureCan } from '@/hooks/state';
 import { transformToEditForm, ITEMS_FILTER_ROLES_QUERY } from './utils';
@@ -96,8 +97,12 @@ function InvoiceFormProvider({
   baseCurrency,
   ...props
 }: InvoiceFormProviderProps) {
-  const { state } = useLocation();
-  const estimateId = (state as { action?: string })?.action;
+  const { state, search } = useLocation();
+  const estimateIdFromQuery = new URLSearchParams(search).get(
+    'from_estimate_id',
+  );
+  const estimateId =
+    (state as { action?: string })?.action || estimateIdFromQuery || undefined;
   const estimateIdNum = estimateId ? Number(estimateId) : undefined;
 
   // Features guard.
@@ -132,10 +137,36 @@ function InvoiceFormProvider({
   const { data: paymentServices, isLoading: isPaymentServicesLoading } =
     useGetPaymentServices();
 
+  const fromEstimate = (estimate || {}) as Record<string, any>;
   const newInvoice = !isEmpty(estimate)
-    ? transformToEditForm({
-        ...pick(estimate, ['customer_id', 'currency_code', 'entries']),
-      })
+    ? {
+        ...transformToEditForm({
+          customer_id: fromEstimate.customer_id ?? fromEstimate.customerId,
+          currency_code: fromEstimate.currency_code ?? fromEstimate.currencyCode,
+          warehouse_id: fromEstimate.warehouse_id ?? fromEstimate.warehouseId,
+          branch_id: fromEstimate.branch_id ?? fromEstimate.branchId,
+          discount: fromEstimate.discount,
+          discount_type:
+            fromEstimate.discount_type ?? fromEstimate.discountType,
+          note: fromEstimate.note,
+          terms_conditions:
+            fromEstimate.terms_conditions ?? fromEstimate.termsConditions,
+          entries: (fromEstimate.entries || []).map((entry) => ({
+            ...entry,
+            item_id: entry.item_id ?? entry.itemId,
+            tax_rate_id: entry.tax_rate_id ?? entry.taxRateId,
+            item_price_lot_id:
+              entry.item_price_lot_id ?? entry.itemPriceLotId,
+            rate: entry.rate,
+            quantity: entry.quantity,
+            discount: entry.discount,
+            description: entry.description || '',
+          })),
+        }),
+        invoice_date: moment().format('YYYY-MM-DD'),
+        due_date: moment().format('YYYY-MM-DD'),
+        note: fromEstimate.note || '',
+      }
     : ([] as []);
 
   // Handle fetching the items table based on the given query.

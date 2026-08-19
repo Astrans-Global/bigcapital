@@ -28,6 +28,7 @@ export * from './invite';
 export * from './invoices';
 export * from './bills';
 export * from './estimates';
+export * from './quotations';
 export * from './receipts';
 export * from './payment-receives';
 export * from './payment-mades';

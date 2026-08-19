@@ -327,6 +327,41 @@ export class SaleEstimatesController {
     );
   }
 
+  @Get(':id/statutory-invoice')
+  @RequirePermission(SaleEstimateAction.View, AbilitySubject.SaleEstimate)
+  @ApiOperation({
+    summary:
+      'Download the Astrans VAT or Non-VAT statutory estimate as Excel or PDF. Invoice number and due date print as N/A. Title is TAX ESTIMATE / SALE ESTIMATE.',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: Number,
+    description: 'The sale estimate id',
+  })
+  public async downloadStatutoryInvoice(
+    @Param('id', ParseIntPipe) estimateId: number,
+    @Query('template') template: string,
+    @Headers('accept') acceptHeader: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const kind = template === 'non_vat' ? 'non_vat' : 'vat';
+    const fileKind = acceptHeader?.includes(AcceptType.ApplicationPdf)
+      ? 'pdf'
+      : 'xlsx';
+    const result = await this.saleEstimatesApplication.exportStatutoryEstimate(
+      estimateId,
+      kind,
+      fileKind,
+    );
+
+    res.set({
+      'Content-Type': result.contentType,
+      'Content-Disposition': `attachment; filename=${result.filename}`,
+    });
+    res.send(result.buffer);
+  }
+
   @Get(':id')
   @RequirePermission(SaleEstimateAction.View, AbilitySubject.SaleEstimate)
   @ApiOperation({

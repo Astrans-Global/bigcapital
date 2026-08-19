@@ -56,6 +56,7 @@ import { ChromiumlyTenancyModule } from '../ChromiumlyTenancy/ChromiumlyTenancy.
 import { CustomersModule } from '../Customers/Customers.module';
 import { VendorsModule } from '../Vendors/Vendors.module';
 import { SaleEstimatesModule } from '../SaleEstimates/SaleEstimates.module';
+import { SaleQuotationsModule } from '../SaleQuotations/SaleQuotations.module';
 import { BillsModule } from '../Bills/Bills.module';
 import { SaleInvoicesModule } from '../SaleInvoices/SaleInvoices.module';
 import { SaleReceiptsModule } from '../SaleReceipts/SaleReceipts.module';
@@ -228,6 +229,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     VendorsModule,
     SaleInvoicesModule,
     SaleEstimatesModule,
+    SaleQuotationsModule,
     SaleReceiptsModule,
     BillsModule,
     BillLandedCostsModule,

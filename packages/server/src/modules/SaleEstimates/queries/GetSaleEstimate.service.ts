@@ -28,7 +28,9 @@ export class GetSaleEstimate {
       .query()
       .findById(estimateId)
       .withGraphFetched('entries.item')
+      .withGraphFetched('entries.tax')
       .withGraphFetched('customer')
+      .withGraphFetched('warehouse')
       .withGraphFetched('branch')
       .withGraphFetched('attachments');
 

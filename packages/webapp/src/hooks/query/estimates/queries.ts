@@ -36,6 +36,8 @@ import {
   fetchSaleEstimateHtmlContent,
 } from '@bigcapital/sdk-ts';
 import { useApiFetcher } from '../../useRequest';
+import useApiRequest from '../../useRequest';
+import { downloadFile } from '../../useDownloadFile';
 import { estimatesKeys } from './query-keys';
 import { itemsKeys } from '../items/query-keys';
 import { useRequestPdf } from '../../useRequestPdf';
@@ -309,3 +311,43 @@ export const useGetSaleEstimateHtml = (
     queryFn: () => fetchSaleEstimateHtmlContent(fetcher, estimateId),
   });
 };
+
+export function useDownloadStatutoryEstimate() {
+  const apiRequest = useApiRequest();
+
+  return useMutation({
+    mutationFn: ({
+      estimateId,
+      template,
+      fileKind,
+      estimateNo,
+    }: {
+      estimateId: number;
+      template: 'vat' | 'non_vat';
+      fileKind: 'xlsx' | 'pdf';
+      estimateNo: string;
+    }) => {
+      const accept =
+        fileKind === 'pdf' ? 'application/pdf' : 'application/xlsx';
+      const label = template === 'vat' ? 'TAX_ESTIMATE' : 'SALE_ESTIMATE';
+      const extension = fileKind === 'pdf' ? 'pdf' : 'xlsx';
+
+      return apiRequest
+        .get(`/sale-estimates/${estimateId}/statutory-invoice`, {
+          responseType: 'blob',
+          headers: { accept },
+          params: { template },
+        })
+        .then((res) => {
+          downloadFile(
+            res.data,
+            `${estimateNo}_${label}.${extension}`,
+            fileKind === 'pdf'
+              ? 'application/pdf'
+              : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          );
+          return res;
+        });
+    },
+  });
+}

@@ -796,6 +796,51 @@ export const getDashboardRoutes = () => [
 
   // Estimates
   {
+    path: `/quotations/:id/edit`,
+    component: lazy(() =>
+      import(
+        '@/containers/Sales/Quotations/QuotationForm/QuotationFormPage'
+      ).then((m) => ({ default: m.QuotationFormPage })),
+    ),
+    name: 'quotation-edit',
+    breadcrumb: 'Edit',
+    pageTitle: 'Edit Quotation',
+    backLink: true,
+    sidebarExpand: false,
+    defaultSearchResource: RESOURCES_TYPES.ESTIMATE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/quotations/new`,
+    component: lazy(() =>
+      import(
+        '@/containers/Sales/Quotations/QuotationForm/QuotationFormPage'
+      ).then((m) => ({ default: m.QuotationFormPage })),
+    ),
+    name: 'quotation-new',
+    breadcrumb: 'New Quotation',
+    pageTitle: 'New Quotation',
+    backLink: true,
+    sidebarExpand: false,
+    defaultSearchResource: RESOURCES_TYPES.ESTIMATE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/quotations`,
+    component: lazy(() =>
+      import(
+        '@/containers/Sales/Quotations/QuotationsLanding/QuotationsList'
+      ).then((m) => ({ default: m.QuotationsList })),
+    ),
+    name: 'quotations-list',
+    breadcrumb: 'Quotations',
+    pageTitle: 'Quotations',
+    defaultSearchResource: RESOURCES_TYPES.ESTIMATE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+
+  // Estimates
+  {
     path: `/estimates/import`,
     component: lazy(() =>
       import('@/containers/Sales/Estimates/EstimatesImport').then((m) => ({
@@ -822,21 +867,6 @@ export const getDashboardRoutes = () => [
     backLink: true,
     sidebarExpand: false,
     defaultSearchResource: RESOURCES_TYPES.ESTIMATE,
-    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
-  },
-  {
-    path: `/invoices/new?from_estimate_id=/:id`,
-    component: lazy(() =>
-      import('@/containers/Sales/Estimates/EstimateForm/EstimateFormPage').then(
-        (m) => ({ default: m.EstimateFormPage }),
-      ),
-    ),
-    name: 'convert-to-invoice',
-    breadcrumb: intl.get('new_estimate'),
-    pageTitle: intl.get('new_estimate'),
-    backLink: true,
-    sidebarExpand: false,
-    defaultSearchResource: RESOURCES_TYPES.INVOICE,
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {

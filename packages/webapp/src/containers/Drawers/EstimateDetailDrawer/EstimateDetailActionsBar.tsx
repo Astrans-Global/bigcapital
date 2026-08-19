@@ -101,7 +101,7 @@ function EstimateDetailActionsBarInner({
               className={Classes.MINIMAL}
               intent={Intent.SUCCESS}
               icon={<Icon icon="tick" />}
-              text={<T id={'convert_to_invoice'} />}
+              text={'Send to pending'}
               onClick={handleConvertEstimate}
             />
             <NavbarDivider />

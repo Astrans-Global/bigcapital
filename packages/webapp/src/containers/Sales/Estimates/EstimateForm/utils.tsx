@@ -25,7 +25,14 @@ import {
 } from '@/containers/Attachments/utils';
 import { convertBrandingTemplatesToOptions } from '@/containers/BrandingTemplates/BrandingTemplatesSelectFields';
 
+import { applyInvoiceTaxRateToEntries } from '../../Invoices/InvoiceForm/utils';
+
+export { applyInvoiceTaxRateToEntries };
+
 export const MIN_LINES_NUMBER = 1;
+export const MAX_ESTIMATE_LINES = 9;
+export const ESTIMATE_DEFAULT_NOTE =
+  'The prices outlined in this quotation are subject to change and are valid for acceptance within 14 days.';
 
 export const defaultEstimateEntry = {
   index: 0,
@@ -35,6 +42,10 @@ export const defaultEstimateEntry = {
   quantity: '',
   description: '',
   amount: '',
+  tax_rate_id: '',
+  tax_rate: '',
+  tax_amount: '',
+  item_price_lot_id: '',
 };
 
 const defaultEstimateEntryReq = {
@@ -44,6 +55,8 @@ const defaultEstimateEntryReq = {
   discount: '',
   quantity: '',
   description: '',
+  tax_rate_id: '',
+  item_price_lot_id: '',
 };
 
 export const defaultEstimate = {
@@ -55,7 +68,7 @@ export const defaultEstimate = {
   estimate_number_manually: '',
   delivered: '',
   reference: '',
-  note: '',
+  note: ESTIMATE_DEFAULT_NOTE,
   terms_conditions: '',
   branch_id: '',
   warehouse_id: '',
@@ -66,7 +79,8 @@ export const defaultEstimate = {
   pdf_template_id: '',
   adjustment: '',
   discount: '',
-  discount_type: 'amount',
+  discount_type: 'percentage',
+  estimate_tax_rate_id: '',
 };
 
 const ERRORS = {
@@ -75,13 +89,19 @@ const ERRORS = {
 };
 
 export const transformToEditForm = (estimate) => {
+  const sourceEntries = (estimate.entries || []).map((entry) => ({
+    ...entry,
+    item_id: entry.item_id ?? entry.itemId,
+    tax_rate_id: entry.tax_rate_id ?? entry.taxRateId,
+    item_price_lot_id: entry.item_price_lot_id ?? entry.itemPriceLotId,
+  }));
   const initialEntries = [
-    ...estimate.entries.map((estimate) => ({
-      ...transformToForm(estimate, defaultEstimateEntry),
+    ...sourceEntries.map((entry) => ({
+      ...transformToForm(entry, defaultEstimateEntry),
     })),
     ...repeatValue(
       defaultEstimateEntry,
-      Math.max(MIN_LINES_NUMBER - estimate.entries.length, 0),
+      Math.max(MIN_LINES_NUMBER - sourceEntries.length, 0),
     ),
   ];
   const entries = R.compose(
@@ -90,9 +110,16 @@ export const transformToEditForm = (estimate) => {
   )(initialEntries);
 
   const attachments = transformAttachmentsToForm(estimate);
+  const estimateTaxRateId =
+    sourceEntries.find((entry) => entry.tax_rate_id)?.tax_rate_id || '';
 
   return {
     ...transformToForm(estimate, defaultEstimate),
+    estimate_tax_rate_id: estimateTaxRateId,
+    expiration_date:
+      estimate.estimate_date || estimate.estimateDate || estimate.expiration_date,
+    discount_type: 'percentage',
+    note: estimate.note || ESTIMATE_DEFAULT_NOTE,
     entries,
     attachments,
   };
@@ -167,12 +194,21 @@ export const transfromsFormValuesToRequest = (values) => {
   const attachments = transformAttachmentsToRequest(values);
 
   return {
-    ...omit(values, ['estimate_number_manually', 'estimate_number']),
+    ...omit(values, [
+      'estimate_number_manually',
+      'estimate_number',
+      'estimate_tax_rate_id',
+    ]),
     // The `estimate_number_manually` will be presented just if the auto-increment
     // is disable, always both attributes hold the same value in manual mode.
     ...(values.estimate_number_manually && {
       estimate_number: values.estimate_number,
     }),
+    delivered: false,
+    discount_type: 'percentage',
+    adjustment: 0,
+    expiration_date: values.estimate_date,
+    note: values.note || ESTIMATE_DEFAULT_NOTE,
     entries: entries.map((entry) => ({
       ...transformToForm(entry, defaultEstimateEntryReq),
     })),
@@ -291,6 +327,22 @@ export const useEstimateAdjustmentFormatted = () => {
   return formattedAmount(adjustment, currencyCode);
 };
 
+export const useEstimateTotalTaxAmount = () => {
+  const { values } = useFormikContext();
+  const { taxRates } = useEstimateFormContext();
+  const subtotal = useEstimateSubtotal();
+  const discount = useEstimateDiscount();
+
+  return React.useMemo(() => {
+    const selected = (taxRates || []).find(
+      (taxRate) => taxRate.id === values.estimate_tax_rate_id,
+    );
+    const rate = toSafeNumber(selected?.rate);
+    const taxable = Math.max(subtotal - discount, 0);
+    return (taxable * rate) / 100;
+  }, [taxRates, values.estimate_tax_rate_id, subtotal, discount]);
+};
+
 /**
  * Retrieves the estimate total.
  * @returns {number}
@@ -298,11 +350,11 @@ export const useEstimateAdjustmentFormatted = () => {
 export const useEstimateTotal = () => {
   const subtotal = useEstimateSubtotal();
   const discount = useEstimateDiscount();
-  const adjustment = useEstimateAdjustment();
+  const taxAmount = useEstimateTotalTaxAmount();
 
   return R.compose(
+    R.add(taxAmount),
     R.subtract(R.__, discount),
-    R.add(R.__, adjustment),
   )(subtotal);
 };
 

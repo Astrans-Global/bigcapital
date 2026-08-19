@@ -1,11 +1,11 @@
 // @ts-nocheck
+import React from 'react';
 import styled from 'styled-components';
-import classNames from 'classnames';
-import { Position, Classes } from '@blueprintjs/core';
+import { Position, FormGroup, HTMLSelect } from '@blueprintjs/core';
 import { useFormikContext } from 'formik';
 import { css } from '@emotion/css';
+import { Theme, useTheme } from '@emotion/react';
 import {
-  FeatureCan,
   FFormGroup,
   FormattedMessage as T,
   FieldRequiredHint,
@@ -17,17 +17,11 @@ import {
   FDateInput,
 } from '@/components';
 import { customersFieldShouldUpdate } from './utils';
-import { Features } from '@/constants';
-import { ProjectsSelect } from '@/containers/Projects/components';
-import {
-  EstimateExchangeRateInputField,
-  EstimateProjectSelectButton,
-} from './components';
+import { EstimateExchangeRateInputField } from './components';
 import { EstimateFormEstimateNumberField } from './EstimateFormEstimateNumberField';
 import { useEstimateFormContext } from './EstimateFormProvider';
 import { useCustomerUpdateExRate } from '@/containers/Entries/withExRateItemEntriesPriceRecalc';
-import { useTheme } from '@emotion/react';
-import { Theme } from '@xstyled/emotion';
+import { useCustomerAreas } from '@/hooks/query';
 import intl from 'react-intl-universal';
 
 const getEstimateFieldsStyle = (theme: Theme) => css`
@@ -48,22 +42,18 @@ const getEstimateFieldsStyle = (theme: Theme) => css`
 `;
 
 /**
- * Estimate form header.
+ * Estimate form header fields — same overlay as the invoice window, with
+ * due date locked to the estimate date. See docs/ops/PHASE1.md ("Estimates").
  */
 export function EstimateFormHeader() {
   const theme = useTheme();
-  const { projects } = useEstimateFormContext();
   const styleClassName = getEstimateFieldsStyle(theme);
 
   return (
     <Stack spacing={18} flex={1} className={styleClassName}>
-      {/* ----------- Customer name ----------- */}
       <EstimateFormCustomerSelect />
-
-      {/* ----------- Exchange Rate ----------- */}
       <EstimateExchangeRateInputField />
 
-      {/* ----------- Estimate Date ----------- */}
       <FFormGroup
         name={'estimate_date'}
         label={intl.get('estimate_date')}
@@ -85,100 +75,123 @@ export function EstimateFormHeader() {
         />
       </FFormGroup>
 
-      {/* ----------- Expiration date ----------- */}
-      <FFormGroup
-        name={'expiration_date'}
-        label={intl.get('expiration_date')}
-        inline
-        fastField
-      >
-        <FDateInput
-          name={'expiration_date'}
-          formatDate={(date) => date.toLocaleDateString()}
-          parseDate={(str) => new Date(str)}
-          popoverProps={{ position: Position.BOTTOM_LEFT, minimal: true }}
-          inputProps={{
-            leftIcon: <Icon icon={'date-range'} />,
-            fill: true,
-          }}
-          fill
-          fastField
-        />
-      </FFormGroup>
-
-      {/* ----------- Estimate number ----------- */}
+      <EstimateDueDateField />
       <EstimateFormEstimateNumberField />
 
-      {/* ----------- Reference ----------- */}
       <FFormGroup name={'reference'} label={intl.get('reference')} inline fill>
         <FInputGroup name={'reference'} minimal={true} />
       </FFormGroup>
-
-      {/*------------ Project name -----------*/}
-      <FeatureCan feature={Features.Projects}>
-        <FFormGroup
-          name={'project_id'}
-          label={intl.get('estimate.project_name.label')}
-          inline={true}
-          className={classNames('form-group--select-list', Classes.FILL)}
-        >
-          <ProjectsSelect
-            name={'project_id'}
-            projects={projects}
-            input={EstimateProjectSelectButton}
-            popoverFill={true}
-          />
-        </FFormGroup>
-      </FeatureCan>
     </Stack>
   );
 }
 
-/**
- * Customer select field of estimate form.
- * @returns {React.ReactNode}
- */
+function EstimateDueDateField() {
+  const { values, setFieldValue } = useFormikContext();
+
+  React.useEffect(() => {
+    if (
+      values.estimate_date &&
+      values.expiration_date !== values.estimate_date
+    ) {
+      setFieldValue('expiration_date', values.estimate_date);
+    }
+  }, [values.estimate_date, values.expiration_date, setFieldValue]);
+
+  return (
+    <FFormGroup name={'expiration_date'} label={intl.get('due_date')} inline>
+      <FDateInput
+        name={'expiration_date'}
+        formatDate={(date) => date.toLocaleDateString()}
+        parseDate={(str) => new Date(str)}
+        popoverProps={{ position: Position.BOTTOM_LEFT, minimal: true }}
+        inputProps={{
+          leftIcon: <Icon icon={'date-range'} />,
+          fill: true,
+          disabled: true,
+        }}
+        disabled
+        fill
+      />
+    </FFormGroup>
+  );
+}
+
+function EstimateFormAreaFilter({ areaId, onAreaIdChange }) {
+  const { data: areas } = useCustomerAreas();
+
+  const handleChange = (event) => {
+    onAreaIdChange(event.target.value ? Number(event.target.value) : '');
+  };
+
+  return (
+    <FormGroup
+      label={intl.get('area') || 'Area'}
+      inline={true}
+      helperText={'Filters the customer list below -- not saved on the estimate.'}
+    >
+      <HTMLSelect fill value={areaId} onChange={handleChange}>
+        <option value="">{intl.get('all_areas') || 'All areas'}</option>
+        {(areas || []).map((area) => (
+          <option key={area.id} value={area.id}>
+            {area.name}
+          </option>
+        ))}
+      </HTMLSelect>
+    </FormGroup>
+  );
+}
+
 function EstimateFormCustomerSelect() {
   const { setFieldValue, values } = useFormikContext();
   const { customers } = useEstimateFormContext();
-
+  const [areaId, setAreaId] = React.useState('');
   const updateEntries = useCustomerUpdateExRate();
 
-  // Handles the customer item change.
+  const filteredCustomers = React.useMemo(() => {
+    if (!areaId) {
+      return customers;
+    }
+    return customers.filter(
+      (customer) => (customer.area_id ?? customer.areaId) === areaId,
+    );
+  }, [customers, areaId]);
+
   const handleItemChange = (customer) => {
     setFieldValue('customer_id', customer.id);
     setFieldValue('currency_code', customer?.currency_code);
-
     updateEntries(customer);
   };
 
   return (
-    <FFormGroup
-      label={intl.get('customer_name')}
-      inline={true}
-      labelInfo={<FieldRequiredHint />}
-      name={'customer_id'}
-      fastField={true}
-      shouldUpdate={customersFieldShouldUpdate}
-      shouldUpdateDeps={{ items: customers }}
-    >
-      <CustomersSelect
+    <>
+      <EstimateFormAreaFilter areaId={areaId} onAreaIdChange={setAreaId} />
+      <FFormGroup
+        label={intl.get('customer_name')}
+        inline={true}
+        labelInfo={<FieldRequiredHint />}
         name={'customer_id'}
-        items={customers}
-        placeholder={<T id={'select_customer_account'} />}
-        onItemChange={handleItemChange}
-        popoverFill={true}
-        allowCreate={true}
         fastField={true}
         shouldUpdate={customersFieldShouldUpdate}
-        shouldUpdateDeps={{ items: customers }}
-      />
-      {values.customer_id && (
-        <CustomerButtonLink customerId={values.customer_id}>
-          <T id={'view_customer_details'} />
-        </CustomerButtonLink>
-      )}
-    </FFormGroup>
+        shouldUpdateDeps={{ items: filteredCustomers }}
+      >
+        <CustomersSelect
+          name={'customer_id'}
+          items={filteredCustomers}
+          placeholder={<T id={'select_customer_account'} />}
+          onItemChange={handleItemChange}
+          popoverFill={true}
+          allowCreate={true}
+          fastField={true}
+          shouldUpdate={customersFieldShouldUpdate}
+          shouldUpdateDeps={{ items: filteredCustomers }}
+        />
+        {values.customer_id && (
+          <CustomerButtonLink customerId={values.customer_id}>
+            <T id={'view_customer_details'} />
+          </CustomerButtonLink>
+        )}
+      </FFormGroup>
+    </>
   );
 }
 

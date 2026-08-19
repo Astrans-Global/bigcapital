@@ -2,6 +2,7 @@ import { ItemEntryDto } from '@/modules/TransactionItemEntry/dto/ItemEntry.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsBoolean,
@@ -42,13 +43,14 @@ export class CommandSaleEstimateDto {
   })
   estimateDate: Date;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
   @ApiProperty({
-    description: 'The expiration date of the estimate',
+    description:
+      'Stored but not user-editable. Always equals the estimate date. Printed as N/A on the statutory sheet.',
     example: '2021-01-01',
   })
-  expirationDate: Date;
+  expirationDate?: Date;
 
   @IsString()
   @IsOptional()
@@ -87,6 +89,7 @@ export class CommandSaleEstimateDto {
 
   @IsArray()
   @ArrayMinSize(1)
+  @ArrayMaxSize(9)
   @ValidateNested({ each: true })
   @Type(() => SaleEstimateEntryDto)
   @ApiProperty({

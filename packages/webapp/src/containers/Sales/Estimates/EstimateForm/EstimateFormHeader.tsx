@@ -1,20 +1,22 @@
 // @ts-nocheck
 import React from 'react';
 import intl from 'react-intl-universal';
+import styled from 'styled-components';
 
 import { EstimateFormHeader as EstimateFormHeaderFields } from './EstimateFormHeaderFields';
+import { EstimateStatutoryDownload } from './EstimateStatutoryDownload';
 import { Group, PageFormBigNumber } from '@/components';
 import { useEstimateTotalFormatted } from './utils';
 import { useIsDarkMode } from '@/hooks/useDarkMode';
 
-// Estimate form top header.
 export function EstimateFormHeader() {
   const isDarkMode = useIsDarkMode();
 
   return (
     <Group
       position="apart"
-      align={'flex-start'}
+      align={'stretch'}
+      noWrap
       p="25px 32px"
       bg="var(--x-estimate-form-header-background)"
       borderBottom="1px solid var(--x-estimate-form-header-border)"
@@ -28,19 +30,28 @@ export function EstimateFormHeader() {
       }}
     >
       <EstimateFormHeaderFields />
+      <HeaderPreviewColumn>
+        <EstimateStatutoryDownload />
+      </HeaderPreviewColumn>
       <EstimateFormBigTotal />
     </Group>
   );
 }
 
-/**
- * Big total of estimate form header.
- * @returns {React.ReactNode}
- */
+const HeaderPreviewColumn = styled.div`
+  flex: 1 1 auto;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
 function EstimateFormBigTotal() {
   const totalFormatted = useEstimateTotalFormatted();
 
   return (
-    <PageFormBigNumber label={intl.get('amount')} amount={totalFormatted} />
+    <div style={{ flexShrink: 0, alignSelf: 'flex-start' }}>
+      <PageFormBigNumber label={intl.get('amount')} amount={totalFormatted} />
+    </div>
   );
 }

@@ -35,6 +35,7 @@ export interface StatutoryInvoiceFillInput {
   narration?: string | null;
   paymentMode?: string | null;
   documentTitle?: string | null;
+  dueDateLabel?: string | null;
   discount?: number | null;
   discountType?: string | null;
   entries: Array<{
@@ -131,7 +132,7 @@ export async function fillStatutoryInvoiceWorkbook(
 
   sheet.getCell('J16').value = blank(input.note);
   sheet.getCell('J17').value = blank(input.referenceNo);
-  sheet.getCell('J18').value = dueDate;
+  sheet.getCell('J18').value = input.dueDateLabel ?? dueDate;
   sheet.getCell('J19').value = blank(input.narration);
 
   const lines = (input.entries || []).slice(0, MAX_SALE_INVOICE_LINES);

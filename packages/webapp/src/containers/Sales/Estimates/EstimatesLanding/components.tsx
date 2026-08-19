@@ -88,16 +88,8 @@ export function ActionsMenu({
         <If condition={!original.is_converted_to_invoice}>
           <MenuItem
             icon={<Icon icon="convert_to" />}
-            text={intl.get('convert_to_invoice')}
+            text={'Send to pending'}
             onClick={safeCallback(onConvert, original)}
-          />
-        </If>
-
-        <If condition={!original.is_delivered}>
-          <MenuItem
-            icon={<Icon icon={'check'} iconSize={18} />}
-            text={intl.get('mark_as_delivered')}
-            onClick={safeCallback(onDeliver, original)}
           />
         </If>
         <Choose>

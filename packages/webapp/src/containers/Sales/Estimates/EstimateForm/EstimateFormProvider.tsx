@@ -16,6 +16,7 @@ import { useProjects } from '@/containers/Projects/hooks';
 import { useGetPdfTemplates } from '@/hooks/query/pdf-templates';
 import { Features } from '@/constants';
 import { useFeatureCan } from '@/hooks/state';
+import { useTaxRates } from '@/hooks/query/tax-rates';
 import { ITEMS_FILTER_ROLES } from './utils';
 
 type UseEstimateResult = ReturnType<typeof useEstimate>;
@@ -35,6 +36,7 @@ interface EstimateFormContextValue {
   estimate: UseEstimateResult['data'];
   items: Item[];
   customers: Customer[];
+  taxRates: unknown[];
   branches: UseBranchesResult['data'];
   warehouses: UseWarehousesResult['data'];
   projects: unknown[];
@@ -136,6 +138,8 @@ function EstimateFormProvider({
   const { data: brandingTemplates, isLoading: isBrandingTemplatesLoading } =
     useGetPdfTemplates({ resource: 'SaleEstimate' });
 
+  const { data: taxRates, isLoading: isTaxRatesLoading } = useTaxRates();
+
   // Fetches the sale estimate state.
   const { data: saleEstimateState, isLoading: isSaleEstimateStateLoading } =
     useGetSaleEstimatesState();
@@ -161,13 +165,15 @@ function EstimateFormProvider({
     isItemsLoading ||
     isEstimateLoading ||
     isBrandingTemplatesLoading ||
-    isSaleEstimateStateLoading;
+    isSaleEstimateStateLoading ||
+    isTaxRatesLoading;
 
   const provider: EstimateFormContextValue = {
     estimateId,
     estimate,
     items: itemsData?.data ?? [],
     customers: customersData?.data ?? [],
+    taxRates: taxRates ?? [],
     branches,
     warehouses,
     projects:

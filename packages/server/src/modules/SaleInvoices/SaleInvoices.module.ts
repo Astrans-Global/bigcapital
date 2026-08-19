@@ -17,6 +17,7 @@ import { ItemsEntriesService } from '../Items/ItemsEntries.service';
 import { CommandSaleInvoiceValidators } from './commands/CommandSaleInvoiceValidators.service';
 import { CommandSaleInvoiceDTOTransformer } from './commands/CommandSaleInvoiceDTOTransformer.service';
 import { SaleEstimateValidators } from '../SaleEstimates/commands/SaleEstimateValidators.service';
+import { ConvertSaleEstimate } from '../SaleEstimates/commands/ConvetSaleEstimate.service';
 import { UnlinkConvertedSaleEstimate } from '../SaleEstimates/commands/UnlinkConvertedSaleEstimate.service';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
 import { AutoIncrementOrdersModule } from '../AutoIncrementOrders/AutoIncrementOrders.module';
@@ -108,6 +109,7 @@ import { ExportStatutoryInvoiceService } from './queries/ExportStatutoryInvoice.
     CommandSaleInvoiceValidators,
     CommandSaleInvoiceDTOTransformer,
     SaleEstimateValidators,
+    ConvertSaleEstimate,
     UnlinkConvertedSaleEstimate,
     SaleInvoicePdfTemplate,
     WriteoffSaleInvoice,

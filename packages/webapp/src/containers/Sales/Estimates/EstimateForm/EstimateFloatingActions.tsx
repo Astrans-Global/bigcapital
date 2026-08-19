@@ -10,7 +10,7 @@ import {
   Menu,
   MenuItem,
 } from '@blueprintjs/core';
-import { If, Icon, FormattedMessage as T, Group, FSelect } from '@/components';
+import { Icon, FormattedMessage as T, Group, FSelect } from '@/components';
 import { useHistory } from 'react-router-dom';
 import { useFormikContext } from 'formik';
 import { useEstimateFormContext } from './EstimateFormProvider';
@@ -23,65 +23,68 @@ import {
 import { PageForm } from '@/components/PageForm';
 import { MoreIcon } from '@/icons/More';
 import { DRAWERS } from '@/constants/drawers';
+import { AppToaster } from '@/components';
 
 /**
- * Estimate floating actions bar.
+ * Estimate floating actions: Save / Clear / Cancel, plus Send to pending.
+ * Save and Deliver is hidden so an estimate cannot skip into a delivered
+ * invoice. See docs/ops/PHASE1.md ("Estimates").
  */
 export function EstimateFloatingActions() {
   const history = useHistory();
   const { openDrawer } = useDrawerActions();
-  const { resetForm, submitForm, isSubmitting } = useFormikContext();
+  const { resetForm, submitForm, isSubmitting, values } = useFormikContext();
+  const { estimate, estimateId, setSubmitPayload } = useEstimateFormContext();
 
-  // Estimate form context.
-  const { estimate, setSubmitPayload } = useEstimateFormContext();
+  const alreadyConverted = Boolean(
+    estimate?.is_converted_to_invoice ||
+      estimate?.converted_to_invoice_id ||
+      estimate?.convertedToInvoiceId,
+  );
 
-  // Handle submit & deliver button click.
-  const handleSubmitDeliverBtnClick = (event) => {
-    setSubmitPayload({ redirect: true, deliver: true });
-    submitForm();
-  };
-
-  // Handle submit, deliver & new button click.
-  const handleSubmitDeliverAndNewBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, deliver: true, resetForm: true });
-    submitForm();
-  };
-
-  // Handle submit, deliver & continue editing button click.
-  const handleSubmitDeliverContinueEditingBtnClick = (event) => {
-    setSubmitPayload({ redirect: false, deliver: true });
-    submitForm();
-  };
-
-  // Handle submit as draft button click.
-  const handleSubmitDraftBtnClick = (event) => {
+  const handleSubmitDraftBtnClick = () => {
     setSubmitPayload({ redirect: true, deliver: false });
     submitForm();
   };
 
-  // Handle submit as draft & new button click.
-  const handleSubmitDraftAndNewBtnClick = (event) => {
+  const handleSubmitDraftAndNewBtnClick = () => {
     setSubmitPayload({ redirect: false, deliver: false, resetForm: true });
     submitForm();
   };
 
-  // Handle submit as draft & continue editing button click.
-  const handleSubmitDraftContinueEditingBtnClick = (event) => {
+  const handleSubmitDraftContinueEditingBtnClick = () => {
     setSubmitPayload({ redirect: false, deliver: false });
     submitForm();
   };
 
-  // Handle the cancel button click.
-  const handleCancelBtnClick = (event) => {
+  const handleSendToPending = () => {
+    if (!estimateId) {
+      AppToaster.show({
+        message: 'Save the estimate first, then send it to a Pending invoice.',
+        intent: Intent.WARNING,
+      });
+      return;
+    }
+    if (alreadyConverted) {
+      AppToaster.show({
+        message: 'This estimate was already sent to an invoice.',
+        intent: Intent.WARNING,
+      });
+      return;
+    }
+    history.push(`/invoices/new?from_estimate_id=${estimateId}`, {
+      action: String(estimateId),
+    });
+  };
+
+  const handleCancelBtnClick = () => {
     history.goBack();
   };
 
-  // Handle the clear button click.
-  const handleClearBtnClick = (event) => {
+  const handleClearBtnClick = () => {
     resetForm();
   };
 
-  // Handles the invoice customize button click.
   const handleCustomizeBtnClick = () => {
     openDrawer(DRAWERS.BRANDING_TEMPLATES, { resource: 'SaleEstimate' });
   };
@@ -91,107 +94,46 @@ export function EstimateFloatingActions() {
   return (
     <PageForm.FooterActions position={'apart'} spacing={10}>
       <Group spacing={10}>
-        {/* ----------- Save And Deliver ----------- */}
-        <If condition={!estimate || !estimate?.is_delivered}>
-          <ButtonGroup>
-            <Button
-              disabled={isSubmitting}
-              loading={isSubmitting}
-              intent={Intent.PRIMARY}
-              onClick={handleSubmitDeliverBtnClick}
-              text={<T id={'save_and_deliver'} />}
-            />
-            <Popover
-              content={
-                <Menu>
-                  <MenuItem
-                    text={<T id={'deliver_and_new'} />}
-                    onClick={handleSubmitDeliverAndNewBtnClick}
-                  />
-                  <MenuItem
-                    text={<T id={'deliver_continue_editing'} />}
-                    onClick={handleSubmitDeliverContinueEditingBtnClick}
-                  />
-                </Menu>
-              }
-              minimal={true}
-              interactionKind={PopoverInteractionKind.CLICK}
-              position={Position.BOTTOM_LEFT}
-            >
-              <Button
-                disabled={isSubmitting}
-                intent={Intent.PRIMARY}
-                rightIcon={<Icon icon="arrow-drop-up-16" iconSize={20} />}
-              />
-            </Popover>
-          </ButtonGroup>
-
-          {/* ----------- Save As Draft ----------- */}
-          <ButtonGroup>
-            <Button
-              disabled={isSubmitting}
-              className={'ml1'}
-              onClick={handleSubmitDraftBtnClick}
-              text={<T id={'save_as_draft'} />}
-            />
-            <Popover
-              content={
-                <Menu>
-                  <MenuItem
-                    text={<T id={'save_and_new'} />}
-                    onClick={handleSubmitDraftAndNewBtnClick}
-                  />
-                  <MenuItem
-                    text={<T id={'save_continue_editing'} />}
-                    onClick={handleSubmitDraftContinueEditingBtnClick}
-                  />
-                </Menu>
-              }
-              minimal={true}
-              interactionKind={PopoverInteractionKind.CLICK}
-              position={Position.BOTTOM_LEFT}
-            >
-              <Button
-                disabled={isSubmitting}
-                rightIcon={<Icon icon="arrow-drop-up-16" iconSize={20} />}
-              />
-            </Popover>
-          </ButtonGroup>
-        </If>
-
-        {/* ----------- Save and New ----------- */}
-        <If condition={estimate && estimate?.is_delivered}>
-          <ButtonGroup>
+        <ButtonGroup>
+          <Button
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            intent={Intent.PRIMARY}
+            onClick={handleSubmitDraftBtnClick}
+            text={<T id={'save'} />}
+          />
+          <Popover
+            content={
+              <Menu>
+                <MenuItem
+                  text={<T id={'save_and_new'} />}
+                  onClick={handleSubmitDraftAndNewBtnClick}
+                />
+                <MenuItem
+                  text={<T id={'save_continue_editing'} />}
+                  onClick={handleSubmitDraftContinueEditingBtnClick}
+                />
+              </Menu>
+            }
+            minimal={true}
+            interactionKind={PopoverInteractionKind.CLICK}
+            position={Position.BOTTOM_LEFT}
+          >
             <Button
               disabled={isSubmitting}
               intent={Intent.PRIMARY}
-              onClick={handleSubmitDeliverBtnClick}
-              style={{ minWidth: '85px' }}
-              text={<T id={'save'} />}
+              rightIcon={<Icon icon="arrow-drop-up-16" iconSize={20} />}
             />
-            <Popover
-              content={
-                <Menu>
-                  <MenuItem
-                    text={<T id={'save_and_new'} />}
-                    onClick={handleSubmitDeliverAndNewBtnClick}
-                  />
-                </Menu>
-              }
-              minimal={true}
-              interactionKind={PopoverInteractionKind.CLICK}
-              position={Position.BOTTOM_LEFT}
-            >
-              <Button
-                disabled={isSubmitting}
-                intent={Intent.PRIMARY}
-                rightIcon={<Icon icon="arrow-drop-up-16" iconSize={20} />}
-              />
-            </Popover>
-          </ButtonGroup>
-        </If>
+          </Popover>
+        </ButtonGroup>
 
-        {/* ----------- Clear & Reset----------- */}
+        <Button
+          disabled={isSubmitting || alreadyConverted}
+          intent={Intent.SUCCESS}
+          onClick={handleSendToPending}
+          text={'Send to pending'}
+        />
+
         <Button
           className={'ml1'}
           disabled={isSubmitting}
@@ -199,7 +141,6 @@ export function EstimateFloatingActions() {
           text={estimate ? <T id={'reset'} /> : <T id={'clear'} />}
         />
 
-        {/* ----------- Cancel ----------- */}
         <Button
           className={'ml1'}
           disabled={isSubmitting}
@@ -209,7 +150,6 @@ export function EstimateFloatingActions() {
       </Group>
 
       <Group spacing={0}>
-        {/* ----------- Branding Template Select ----------- */}
         <BrandingThemeFormGroup
           name={'pdf_template_id'}
           label={'Branding'}
@@ -228,7 +168,6 @@ export function EstimateFloatingActions() {
           />
         </BrandingThemeFormGroup>
 
-        {/* ----------- More Select ----------- */}
         <Popover
           minimal={true}
           interactionKind={PopoverInteractionKind.CLICK}

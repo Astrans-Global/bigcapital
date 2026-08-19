@@ -34,6 +34,8 @@ import {
   transfromsFormValuesToRequest,
   handleErrors,
   resetFormState,
+  MAX_ESTIMATE_LINES,
+  ESTIMATE_DEFAULT_NOTE,
 } from './utils';
 import { PageForm } from '@/components/PageForm';
 
@@ -78,7 +80,7 @@ function EstimateFormInner({
           entries: orderingLinesIndexes(defaultEstimate.entries),
           currency_code: baseCurrency,
           terms_conditions: defaultTo(estimateTermsConditions, ''),
-          note: defaultTo(estimateCustomerNotes, ''),
+          note: defaultTo(estimateCustomerNotes, ESTIMATE_DEFAULT_NOTE) || ESTIMATE_DEFAULT_NOTE,
           pdf_template_id: saleEstimateState?.defaultTemplateId,
         }),
   };
@@ -93,6 +95,14 @@ function EstimateFormInner({
     const entries = values.entries.filter(
       (item) => item.item_id && item.quantity,
     );
+    if (entries.length > MAX_ESTIMATE_LINES) {
+      AppToaster.show({
+        message: `An estimate can have at most ${MAX_ESTIMATE_LINES} item lines.`,
+        intent: Intent.DANGER,
+      });
+      setSubmitting(false);
+      return;
+    }
     const totalQuantity = sumBy(entries, (entry) => parseInt(entry.quantity));
 
     // Validate the entries quantity should be bigger than zero.
@@ -106,7 +116,7 @@ function EstimateFormInner({
     }
     const form = {
       ...transfromsFormValuesToRequest(values),
-      delivered: submitPayload.deliver,
+      delivered: false,
     };
     // Handle the request success.
     const onSuccess = (response) => {

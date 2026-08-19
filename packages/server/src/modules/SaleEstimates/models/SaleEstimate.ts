@@ -54,10 +54,12 @@ export class SaleEstimate extends TenantBaseModel {
   discountType: DiscountType;
 
   adjustment: number;
+  taxAmountWithheld: number;
 
   public entries!: ItemEntry[];
   public attachments!: Document[];
   public customer!: Customer;
+  public warehouse?: any;
 
   /**
    * Table name
@@ -128,13 +130,15 @@ export class SaleEstimate extends TenantBaseModel {
   }
 
   /**
-   * Estimate total.
+   * Estimate total (VAT included after header discount). Same math as a
+   * Pending invoice. Estimates still post nothing to GL.
    * @returns {number}
    */
   get total() {
     const adjustmentAmount = defaultTo(this.adjustment, 0);
+    const taxAmount = defaultTo(this.taxAmountWithheld, 0);
 
-    return this.subtotal - this.discountAmount - adjustmentAmount;
+    return this.subtotal - this.discountAmount + taxAmount + adjustmentAmount;
   }
 
   /**

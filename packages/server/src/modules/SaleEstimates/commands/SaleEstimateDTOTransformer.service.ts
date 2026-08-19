@@ -16,6 +16,9 @@ import { Customer } from '@/modules/Customers/models/Customer';
 import { ISaleEstimateDTO } from '../types/SaleEstimates.types';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { CommandSaleEstimateDto } from '../dtos/SaleEstimate.dto';
+import { ItemEntriesTaxTransactions } from '@/modules/TaxRates/ItemEntriesTaxTransactions.service';
+import { computeSaleInvoiceVatAfterDiscount } from '@/modules/SaleInvoices/ComputeSaleInvoiceVat';
+import { DiscountType } from '@/common/types/Discount';
 
 @Injectable()
 export class SaleEstimateDTOTransformer {
@@ -28,6 +31,7 @@ export class SaleEstimateDTOTransformer {
     private readonly warehouseDTOTransform: WarehouseTransactionDTOTransform,
     private readonly estimateIncrement: SaleEstimateIncrement,
     private readonly brandingTemplatesTransformer: BrandingTemplateDTOTransformer,
+    private readonly taxDTOTransformer: ItemEntriesTaxTransactions,
   ) {}
 
   /**
@@ -57,13 +61,35 @@ export class SaleEstimateDTOTransformer {
     // Validate the sale estimate number require.
     this.validators.validateEstimateNoRequire(estimateNumber);
 
-    const entries = R.compose(
-      // Associate the reference type to item entries.
-      R.map((entry) => R.assoc('reference_type', 'SaleEstimate', entry)),
+    const initialEntries = estimateDTO.entries.map((entry) => ({
+      ...entry,
+      referenceType: 'SaleEstimate',
+      isInclusiveTax: false,
+    }));
+    const asyncEntries = await composeAsync(
+      this.taxDTOTransformer.assocTaxRateFromTaxIdToEntries,
+      this.taxDTOTransformer.assocTaxRateIdFromCodeToEntries,
+    )(initialEntries);
 
-      // Associate default index to item entries.
+    const entries = R.compose(
+      R.map(R.omit(['taxCode'])),
       assocItemEntriesDefaultIndex,
-    )(estimateDTO.entries);
+    )(asyncEntries);
+
+    const vatRatePercent =
+      Number(
+        (entries as Array<{ taxRate?: number }>).find((entry) => entry.taxRate)
+          ?.taxRate,
+      ) || 0;
+    const vatAfterDiscount = computeSaleInvoiceVatAfterDiscount({
+      entries,
+      discount: estimateDTO.discount,
+      discountType: estimateDTO.discountType || DiscountType.Percentage,
+      vatRatePercent,
+    });
+
+    const expirationDate =
+      estimateDTO.estimateDate || oldSaleEstimate?.estimateDate;
 
     const initialDTO = {
       amount,
@@ -71,8 +97,11 @@ export class SaleEstimateDTOTransformer {
         omit(estimateDTO, ['delivered', 'entries', 'attachments']),
         ['estimateDate', 'expirationDate'],
       ),
+      expirationDate,
       currencyCode: paymentCustomer.currencyCode,
       exchangeRate: estimateDTO.exchangeRate || 1,
+      taxAmountWithheld: vatAfterDiscount.vatAmount,
+      discountType: estimateDTO.discountType || DiscountType.Percentage,
       ...(estimateNumber ? { estimateNumber } : {}),
       entries,
       // Avoid rewrite the deliver date in edit mode when already published.

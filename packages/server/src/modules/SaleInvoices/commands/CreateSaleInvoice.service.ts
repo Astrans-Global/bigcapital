@@ -10,6 +10,7 @@ import { CommandSaleInvoiceValidators } from './CommandSaleInvoiceValidators.ser
 import { CommandSaleInvoiceDTOTransformer } from './CommandSaleInvoiceDTOTransformer.service';
 import { UnitOfWork } from '@/modules/Tenancy/TenancyDB/UnitOfWork.service';
 import { SaleEstimateValidators } from '@/modules/SaleEstimates/commands/SaleEstimateValidators.service';
+import { ConvertSaleEstimate } from '@/modules/SaleEstimates/commands/ConvetSaleEstimate.service';
 import { SaleInvoice } from '../models/SaleInvoice';
 import { SaleEstimate } from '@/modules/SaleEstimates/models/SaleEstimate';
 import { Customer } from '@/modules/Customers/models/Customer';
@@ -36,6 +37,7 @@ export class CreateSaleInvoice {
     private readonly transformerDTO: CommandSaleInvoiceDTOTransformer,
     private readonly eventPublisher: EventEmitter2,
     private readonly commandEstimateValidators: SaleEstimateValidators,
+    private readonly convertSaleEstimate: ConvertSaleEstimate,
     private readonly uow: UnitOfWork,
 
     @Inject(SaleInvoice.name)
@@ -108,6 +110,14 @@ export class CreateSaleInvoice {
       const saleInvoice = await this.saleInvoiceModel()
         .query(trx)
         .upsertGraph(saleInvoiceObj);
+
+      if (saleInvoiceDTO.fromEstimateId) {
+        await this.convertSaleEstimate.convertEstimateToInvoice(
+          saleInvoiceDTO.fromEstimateId,
+          saleInvoice.id,
+          trx,
+        );
+      }
 
       const eventPayload: ISaleInvoiceCreatedPayload = {
         saleInvoice,
