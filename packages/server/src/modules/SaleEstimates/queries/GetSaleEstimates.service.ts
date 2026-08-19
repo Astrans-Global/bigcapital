@@ -41,7 +41,7 @@ export class GetSaleEstimatesService {
 
     // Dynamic list service.
     const dynamicFilter = await this.dynamicListService.dynamicList(
-      SaleEstimate,
+      SaleEstimate as any,
       filter,
     );
     const { results, pagination } = await this.saleEstimateModel()
