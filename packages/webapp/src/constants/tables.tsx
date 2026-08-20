@@ -3,6 +3,7 @@ export const TABLES = {
   ITEMS: 'items',
   INVENTORY_ADJUSTMENTS: 'inventory_adjustment',
   ESTIMATES: 'estimates',
+  QUOTATIONS: 'quotations',
   INVOICES: 'invoices',
   RECEIPTS: 'receipts',
   PAYMENT_RECEIVES: 'payment_receives',

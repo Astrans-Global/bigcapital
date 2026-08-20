@@ -57,6 +57,16 @@ export function useDeleteQuotation() {
   });
 }
 
+export function useRefreshQuotations() {
+  const queryClient = useQueryClient();
+
+  return {
+    refresh: () => {
+      queryClient.invalidateQueries({ queryKey: quotationsKeys.all() });
+    },
+  };
+}
+
 export function useDownloadStatutoryQuotation() {
   const apiRequest = useApiRequest();
 

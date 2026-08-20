@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button, Intent } from '@blueprintjs/core';
 import * as R from 'ramda';
-import { EmptyStatus, Can, FormattedMessage as T } from '@/components';
+import { EmptyStatus, Can } from '@/components';
 import { SaleInvoiceAction, AbilitySubject } from '@/constants/abilityOption';
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 import { DialogsName } from '@/constants/dialogs';
@@ -31,9 +31,6 @@ function TaxRatesLandingEmptyStateRoot({
               }}
             >
               New tax rate
-            </Button>
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
             </Button>
           </Can>
         </>

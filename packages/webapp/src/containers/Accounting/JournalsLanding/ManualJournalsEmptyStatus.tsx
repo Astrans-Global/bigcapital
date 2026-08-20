@@ -29,9 +29,6 @@ export function ManualJournalsEmptyStatus() {
               <T id={'make_journal'} />
             </Button>
 
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
-            </Button>
           </Can>
         </>
       }

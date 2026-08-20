@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as R from 'ramda';
 import { Button, Intent } from '@blueprintjs/core';
-import { EmptyStatus, Can, FormattedMessage as T } from '@/components';
+import { EmptyStatus, Can } from '@/components';
 import { AbilitySubject, BankRuleAction } from '@/constants/abilityOption';
 import { withDialogActions } from '@/containers/Dialog/withDialogActions';
 import { DialogsName } from '@/constants/dialogs';
@@ -35,9 +35,6 @@ function BankRulesLandingEmptyStateRoot({
               New Bank Rule
             </Button>
 
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
-            </Button>
           </Can>
         </>
       }

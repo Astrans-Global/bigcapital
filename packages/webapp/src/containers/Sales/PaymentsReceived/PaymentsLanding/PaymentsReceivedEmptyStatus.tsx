@@ -38,9 +38,6 @@ export function PaymentsReceivedEmptyStatus() {
               <T id={'new_payment_received'} />
             </Button>
 
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
-            </Button>
           </Can>
         </>
       }

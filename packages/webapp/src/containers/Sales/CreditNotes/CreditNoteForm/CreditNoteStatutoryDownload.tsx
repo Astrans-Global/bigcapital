@@ -35,8 +35,12 @@ export function CreditNoteStatutoryDownload() {
   );
 
   const [template, setTemplate] = React.useState(hasTin ? 'vat' : 'non_vat');
+  const userChoseTemplate = React.useRef(false);
 
   React.useEffect(() => {
+    if (userChoseTemplate.current) {
+      return;
+    }
     setTemplate(hasTin ? 'vat' : 'non_vat');
   }, [hasTin]);
 
@@ -68,8 +72,11 @@ export function CreditNoteStatutoryDownload() {
     <Group spacing={8} title={disabledHint}>
       <HTMLSelect
         value={template}
-        onChange={(event) => setTemplate(event.target.value)}
-        disabled={!canDownload || isPending}
+        onChange={(event) => {
+          userChoseTemplate.current = true;
+          setTemplate(event.currentTarget.value);
+        }}
+        disabled={isPending}
       >
         <option value="vat">VAT credit note</option>
         <option value="non_vat">Non-VAT credit note</option>

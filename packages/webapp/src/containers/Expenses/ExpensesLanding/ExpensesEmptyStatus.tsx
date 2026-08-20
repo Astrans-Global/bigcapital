@@ -29,9 +29,6 @@ export function InvoicesEmptyStatus() {
               <T id={'new_expense'} />
             </Button>
 
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
-            </Button>
           </Can>
         </>
       }

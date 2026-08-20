@@ -31,8 +31,12 @@ export function ReceiptStatutoryDownload() {
   );
 
   const [template, setTemplate] = React.useState(hasTin ? 'vat' : 'non_vat');
+  const userChoseTemplate = React.useRef(false);
 
   React.useEffect(() => {
+    if (userChoseTemplate.current) {
+      return;
+    }
     setTemplate(hasTin ? 'vat' : 'non_vat');
   }, [hasTin]);
 
@@ -64,8 +68,11 @@ export function ReceiptStatutoryDownload() {
     <Group spacing={8} title={disabledHint}>
       <HTMLSelect
         value={template}
-        onChange={(event) => setTemplate(event.target.value)}
-        disabled={!canDownload || isPending}
+        onChange={(event) => {
+          userChoseTemplate.current = true;
+          setTemplate(event.currentTarget.value);
+        }}
+        disabled={isPending}
       >
         <option value="vat">VAT invoice</option>
         <option value="non_vat">Non-VAT invoice</option>

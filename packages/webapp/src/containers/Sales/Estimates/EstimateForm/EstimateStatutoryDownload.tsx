@@ -15,9 +15,11 @@ export function EstimateStatutoryDownload() {
   const { values } = useFormikContext();
   const { mutateAsync: download, isPending } = useDownloadStatutoryEstimate();
 
-  const canDownload = Boolean(estimateId);
+  const savedId = estimateId || estimate?.id;
+  const canDownload = Boolean(savedId);
+
   const selectedCustomer = (customers || []).find(
-    (customer) => customer.id === values.customer_id,
+    (customer) => Number(customer.id) === Number(values.customer_id),
   );
   const hasTin = Boolean(
     selectedCustomer?.tin_number ||
@@ -27,8 +29,12 @@ export function EstimateStatutoryDownload() {
   );
 
   const [template, setTemplate] = React.useState(hasTin ? 'vat' : 'non_vat');
+  const userChoseTemplate = React.useRef(false);
 
   React.useEffect(() => {
+    if (userChoseTemplate.current) {
+      return;
+    }
     setTemplate(hasTin ? 'vat' : 'non_vat');
   }, [hasTin]);
 
@@ -38,10 +44,11 @@ export function EstimateStatutoryDownload() {
     }
     try {
       await download({
-        estimateId,
+        estimateId: savedId,
         template,
         fileKind,
-        estimateNo: estimate?.estimate_number || values.estimate_number || 'ESTIMATE',
+        estimateNo:
+          estimate?.estimate_number || values.estimate_number || 'ESTIMATE',
       });
     } catch (error) {
       AppToaster.show({
@@ -54,12 +61,17 @@ export function EstimateStatutoryDownload() {
   return (
     <Group
       spacing={8}
+      align="center"
+      style={{ position: 'relative', zIndex: 6 }}
       title={canDownload ? undefined : 'Available once this estimate is saved.'}
     >
       <HTMLSelect
         value={template}
-        onChange={(event) => setTemplate(event.target.value)}
-        disabled={!canDownload || isPending}
+        onChange={(event) => {
+          userChoseTemplate.current = true;
+          setTemplate(event.target.value);
+        }}
+        disabled={isPending}
       >
         <option value="vat">VAT estimate</option>
         <option value="non_vat">Non-VAT estimate</option>

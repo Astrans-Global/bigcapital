@@ -29,9 +29,6 @@ export function PaymentMadesEmptyStatus() {
               <T id={'new_bill_payment'} />
             </Button>
 
-            <Button intent={Intent.NONE} large={true}>
-              <T id={'learn_more'} />
-            </Button>
           </Can>
         </>
       }
