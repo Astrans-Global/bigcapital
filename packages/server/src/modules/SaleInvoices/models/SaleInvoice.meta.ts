@@ -76,12 +76,22 @@ export const SaleInvoiceMeta = {
       fieldType: 'number',
       virtualColumn: true,
     },
-    status: {
-      name: 'invoice.field.status',
+    dms_status: {
+      name: 'DMS Status',
+      column: 'dms_status',
       fieldType: 'enumeration',
       options: [
-        { key: 'draft', label: 'invoice.field.status.draft' },
-        { key: 'delivered', label: 'invoice.field.status.delivered' },
+        { key: 'pending', label: 'Pending' },
+        { key: 'reserved', label: 'Reserved' },
+        { key: 'invoiced', label: 'Invoiced' },
+        { key: 'delivered', label: 'Delivered' },
+      ],
+      filterCustomQuery: DmsStatusFieldFilterQuery,
+    },
+    status: {
+      name: 'Payment status',
+      fieldType: 'enumeration',
+      options: [
         { key: 'unpaid', label: 'invoice.field.status.unpaid' },
         { key: 'overdue', label: 'invoice.field.status.overdue' },
         { key: 'partially-paid', label: 'invoice.field.status.partially-paid' },
@@ -89,6 +99,25 @@ export const SaleInvoiceMeta = {
       ],
       filterCustomQuery: StatusFieldFilterQuery,
       sortCustomQuery: StatusFieldSortQuery,
+    },
+    dms_payment_mode: {
+      name: 'Mode of Payment',
+      column: 'dms_payment_mode',
+      fieldType: 'enumeration',
+      options: [
+        { key: 'CASH', label: 'CASH' },
+        { key: 'BANK', label: 'BANK' },
+        { key: 'CREDIT', label: 'CREDIT' },
+      ],
+    },
+    warehouse: {
+      name: 'Warehouse',
+      column: 'warehouse_id',
+      fieldType: 'relation',
+      relationType: 'enumeration',
+      relationKey: 'warehouse',
+      relationEntityLabel: 'name',
+      relationEntityKey: 'id',
     },
     created_at: {
       name: 'invoice.field.created_at',
@@ -306,6 +335,10 @@ export const SaleInvoiceMeta = {
  */
 function StatusFieldFilterQuery(query, role) {
   query.modify('statusFilter', role.value);
+}
+
+function DmsStatusFieldFilterQuery(query, role) {
+  query.modify('filterByDmsStatus', role.value);
 }
 
 /**

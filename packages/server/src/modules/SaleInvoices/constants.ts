@@ -60,11 +60,44 @@ export const ERRORS = {
 export const DEFAULT_VIEW_COLUMNS = [];
 export const SaleInvoiceDefaultViews = [
   {
-    name: 'Draft',
-    slug: 'draft',
+    name: 'Pending',
+    slug: 'pending',
     rolesLogicExpression: '1',
     roles: [
-      { index: 1, fieldKey: 'status', comparator: 'equals', value: 'draft' },
+      {
+        index: 1,
+        fieldKey: 'dms_status',
+        comparator: 'equals',
+        value: 'pending',
+      },
+    ],
+    columns: DEFAULT_VIEW_COLUMNS,
+  },
+  {
+    name: 'Reserved',
+    slug: 'reserved',
+    rolesLogicExpression: '1',
+    roles: [
+      {
+        index: 1,
+        fieldKey: 'dms_status',
+        comparator: 'equals',
+        value: 'reserved',
+      },
+    ],
+    columns: DEFAULT_VIEW_COLUMNS,
+  },
+  {
+    name: 'Invoiced',
+    slug: 'invoiced',
+    rolesLogicExpression: '1',
+    roles: [
+      {
+        index: 1,
+        fieldKey: 'dms_status',
+        comparator: 'equals',
+        value: 'invoiced',
+      },
     ],
     columns: DEFAULT_VIEW_COLUMNS,
   },
@@ -75,7 +108,7 @@ export const SaleInvoiceDefaultViews = [
     roles: [
       {
         index: 1,
-        fieldKey: 'status',
+        fieldKey: 'dms_status',
         comparator: 'equals',
         value: 'delivered',
       },

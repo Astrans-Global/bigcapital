@@ -48,6 +48,7 @@ export class GetSaleEstimatesService {
       .query()
       .onBuild((builder) => {
         builder.withGraphFetched('customer');
+        builder.withGraphFetched('warehouse');
         builder.withGraphFetched('entries');
         builder.withGraphFetched('entries.item');
 

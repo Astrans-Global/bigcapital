@@ -270,6 +270,25 @@ export function useInvoicesTableColumns() {
         clickable: true,
       },
       {
+        id: 'warehouse',
+        Header: 'Warehouse',
+        accessor: (row) => row.warehouse?.name || '',
+        width: 140,
+        className: 'warehouse',
+        clickable: true,
+        textOverview: true,
+      },
+      {
+        id: 'dms_payment_mode',
+        Header: 'Mode of Payment',
+        accessor: (row) =>
+          row.dms_payment_mode || row.dmsPaymentMode || '',
+        width: 130,
+        className: 'dms_payment_mode',
+        clickable: true,
+        textOverview: true,
+      },
+      {
         id: 'due_date',
         Header: intl.get('due_date'),
         accessor: 'due_date',

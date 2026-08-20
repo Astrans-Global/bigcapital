@@ -49,6 +49,7 @@ export class GetSaleInvoicesService {
       .onBuild((builder) => {
         builder.withGraphFetched('entries.item');
         builder.withGraphFetched('customer');
+        builder.withGraphFetched('warehouse');
 
         dynamicFilter.buildQuery()(builder);
         _filterDto?.filterQuery?.(builder as any);

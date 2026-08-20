@@ -21,6 +21,18 @@ import { safeCallback } from '@/utils';
  */
 export const statusAccessor = (row) => (
   <Choose>
+    <Choose.When
+      condition={
+        row.is_converted_to_invoice ||
+        row.converted_to_invoice_id ||
+        row.convertedToInvoiceId
+      }
+    >
+      <Tag intent={Intent.PRIMARY} round minimal>
+        Sent to pending
+      </Tag>
+    </Choose.When>
+
     <Choose.When condition={row.is_approved}>
       <Tag intent={Intent.SUCCESS} round minimal>
         <T id={'approved'} />
@@ -212,6 +224,15 @@ export function useEstiamtesTableColumns() {
         width: 140,
         className: 'status',
         clickable: true,
+      },
+      {
+        id: 'warehouse',
+        Header: 'Warehouse',
+        accessor: (row) => row.warehouse?.name || '',
+        width: 140,
+        className: 'warehouse',
+        clickable: true,
+        textOverview: true,
       },
       {
         id: 'reference_no',

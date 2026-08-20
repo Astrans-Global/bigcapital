@@ -49,6 +49,34 @@ export const SaleReceiptDefaultViews = [
     ],
     columns: DEFAULT_VIEW_COLUMNS,
   },
+  {
+    name: 'CASH',
+    slug: 'cash',
+    rolesLogicExpression: '1',
+    roles: [
+      {
+        index: 1,
+        fieldKey: 'dms_payment_mode',
+        comparator: 'equals',
+        value: 'CASH',
+      },
+    ],
+    columns: DEFAULT_VIEW_COLUMNS,
+  },
+  {
+    name: 'BANK',
+    slug: 'bank',
+    rolesLogicExpression: '1',
+    roles: [
+      {
+        index: 1,
+        fieldKey: 'dms_payment_mode',
+        comparator: 'equals',
+        value: 'BANK',
+      },
+    ],
+    columns: DEFAULT_VIEW_COLUMNS,
+  },
 ];
 
 export const SaleReceiptsSampleData = [

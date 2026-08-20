@@ -467,6 +467,13 @@ export class SaleInvoice extends TenantBaseModel {
       },
 
       /**
+       * Astrans DMS pipeline (Pending / Reserved / Invoiced / Delivered).
+       */
+      filterByDmsStatus(query, status) {
+        query.where('dms_status', status);
+      },
+
+      /**
        * Status filter.
        */
       statusFilter(query, filterType) {

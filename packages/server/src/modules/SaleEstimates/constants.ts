@@ -79,7 +79,7 @@ export const SaleEstimateDefaultViews = [
     columns: DEFAULT_VIEW_COLUMNS,
   },
   {
-    name: 'Invoiced',
+    name: 'Sent to pending',
     slug: 'invoiced',
     rolesLogicExpression: '1',
     roles: [
@@ -102,20 +102,6 @@ export const SaleEstimateDefaultViews = [
         fieldKey: 'status',
         comparator: 'equals',
         value: 'expired',
-      },
-    ],
-    columns: DEFAULT_VIEW_COLUMNS,
-  },
-  {
-    name: 'Closed',
-    slug: 'closed',
-    rolesLogicExpression: '1',
-    roles: [
-      {
-        index: 1,
-        fieldKey: 'status',
-        comparator: 'equals',
-        value: 'closed',
       },
     ],
     columns: DEFAULT_VIEW_COLUMNS,

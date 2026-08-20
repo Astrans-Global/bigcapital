@@ -85,6 +85,24 @@ export const SaleReceiptMeta = {
       filterCustomQuery: StatusFieldFilterQuery,
       sortCustomQuery: StatusFieldSortQuery,
     },
+    dms_payment_mode: {
+      name: 'Mode of Payment',
+      column: 'dms_payment_mode',
+      fieldType: 'enumeration',
+      options: [
+        { key: 'CASH', label: 'CASH' },
+        { key: 'BANK', label: 'BANK' },
+      ],
+    },
+    warehouse: {
+      name: 'Warehouse',
+      column: 'warehouse_id',
+      fieldType: 'relation',
+      relationType: 'enumeration',
+      relationKey: 'warehouse',
+      relationEntityLabel: 'name',
+      relationEntityKey: 'id',
+    },
   },
   columns: {
     depositAccount: {
