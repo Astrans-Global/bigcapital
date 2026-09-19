@@ -6,7 +6,7 @@ import {
   useDashboardMeta,
 } from '@/hooks/query';
 import { useSplashLoading } from '@/hooks/state';
-import { useWatch, useWatchImmediate, useWhen } from '@/hooks';
+import { useWatchImmediate, useWhen } from '@/hooks';
 import { setCookie, getCookie } from '@/utils';
 
 /**
@@ -24,13 +24,10 @@ export function useDashboardMetaBoot() {
   });
   const [startLoading, stopLoading] = useSplashLoading();
 
-  useWatchImmediate((value) => {
-    value && startLoading();
+  useWatchImmediate((loading) => {
+    if (loading) startLoading();
+    else stopLoading();
   }, isDashboardMetaLoading);
-
-  useWatchImmediate(() => {
-    isDashboardMetaSuccess && stopLoading();
-  }, isDashboardMetaSuccess);
 
   return {
     meta: dashboardMeta,
@@ -85,27 +82,19 @@ export function useApplicationBoot() {
 
   const [startLoading, stopLoading] = useSplashLoading();
 
-  // Splash loading when organization request loading and
-  // application still not booted.
-  useWatchImmediate((value) => {
-    value && !isBooted.current && startLoading();
+  // Splash follows org/user loading in both directions. Success-only stop
+  // left the logo up forever after a VM reboot when those APIs hung or failed.
+  useWatchImmediate((loading) => {
+    if (isBooted.current) return;
+    if (loading) startLoading();
+    else stopLoading();
   }, isOrgLoading);
 
-  // Splash loading when request authenticated user loading and
-  // application still not booted yet.
-  useWatchImmediate((value) => {
-    value && !isBooted.current && startLoading();
+  useWatchImmediate((loading) => {
+    if (isBooted.current) return;
+    if (loading) startLoading();
+    else stopLoading();
   }, isAuthUserLoading);
-
-  // Stop splash loading once organization request success.
-  useWatch((value) => {
-    value && stopLoading();
-  }, isCurrentOrganizationSuccess);
-
-  // Stop splash loading once authenticated user request success.
-  useWatch((value) => {
-    value && stopLoading();
-  }, isAuthUserSuccess);
 
   // Once the all requests complete change the app loading state.
   useWhen(

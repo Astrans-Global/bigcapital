@@ -23,7 +23,7 @@ export default function useApiRequest() {
 
   const http = React.useMemo(() => {
     // Axios instance.
-    const instance = axios.create();
+    const instance = axios.create({ timeout: 15000 });
 
     // Request interceptors.
     instance.interceptors.request.use(
@@ -166,7 +166,7 @@ export function useAuthApiFetcher() {
 export function useAuthApiRequest() {
   const http = React.useMemo(() => {
     // Axios instance.
-    return axios.create();
+    return axios.create({ timeout: 15000 });
   }, []);
 
   return React.useMemo(

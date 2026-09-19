@@ -87,7 +87,12 @@ function useAppLoadLocales(currentLocale) {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Lodas the locales data file.
+    let cancelled = false;
+    const finish = () => {
+      if (!cancelled) setIsLoading(false);
+    };
+    const timeout = setTimeout(finish, 8000);
+
     loadLocales(currentLocale)
       .then((results) => {
         return intl.init({
@@ -100,8 +105,15 @@ function useAppLoadLocales(currentLocale) {
       .then(() => loadMomentLocale(currentLocale))
       .then(() => {
         moment.locale(transformMomentLocale(currentLocale));
-        setIsLoading(false);
-      });
+        finish();
+      })
+      .catch(() => finish())
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [currentLocale, stopLoading]);
 
   // Watches the value to start/stop splash screen.
@@ -122,12 +134,24 @@ function useAppYupLoadLocales(currentLocale) {
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
+    let cancelled = false;
+    const finish = () => {
+      if (!cancelled) setIsLoading(false);
+    };
+    const timeout = setTimeout(finish, 8000);
+
     loadYupLocales(currentLocale)
       .then((results) => {
         setLocale(results);
-        setIsLoading(false);
+        finish();
       })
-      .then(() => {});
+      .catch(() => finish())
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [currentLocale, stopLoading]);
 
   // Watches the valiue to start/stop splash screen.
