@@ -25,11 +25,16 @@ export class PdChequeGLService {
     private readonly pdChequeModel: TenantModelProxy<typeof PdCheque>,
   ) {}
 
-  public async resolveCollectionAccounts() {
-    const cheques = await this.accountRepository.findBySlug(CHEQUES_IN_HAND_SLUG);
-    const advances = await this.accountRepository.findBySlug(
+  public async resolveCollectionAccounts(): Promise<{
+    cheques: { id: number };
+    advances: { id: number };
+  }> {
+    const cheques = (await this.accountRepository.findBySlug(
+      CHEQUES_IN_HAND_SLUG,
+    )) as unknown as { id: number } | null;
+    const advances = (await this.accountRepository.findBySlug(
       CUSTOMER_ADVANCES_SLUG,
-    );
+    )) as unknown as { id: number } | null;
     if (!cheques) {
       throw new ServiceError(
         ERRORS.CHEQUES_ACCOUNT_MISSING,
