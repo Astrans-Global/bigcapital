@@ -319,3 +319,47 @@ export function useGetPaymentReceiveHtml(
     queryFn: () => fetchPaymentReceiveHtmlContent(fetcher, paymentReceivedId),
   });
 }
+
+export function useCashInHand(
+  query?: { areaId?: number; agentId?: number },
+  props?: Omit<UseQueryOptions<any[], Error>, 'queryKey' | 'queryFn'>,
+) {
+  const apiRequest = useApiRequest();
+  return useQuery({
+    ...props,
+    queryKey: paymentReceivesKeys.cashInHand(query),
+    queryFn: () =>
+      apiRequest
+        .get('payments-received/cash-in-hand', { params: query })
+        .then((res) => res.data),
+  });
+}
+
+export function useDepositCashPayment(
+  props?: UseMutationOptions<
+    void,
+    Error,
+    { id: number; bankAccountId: number; depositDate?: string }
+  >,
+) {
+  const client = useQueryClient();
+  const apiRequest = useApiRequest();
+
+  return useMutation({
+    ...props,
+    mutationFn: ({ id, bankAccountId, depositDate }) =>
+      apiRequest
+        .post(`payments-received/${id}/deposit`, {
+          bankAccountId,
+          depositDate,
+        })
+        .then((res) => res.data),
+    onSuccess: (data, variables, ...rest) => {
+      commonInvalidateQueries(client);
+      client.invalidateQueries({
+        queryKey: paymentReceivesKeys.cashInHand(),
+      });
+      props?.onSuccess?.(data, variables, ...rest);
+    },
+  });
+}

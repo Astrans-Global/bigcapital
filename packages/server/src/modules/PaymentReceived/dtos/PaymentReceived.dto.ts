@@ -8,6 +8,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsInt,
+  IsIn,
   ValidateNested,
 } from 'class-validator';
 import { ToNumber } from '@/common/decorators/Validators';
@@ -80,14 +81,32 @@ export class CommandPaymentReceivedDto {
   })
   referenceNo?: string;
 
+  @IsOptional()
   @ToNumber()
   @IsInt()
-  @IsNotEmpty()
   @ApiProperty({
     description: 'The id of the deposit account',
     example: 1,
   })
-  depositAccountId: number;
+  depositAccountId?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['cash', 'bank_transfer', 'bank_deposit', 'pd_cheque'])
+  @ApiProperty({
+    description: 'How the customer paid',
+    example: 'cash',
+  })
+  paymentMethod?: string;
+
+  @IsOptional()
+  @ToNumber()
+  @IsInt()
+  @ApiProperty({
+    description: 'Sales agent who collected cash',
+    example: 1,
+  })
+  agentId?: number;
 
   @IsOptional()
   @ToNumber()

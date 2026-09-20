@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Features } from '@/constants';
-import { useFeatureCan } from '@/hooks/state';
+import { useFeatureCan, useSetSettings } from '@/hooks/state';
 import { useProjects } from '@/containers/Projects/hooks';
 import {
-  useSettingsPaymentReceives,
+  useSettings,
   usePaymentReceiveEditPage,
   useAccounts,
   useCustomers,
@@ -11,6 +11,7 @@ import {
   useCreatePaymentReceive,
   useEditPaymentReceive,
   usePaymentReceivedState,
+  useCreatePdCheque,
 } from '@/hooks/query';
 import { useGetPdfTemplates } from '@/hooks/query/pdf-templates';
 
@@ -47,6 +48,7 @@ interface PaymentReceiveFormContextValue {
 
   editPaymentReceiveMutate: UseEditPaymentReceiveResult['mutateAsync'];
   createPaymentReceiveMutate: UseCreatePaymentReceiveResult['mutateAsync'];
+  createPdChequeMutate: ReturnType<typeof useCreatePdCheque>['mutateAsync'];
 
   isExcessConfirmed: boolean;
   setIsExcessConfirmed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -100,8 +102,17 @@ function PaymentReceiveFormProvider({
   // Handle fetch accounts data.
   const { data: accounts, isLoading: isAccountsLoading } = useAccounts();
 
-  // Fetch payment made settings.
-  useSettingsPaymentReceives();
+  // Fetch all settings so collection number groups land in Redux.
+  const { data: settingsPayload } = useSettings();
+  const setSettings = useSetSettings();
+  useEffect(() => {
+    const options = Array.isArray(settingsPayload)
+      ? settingsPayload
+      : (settingsPayload as { settings?: unknown } | undefined)?.settings;
+    if (Array.isArray(options) && options.length) {
+      setSettings(options);
+    }
+  }, [settingsPayload, setSettings]);
 
   // Fetches customers list.
   const { data: customersData, isLoading: isCustomersLoading } = useCustomers({
@@ -138,6 +149,7 @@ function PaymentReceiveFormProvider({
   // Create and edit payment receive mutations.
   const { mutateAsync: editPaymentReceiveMutate } = useEditPaymentReceive();
   const { mutateAsync: createPaymentReceiveMutate } = useCreatePaymentReceive();
+  const { mutateAsync: createPdChequeMutate } = useCreatePdCheque();
 
   const [isExcessConfirmed, setIsExcessConfirmed] = useState<boolean>(false);
 
@@ -170,6 +182,7 @@ function PaymentReceiveFormProvider({
 
     editPaymentReceiveMutate,
     createPaymentReceiveMutate,
+    createPdChequeMutate,
 
     isExcessConfirmed,
     setIsExcessConfirmed,

@@ -7,6 +7,7 @@ export * from './use-general-ledger';
 export * from './use-journal-sheet';
 export * from './use-ap-aging-summary';
 export * from './use-ar-aging-summary';
+export * from './use-invoice-aging';
 export * from './use-inventory-valuation';
 export * from './use-inventory-item-details';
 export * from './use-purchases-by-items';

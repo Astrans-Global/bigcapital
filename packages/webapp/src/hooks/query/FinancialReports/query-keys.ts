@@ -63,6 +63,10 @@ export const financialReportsKeys = {
     [FINANCIAL_REPORT, UNREALIZED_GAIN_OR_LOSS, query] as const,
   salesTaxLiability: (query?: Record<string, unknown>) =>
     [FINANCIAL_REPORT, SALES_TAX_LIABILITY_SUMMARY, query] as const,
+  outstandingAging: (query?: Record<string, unknown>) =>
+    [FINANCIAL_REPORT, 'OUTSTANDING-AGING', query] as const,
+  rdOutstandingAging: (query?: Record<string, unknown>) =>
+    [FINANCIAL_REPORT, 'RD-OUTSTANDING-AGING', query] as const,
 };
 
 // Grouped object for use in components/hooks

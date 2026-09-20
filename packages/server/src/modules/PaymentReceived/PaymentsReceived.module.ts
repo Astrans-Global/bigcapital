@@ -18,6 +18,7 @@ import { ChromiumlyTenancyModule } from '../ChromiumlyTenancy/ChromiumlyTenancy.
 import { TemplateInjectableModule } from '../TemplateInjectable/TemplateInjectable.module';
 import { PaymentReceivedBrandingTemplate } from './queries/PaymentReceivedBrandingTemplate.service';
 import { PaymentReceivedIncrement } from './commands/PaymentReceivedIncrement.service';
+import { PaymentReceivedMethodService } from './commands/PaymentReceivedMethod.service';
 import { BranchesModule } from '../Branches/Branches.module';
 import { WarehousesModule } from '../Warehouses/Warehouses.module';
 import { PdfTemplatesModule } from '../PdfTemplate/PdfTemplates.module';
@@ -43,6 +44,9 @@ import { GetPaymentReceivedMailTemplate } from './queries/GetPaymentReceivedMail
 import { GetPaymentReceivedMailState } from './queries/GetPaymentReceivedMailState.service';
 import { BulkDeletePaymentReceivedService } from './BulkDeletePaymentReceived.service';
 import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePaymentReceived.service';
+import { GetCashInHandService } from './queries/GetCashInHand.service';
+import { DepositCashPaymentReceivedService } from './commands/DepositCashPaymentReceived.service';
+import { BankingTransactionsModule } from '../BankingTransactions/BankingTransactions.module';
 
 @Module({
   controllers: [PaymentReceivesController],
@@ -57,6 +61,7 @@ import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePa
     GetPaymentReceivedPdfService,
     PaymentReceivedValidators,
     PaymentReceiveDTOTransformer,
+    PaymentReceivedMethodService,
     PaymentReceivedBrandingTemplate,
     PaymentReceivedIncrement,
     PaymentReceivedGLEntries,
@@ -74,6 +79,8 @@ import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePa
     GetPaymentReceivedMailState,
     BulkDeletePaymentReceivedService,
     ValidateBulkDeletePaymentReceivedService,
+    GetCashInHandService,
+    DepositCashPaymentReceivedService,
   ],
   exports: [
     PaymentReceivesApplication,
@@ -96,6 +103,7 @@ import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePa
     MailNotificationModule,
     DynamicListModule,
     MailModule,
+    BankingTransactionsModule,
     BullModule.registerQueue({ name: SEND_PAYMENT_RECEIVED_MAIL_QUEUE }),
     BullBoardModule.forFeature({
       name: SEND_PAYMENT_RECEIVED_MAIL_QUEUE,

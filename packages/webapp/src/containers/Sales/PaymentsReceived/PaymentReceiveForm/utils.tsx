@@ -37,6 +37,10 @@ export const defaultPaymentReceiveEntry = {
 export const defaultPaymentReceive = {
   customer_id: '',
   deposit_account_id: '',
+  payment_method: '',
+  agent_id: '',
+  cheque_no: '',
+  banking_date: moment(new Date()).format('YYYY-MM-DD'),
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   reference_no: '',
   payment_receive_no: '',
@@ -50,6 +54,7 @@ export const defaultPaymentReceive = {
   attachments: [],
   branch_id: '',
   pdf_template_id: '',
+  area_id: '',
 };
 
 export const defaultRequestPaymentEntry = {
@@ -164,12 +169,11 @@ export const transformFormToRequest = (form) => {
   const attachments = transformAttachmentsToRequest(form);
 
   return {
-    ...omit(form, ['payment_receive_no_manually', 'payment_receive_no']),
-    // The `payment_receive_no_manually` will be presented just if the auto-increment
-    // is disable, always both attributes hold the same value in manual mode.
-    ...(form.payment_receive_no_manually && {
-      payment_receive_no: form.payment_receive_no,
-    }),
+    ...omit(form, [
+      'payment_receive_no_manually',
+      'payment_receive_no',
+      'area_id',
+    ]),
     entries: orderingLinesIndexes(entries),
     attachments,
   };

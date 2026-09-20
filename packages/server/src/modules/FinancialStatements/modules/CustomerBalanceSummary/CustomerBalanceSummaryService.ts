@@ -55,6 +55,7 @@ export class CustomerBalanceSummaryService {
     // Retrieve the customers list ordered by the display name.
     const customers = await this.reportRepository.getCustomers(
       query.customersIds,
+      query.areaIds,
     );
     // Retrieve the customers debit/credit totals.
     const customersEntries = await this.getReportCustomersEntries(

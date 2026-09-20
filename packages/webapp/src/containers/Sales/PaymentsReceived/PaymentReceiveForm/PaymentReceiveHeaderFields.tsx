@@ -8,6 +8,8 @@ import {
   Classes,
   ControlGroup,
   Button,
+  HTMLSelect,
+  FormGroup,
 } from '@blueprintjs/core';
 import { isEmpty, toSafeInteger } from 'lodash';
 import { useFormikContext } from 'formik';
@@ -22,6 +24,7 @@ import {
   Stack,
   FDateInput,
 } from '@/components';
+import { useCustomerAreas, useSalesAgents } from '@/hooks/query';
 import { safeSumBy } from '@/utils';
 import {
   FFormGroup,
@@ -32,6 +35,7 @@ import {
   CustomerDrawerLink,
   Hint,
   Money,
+  FInputGroup,
 } from '@/components';
 import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
 import { ACCOUNT_TYPE } from '@/constants/accountTypes';
@@ -78,8 +82,9 @@ export function PaymentReceiveHeaderFields() {
   const { accounts, projects } = usePaymentReceiveFormContext();
 
   // Formik form context.
+  // Formik form context.
   const {
-    values: { entries, currency_code },
+    values: { entries, currency_code, amount, payment_method },
     setFieldValue,
   } = useFormikContext();
 
@@ -88,6 +93,14 @@ export function PaymentReceiveHeaderFields() {
     () => safeSumBy(entries, 'due_amount'),
     [entries],
   );
+  const assignedAmount = useMemo(
+    () => safeSumBy(entries, 'payment_amount'),
+    [entries],
+  );
+  const remainingToAssign = (Number(amount) || 0) - assignedAmount;
+  const isCash = payment_method === 'cash';
+  const isBank =
+    payment_method === 'bank_transfer' || payment_method === 'bank_deposit';
   // Handle receive full-amount link click.
   const handleReceiveFullAmountClick = () => {
     const newEntries = fullAmountPaymentEntries(entries);
@@ -106,6 +119,9 @@ export function PaymentReceiveHeaderFields() {
     <Stack spacing={18} flex={1} className={styleClassName}>
       {/* ------------- Customer name ------------- */}
       <PaymentReceiveCustomerSelect />
+
+      {/* ------------- Payment method ------------- */}
+      <PaymentReceiveMethodFields />
 
       {/* ----------- Exchange rate ----------- */}
       <PaymentReceiveExchangeRateInputField
@@ -179,12 +195,17 @@ export function PaymentReceiveHeaderFields() {
             <Money amount={totalDueAmount} currency={currency_code} />)
           </Button>
         )}
+        <div style={{ marginTop: 6, fontSize: 12 }}>
+          {intl.get('remaining_to_assign')}:{' '}
+          <Money amount={remainingToAssign} currency={currency_code} />
+        </div>
       </FFormGroup>
 
       {/* ------------ Payment receive no. ------------ */}
       <PaymentReceivePaymentNoField />
 
-      {/* ------------ Deposit account ------------ */}
+      {/* ------------ Deposit account (bank methods only) ------------ */}
+      {isBank && (
       <FFormGroup
         name={'deposit_account_id'}
         label={intl.get('deposit_to')}
@@ -199,16 +220,13 @@ export function PaymentReceiveHeaderFields() {
           items={accounts}
           labelInfo={<FieldRequiredHint />}
           placeholder={<T id={'select_deposit_account'} />}
-          filterByTypes={[
-            ACCOUNT_TYPE.CASH,
-            ACCOUNT_TYPE.BANK,
-            ACCOUNT_TYPE.OTHER_CURRENT_ASSET,
-          ]}
+          filterByTypes={[ACCOUNT_TYPE.BANK]}
           shouldUpdate={accountsFieldShouldUpdate}
           fastField={true}
           fill={true}
         />
       </FFormGroup>
+      )}
 
       {/* ------------ Reference No. ------------ */}
       <FFormGroup
@@ -245,48 +263,183 @@ const CustomerButtonLink = styled(CustomerDrawerLink)`
   margin-top: 6px;
 `;
 
-/**
- * Customer select field of payment receive form.
- * @returns {React.ReactNode}
- */
-function PaymentReceiveCustomerSelect() {
-  // Payment receive form context.
-  const { customers, isNewMode } = usePaymentReceiveFormContext();
-
-  // Formik form context.
+function PaymentReceiveMethodFields() {
   const { values, setFieldValue } = useFormikContext();
+  const { data: agents } = useSalesAgents();
+  const { isNewMode } = usePaymentReceiveFormContext();
+
+  const handleMethodChange = (event) => {
+    const method = event.target.value;
+    setFieldValue('payment_method', method);
+    setFieldValue('agent_id', '');
+    if (method === 'cash') {
+      setFieldValue('deposit_account_id', '');
+    }
+  };
+
+  const handleAgentChange = (event) => {
+    const agentId = event.target.value ? Number(event.target.value) : '';
+    setFieldValue('agent_id', agentId);
+    const agent = (agents || []).find((item) => item.id === agentId);
+    if (agent?.cashAccountId) {
+      setFieldValue('deposit_account_id', agent.cashAccountId);
+    }
+  };
 
   return (
-    <FFormGroup
-      label={intl.get('customer_name')}
-      inline={true}
-      labelInfo={<FieldRequiredHint />}
-      name={'customer_id'}
-      fastField={true}
-      shouldUpdate={customersFieldShouldUpdate}
-      shouldUpdateDeps={{ items: customers }}
-    >
-      <CustomersSelect
+    <>
+      <FFormGroup
+        name={'payment_method'}
+        label={intl.get('payment_method')}
+        labelInfo={<FieldRequiredHint />}
+        inline
+      >
+        <HTMLSelect
+          fill
+          value={values.payment_method || ''}
+          disabled={!isNewMode}
+          onChange={handleMethodChange}
+        >
+          <option value="">{intl.get('select_payment_method')}</option>
+          <option value="cash">{intl.get('payment_method.cash')}</option>
+          <option value="bank_transfer">
+            {intl.get('payment_method.bank_transfer')}
+          </option>
+          <option value="bank_deposit">
+            {intl.get('payment_method.bank_deposit')}
+          </option>
+          <option value="pd_cheque">{intl.get('payment_method.pd_cheque')}</option>
+        </HTMLSelect>
+      </FFormGroup>
+
+      {values.payment_method === 'pd_cheque' && (
+        <>
+          <FFormGroup
+            name={'cheque_no'}
+            label={intl.get('cheque_number')}
+            labelInfo={<FieldRequiredHint />}
+            inline
+          >
+            <FInputGroup name={'cheque_no'} fill />
+          </FFormGroup>
+          <FFormGroup
+            name={'banking_date'}
+            label={intl.get('banking_date')}
+            labelInfo={<FieldRequiredHint />}
+            inline
+          >
+            <FDateInput
+              name={'banking_date'}
+              formatDate={(date) => date.toLocaleDateString()}
+              parseDate={(str) => new Date(str)}
+              popoverProps={{ position: Position.BOTTOM_LEFT, minimal: true }}
+              fill
+            />
+          </FFormGroup>
+        </>
+      )}
+
+      {values.payment_method === 'cash' && (
+        <FFormGroup
+          name={'agent_id'}
+          label={intl.get('agent')}
+          labelInfo={<FieldRequiredHint />}
+          inline
+        >
+          <HTMLSelect
+            fill
+            value={values.agent_id || ''}
+            disabled={!isNewMode}
+            onChange={handleAgentChange}
+          >
+            <option value="">{intl.get('select_agent')}</option>
+            {(agents || [])
+              .filter((agent) => agent.active !== false)
+              .map((agent) => (
+                <option key={agent.id} value={agent.id}>
+                  {agent.name}
+                </option>
+              ))}
+          </HTMLSelect>
+        </FFormGroup>
+      )}
+    </>
+  );
+}
+
+/**
+ * Customer select field of payment receive form.
+ */
+function PaymentReceiveCustomerSelect() {
+  const { customers, isNewMode } = usePaymentReceiveFormContext();
+  const { values, setFieldValue } = useFormikContext();
+  const { data: areas } = useCustomerAreas();
+  const areaId = values.area_id || '';
+
+  const filteredCustomers = React.useMemo(() => {
+    if (!areaId) {
+      return [];
+    }
+    return customers.filter(
+      (customer) => (customer.area_id ?? customer.areaId) === Number(areaId),
+    );
+  }, [customers, areaId]);
+
+  return (
+    <>
+      <FormGroup
+        label={intl.get('area')}
+        inline={true}
+        helperText={intl.get('select_area_first')}
+      >
+        <HTMLSelect
+          fill
+          value={areaId}
+          onChange={(event) => {
+            setFieldValue('area_id', event.target.value);
+            setFieldValue('customer_id', '');
+          }}
+        >
+          <option value="">{intl.get('select_area_first')}</option>
+          {(areas || []).map((area) => (
+            <option key={area.id} value={area.id}>
+              {area.name}
+            </option>
+          ))}
+        </HTMLSelect>
+      </FormGroup>
+
+      <FFormGroup
+        label={intl.get('customer_name')}
+        inline={true}
+        labelInfo={<FieldRequiredHint />}
         name={'customer_id'}
-        items={customers}
-        placeholder={<T id={'select_customer_account'} />}
-        onItemChange={(customer) => {
-          setFieldValue('customer_id', customer.id);
-          setFieldValue('full_amount', '');
-          setFieldValue('currency_code', customer?.currency_code);
-        }}
-        popoverFill={true}
-        disabled={!isNewMode}
-        allowCreate={true}
         fastField={true}
         shouldUpdate={customersFieldShouldUpdate}
-        shouldUpdateDeps={{ items: customers }}
-      />
-      {values.customer_id && (
-        <CustomerButtonLink customerId={values.customer_id}>
-          <T id={'view_customer_details'} />
-        </CustomerButtonLink>
-      )}
-    </FFormGroup>
+        shouldUpdateDeps={{ items: filteredCustomers }}
+      >
+        <CustomersSelect
+          name={'customer_id'}
+          items={filteredCustomers}
+          placeholder={<T id={'select_customer_account'} />}
+          onItemChange={(customer) => {
+            setFieldValue('customer_id', customer.id);
+            setFieldValue('full_amount', '');
+            setFieldValue('currency_code', customer?.currency_code);
+          }}
+          popoverFill={true}
+          disabled={!isNewMode}
+          allowCreate={true}
+          fastField={true}
+          shouldUpdate={customersFieldShouldUpdate}
+          shouldUpdateDeps={{ items: filteredCustomers }}
+        />
+        {values.customer_id && (
+          <CustomerButtonLink customerId={values.customer_id}>
+            <T id={'view_customer_details'} />
+          </CustomerButtonLink>
+        )}
+      </FFormGroup>
+    </>
   );
 }

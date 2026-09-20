@@ -24,7 +24,7 @@ import {
   CreatePaymentReceiveFormSchema,
 } from './PaymentReceiveForm.schema';
 import { AppToaster } from '@/components';
-import { transactionNumber, compose } from '@/utils';
+import { compose } from '@/utils';
 import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
 
 import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
@@ -45,9 +45,6 @@ import { PageForm } from '@/components/PageForm';
 function PaymentReceiveFormRoot({
   // #withSettings
   preferredDepositAccount,
-  paymentReceiveNextNumber,
-  paymentReceiveNumberPrefix,
-  paymentReceiveAutoIncrement,
 
   // #withDialogActions
   openDialog,
@@ -65,26 +62,17 @@ function PaymentReceiveFormRoot({
     submitPayload,
     editPaymentReceiveMutate,
     createPaymentReceiveMutate,
+    createPdChequeMutate,
     isExcessConfirmed,
     paymentReceivedState,
   } = usePaymentReceiveFormContext();
 
-  // Payment receive number.
-  const nextPaymentNumber = transactionNumber(
-    paymentReceiveNumberPrefix,
-    paymentReceiveNextNumber,
-  );
-  // Form initial values.
+  // Payment receive number is assigned on the server.
   const initialValues = {
     ...(!isEmpty(paymentReceiveEditPage)
       ? transformToEditForm(paymentReceiveEditPage, paymentEntriesEditPage)
       : {
           ...defaultPaymentReceive,
-          // If the auto-increment mode is enabled, take the next payment
-          // number from the settings.
-          ...(paymentReceiveAutoIncrement && {
-            payment_receive_no: nextPaymentNumber,
-          }),
           deposit_account_id: defaultTo(preferredDepositAccount, ''),
           currency_code: baseCurrency,
           pdf_template_id: paymentReceivedState?.defaultTemplateId,
@@ -108,8 +96,13 @@ function PaymentReceiveFormRoot({
       return;
     }
     // Show the confirm popup if the excessed amount bigger than zero and
-    // excess confirmation has not been confirmed yet.
-    if (exceededAmount > 0 && !isExcessConfirmed) {
+    // excess confirmation has not been confirmed yet. Cheque leftover is
+    // parked in Customer Advances, so skip this dialog for PD cheques.
+    if (
+      values.payment_method !== 'pd_cheque' &&
+      exceededAmount > 0 &&
+      !isExcessConfirmed
+    ) {
       setSubmitting(false);
       openDialog('payment-received-excessed-payment');
       return;
@@ -122,7 +115,9 @@ function PaymentReceiveFormRoot({
       setSubmitting(false);
       AppToaster.show({
         message: intl.get(
-          paymentReceiveId
+          values.payment_method === 'pd_cheque'
+            ? 'the_cheque_has_been_created'
+            : paymentReceiveId
             ? 'the_payment_received_transaction_has_been_edited'
             : 'the_payment_received_transaction_has_been_created',
         ),
@@ -130,7 +125,11 @@ function PaymentReceiveFormRoot({
       });
 
       if (submitPayload.redirect) {
-        history.push('/payments-received');
+        history.push(
+          values.payment_method === 'pd_cheque'
+            ? '/cheques-in-hand'
+            : '/payments-received',
+        );
       }
       if (submitPayload.resetForm) {
         resetFormState({ resetForm, initialValues, values });
@@ -143,6 +142,22 @@ function PaymentReceiveFormRoot({
       }
       setSubmitting(false);
     };
+
+    if (values.payment_method === 'pd_cheque') {
+      const chequeForm = {
+        customer_id: form.customer_id,
+        cheque_no: values.cheque_no,
+        amount: form.amount,
+        collected_date: form.payment_date,
+        banking_date: values.banking_date,
+        entries: form.entries,
+        exchange_rate: form.exchange_rate,
+        reference_no: form.reference_no,
+        statement: form.statement,
+        branch_id: form.branch_id,
+      };
+      return createPdChequeMutate(chequeForm).then(onSaved).catch(onError);
+    }
 
     if (paymentReceiveId) {
       return editPaymentReceiveMutate([paymentReceiveId, form])
@@ -200,9 +215,6 @@ function PaymentReceiveFormRoot({
 export const PaymentReceivedForm = compose(
   withSettings(({ paymentReceiveSettings }) => ({
     paymentReceiveSettings,
-    paymentReceiveNextNumber: paymentReceiveSettings?.nextNumber,
-    paymentReceiveNumberPrefix: paymentReceiveSettings?.numberPrefix,
-    paymentReceiveAutoIncrement: paymentReceiveSettings?.autoIncrement,
     preferredDepositAccount: paymentReceiveSettings?.preferredDepositAccount,
   })),
   withDialogActions,

@@ -23,6 +23,8 @@ export const paymentReceivesKeys = {
     [PAYMENT_RECEIVE_MAIL_OPTIONS, id] as const,
   notifyBySms: (id: number | null | undefined) =>
     [NOTIFY_PAYMENT_RECEIVE_BY_SMS, id] as const,
+  cashInHand: (query?: Record<string, unknown>) =>
+    [PAYMENT_RECEIVES, 'cash-in-hand', query] as const,
 };
 
 // Grouped object for use in components/hooks

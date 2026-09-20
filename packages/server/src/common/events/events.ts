@@ -420,6 +420,12 @@ export const events = {
     onDeleted: 'onCustomerAreaDeleted',
   },
 
+  salesAgent: {
+    onCreated: 'onSalesAgentCreated',
+    onEdited: 'onSalesAgentEdited',
+    onDeleted: 'onSalesAgentDeleted',
+  },
+
   /**
    * Customer route city service.
    */

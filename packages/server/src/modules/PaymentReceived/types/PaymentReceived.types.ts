@@ -23,7 +23,9 @@ export interface IPaymentReceivedCreateDTO {
   amount?: number;
   exchangeRate?: number;
   referenceNo?: string;
-  depositAccountId: number;
+  depositAccountId?: number;
+  paymentMethod?: string;
+  agentId?: number;
   paymentReceiveNo?: string;
   statement?: string;
   entries: IPaymentReceivedEntryDTO[];
@@ -38,7 +40,9 @@ export interface IPaymentReceivedEditDTO {
   amount: number;
   exchangeRate: number;
   referenceNo: string;
-  depositAccountId: number;
+  depositAccountId?: number;
+  paymentMethod?: string;
+  agentId?: number;
   paymentReceiveNo?: string;
   statement: string;
   entries: IPaymentReceivedEntryDTO[];

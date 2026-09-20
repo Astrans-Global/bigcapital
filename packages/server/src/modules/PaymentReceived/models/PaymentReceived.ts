@@ -23,6 +23,10 @@ export class PaymentReceived extends TenantBaseModel {
   referenceNo: string;
   depositAccountId: number;
   paymentReceiveNo: string;
+  paymentMethod?: string;
+  agentId?: number;
+  depositedAt?: string;
+  depositedBankId?: number;
   exchangeRate: number;
   statement: string;
 
@@ -109,6 +113,16 @@ export class PaymentReceived extends TenantBaseModel {
         join: {
           from: 'payment_receives.depositAccountId',
           to: 'accounts.id',
+        },
+      },
+
+      agent: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: require('../../SalesAgents/models/SalesAgent.model')
+          .SalesAgent,
+        join: {
+          from: 'payment_receives.agentId',
+          to: 'sales_agents.id',
         },
       },
 

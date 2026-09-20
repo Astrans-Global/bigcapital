@@ -14,6 +14,8 @@ export * from './items-categories';
 export * from './items-subcategories';
 export * from './item-price-lots';
 export * from './customer-areas';
+export * from './sales-agents';
+export * from './pd-cheques';
 export * from './secondary-pnl';
 export * from './customer-route-cities';
 export * from './delivery-prep';

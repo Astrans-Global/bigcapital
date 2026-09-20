@@ -13,7 +13,9 @@ export class PaymentReceivedAutoIncrementSubscriber {
    * @param {IPaymentReceivedCreatedPayload} payload -
    */
   @OnEvent(events.paymentReceive.onCreated)
-  private async handlePaymentNextNumberIncrement({}: IPaymentReceivedCreatedPayload) {
-    await this.paymentIncrement.incrementNextPaymentReceiveNumber();
+  private async handlePaymentNextNumberIncrement({
+    paymentReceive,
+  }: IPaymentReceivedCreatedPayload) {
+    await this.paymentIncrement.incrementForMethod(paymentReceive.paymentMethod);
   }
 }

@@ -319,6 +319,32 @@ export const getDashboardRoutes = () => [
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
   {
+    path: '/financial-reports/outstanding-aging-summary',
+    component: lazy(() =>
+      import(
+        '@/containers/FinancialStatements/OutstandingAgingSummary/OutstandingAgingSummary'
+      ).then((m) => ({ default: m.OutstandingAgingSummary })),
+    ),
+    breadcrumb: intl.get('outstanding_aging_summary'),
+    pageTitle: intl.get('outstanding_aging_summary'),
+    backLink: true,
+    sidebarExpand: false,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: '/financial-reports/rd-outstanding-aging-summary',
+    component: lazy(() =>
+      import(
+        '@/containers/FinancialStatements/RdOutstandingAgingSummary/RdOutstandingAgingSummary'
+      ).then((m) => ({ default: m.RdOutstandingAgingSummary })),
+    ),
+    breadcrumb: intl.get('rd_outstanding_aging_summary'),
+    pageTitle: intl.get('rd_outstanding_aging_summary'),
+    backLink: true,
+    sidebarExpand: false,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
     path: '/financial-reports/payable-aging-summary',
     component: lazy(() =>
       import(
@@ -666,6 +692,18 @@ export const getDashboardRoutes = () => [
     ),
     breadcrumb: intl.get('route_cities'),
     pageTitle: intl.get('route_cities'),
+    defaultSearchResource: RESOURCES_TYPES.CUSTOMER,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/customers/agents`,
+    component: lazy(() =>
+      import('@/containers/SalesAgents/SalesAgentsList').then((m) => ({
+        default: m.SalesAgentsList,
+      })),
+    ),
+    breadcrumb: intl.get('agents'),
+    pageTitle: intl.get('agents'),
     defaultSearchResource: RESOURCES_TYPES.CUSTOMER,
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
@@ -1161,6 +1199,30 @@ export const getDashboardRoutes = () => [
     ),
     breadcrumb: intl.get('payments_received_list'),
     pageTitle: intl.get('payments_received_list'),
+    defaultSearchResource: RESOURCES_TYPES.PAYMENT_RECEIVE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/cash-in-hand`,
+    component: lazy(() =>
+      import('@/containers/Sales/CashInHand/CashInHandList').then((m) => ({
+        default: m.CashInHandList,
+      })),
+    ),
+    breadcrumb: intl.get('cash_in_hand'),
+    pageTitle: intl.get('cash_in_hand'),
+    defaultSearchResource: RESOURCES_TYPES.PAYMENT_RECEIVE,
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: `/cheques-in-hand`,
+    component: lazy(() =>
+      import('@/containers/Sales/ChequesInHand/ChequesInHandList').then(
+        (m) => ({ default: m.ChequesInHandList }),
+      ),
+    ),
+    breadcrumb: intl.get('cheques_in_hand'),
+    pageTitle: intl.get('cheques_in_hand'),
     defaultSearchResource: RESOURCES_TYPES.PAYMENT_RECEIVE,
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },

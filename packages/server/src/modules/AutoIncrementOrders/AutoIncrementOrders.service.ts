@@ -3,6 +3,27 @@ import { SettingsStore } from '../Settings/SettingsStore';
 import { SETTINGS_PROVIDER } from '../Settings/Settings.types';
 import { transactionIncrement } from '@/utils/transaction-increment';
 
+const COLLECTION_FORMAT_FALLBACKS: Record<
+  string,
+  { prefix: string; suffix: string; next?: string }
+> = {
+  payment_receives_cash: { prefix: 'CIH-', suffix: '' },
+  payment_receives_bank_transfer: { prefix: 'PAY-', suffix: '-BT' },
+  payment_receives_bank_deposit: { prefix: 'PAY-', suffix: '-BD' },
+};
+
+function chequeLetterFallback(group: string) {
+  const match = /^pd_cheques_([A-Z])$/.exec(group);
+  if (!match) {
+    return null;
+  }
+  return {
+    prefix: `CH${match[1]}-`,
+    suffix: '',
+    next: '000001',
+  };
+}
+
 /**
  * Auto increment orders service.
  */
@@ -31,13 +52,11 @@ export class AutoIncrementOrdersService {
   /**
    * Retrieve the next service transaction number.
    * @param {string} settingsGroup
-   * @param {Function} getMaxTransactionNo
    * @return {Promise<string>}
    */
   async getNextTransactionNumber(group: string): Promise<string> {
     const settingsStore = await this.settingsStore();
 
-    // Settings service transaction number and prefix.
     const autoIncrement = await this.autoIncrementEnabled(group);
 
     const settingNo = settingsStore.get({ group, key: 'next_number' }, '');
@@ -45,7 +64,70 @@ export class AutoIncrementOrdersService {
       { group, key: 'number_prefix' },
       '',
     );
-    return autoIncrement ? `${settingPrefix}${settingNo}` : '';
+    const settingSuffix = settingsStore.get(
+      { group, key: 'number_suffix' },
+      '',
+    );
+    return autoIncrement ? `${settingPrefix}${settingNo}${settingSuffix || ''}` : '';
+  }
+
+  /**
+   * Always-on peek of prefix + next + suffix (collection series).
+   */
+  async peekNumber(group: string): Promise<string> {
+    const settingsStore = await this.settingsStore();
+    const fallback =
+      COLLECTION_FORMAT_FALLBACKS[group] || chequeLetterFallback(group);
+    const settingNo = settingsStore.get(
+      { group, key: 'next_number' },
+      fallback?.next || '00001',
+    );
+    const settingPrefix = settingsStore.get(
+      { group, key: 'number_prefix' },
+      fallback?.prefix || '',
+    );
+    const settingSuffix = settingsStore.get(
+      { group, key: 'number_suffix' },
+      fallback?.suffix || '',
+    );
+    return `${settingPrefix}${settingNo}${settingSuffix || ''}`;
+  }
+
+  /**
+   * Seed prefix/next if this collection series has never been used.
+   */
+  async ensureGroup(
+    group: string,
+    format: { prefix: string; suffix?: string; next: string },
+  ): Promise<void> {
+    const settingsStore = await this.settingsStore();
+    const hasPrefix = settingsStore.get({ group, key: 'number_prefix' }, '');
+    if (hasPrefix) {
+      return;
+    }
+    settingsStore.set({ group, key: 'number_prefix' }, format.prefix);
+    settingsStore.set({ group, key: 'number_suffix' }, format.suffix || '');
+    settingsStore.set({ group, key: 'next_number' }, format.next);
+    settingsStore.set({ group, key: 'auto_increment' }, true);
+    await settingsStore.save();
+  }
+
+  /**
+   * Always increment next_number for the group.
+   */
+  async bumpNumber(group: string): Promise<void> {
+    const settingsStore = await this.settingsStore();
+    const fallback =
+      COLLECTION_FORMAT_FALLBACKS[group] || chequeLetterFallback(group);
+    const settingNo = settingsStore.get(
+      { group, key: 'next_number' },
+      fallback?.next || '00001',
+    );
+    settingsStore.set(
+      { group, key: 'next_number' },
+      transactionIncrement(String(settingNo)),
+    );
+    await settingsStore.save();
   }
 
   /**

@@ -10,6 +10,7 @@ import {
 export interface ICustomerBalanceSummaryQuery
   extends IContactBalanceSummaryQuery {
   customersIds: number[];
+  areaIds?: number[];
 }
 
 export interface ICustomerBalanceSummaryAmount

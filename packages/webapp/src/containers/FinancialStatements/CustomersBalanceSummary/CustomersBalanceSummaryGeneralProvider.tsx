@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { FinancialHeaderLoadingSkeleton } from '../FinancialHeaderLoadingSkeleton';
 import { useCustomers } from '@/hooks/query';
+import { useCustomerAreas } from '@/hooks/query';
 import { asSelectItems } from '@/components/Forms/asSelectItems';
 
 type UseCustomersResult = ReturnType<typeof useCustomers>;
@@ -11,6 +12,7 @@ type CustomersBalanceSummaryGeneralContextValue = {
   customers: UseCustomersResult['data'] extends { customers: infer C }
     ? C
     : unknown;
+  areas: any[];
 };
 
 type CustomersBalanceSummaryGeneralProviderProps = {
@@ -29,11 +31,13 @@ function CustomersBalanceSummaryGeneralProvider({
     isFetching: isCustomersFetching,
     isLoading: isCustomersLoading,
   } = useCustomers();
+  const { data: areas } = useCustomerAreas();
 
   const provider: CustomersBalanceSummaryGeneralContextValue = {
     isCustomersLoading,
     isCustomersFetching,
     customers: asSelectItems((customersData as any)?.customers ?? customersData),
+    areas: areas || [],
   };
 
   return isCustomersLoading ? (

@@ -1,93 +1,90 @@
 // @ts-nocheck
 import React from 'react';
-import { Position, ControlGroup } from '@blueprintjs/core';
 import { useFormikContext } from 'formik';
 import * as R from 'ramda';
 
-import { FInputGroup, FormattedMessage as T } from '@/components';
-import {
-  FFormGroup,
-  FieldRequiredHint,
-  Icon,
-  InputPrependButton,
-} from '@/components';
-
-import { withDialogActions } from '@/containers/Dialog/withDialogActions';
+import { FInputGroup, FFormGroup, FieldRequiredHint } from '@/components';
 import { withSettings } from '@/containers/Settings/withSettings';
+import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
+import {
+  chequeAreaLetter,
+  previewCollectionNumber,
+} from './collectionNumber';
+import { useCustomerAreas } from '@/hooks/query';
 import intl from 'react-intl-universal';
 
+function chequeSettingsFromAll(allSettings, areaName) {
+  if (!areaName) {
+    return undefined;
+  }
+  const letter = chequeAreaLetter(areaName);
+  return allSettings?.[`pdCheques${letter}`];
+}
+
 /**
- * Payment receive number field.
+ * Payment receive number field — always auto-generated, never manual.
  */
 export const PaymentReceivePaymentNoField = R.compose(
-  withSettings(({ paymentReceiveSettings }) => ({
-    paymentReceiveAutoIncrement: paymentReceiveSettings?.autoIncrement,
-  })),
-  withDialogActions,
+  withSettings(
+    ({
+      allSettings,
+      paymentReceivesCashSettings,
+      paymentReceivesBankTransferSettings,
+      paymentReceivesBankDepositSettings,
+    }) => ({
+      allSettings,
+      cashNumberSettings: paymentReceivesCashSettings,
+      bankTransferNumberSettings: paymentReceivesBankTransferSettings,
+      bankDepositNumberSettings: paymentReceivesBankDepositSettings,
+    }),
+  ),
 )(({
-  // #withDialogActions
-  openDialog,
-
-  // #withSettings
-  paymentReceiveAutoIncrement,
+  allSettings,
+  cashNumberSettings,
+  bankTransferNumberSettings,
+  bankDepositNumberSettings,
 }) => {
-  const { values, setFieldValue } = useFormikContext();
-
-  // Handle click open payment receive number dialog.
-  const handleClickOpenDialog = () => {
-    openDialog('payment-receive-number-form');
+  const { values } = useFormikContext();
+  const { isNewMode } = usePaymentReceiveFormContext();
+  const { data: areas } = useCustomerAreas();
+  const method = values.payment_method;
+  const area = (areas || []).find(
+    (item) => String(item.id) === String(values.area_id),
+  );
+  const settingsByMethod = {
+    cash: cashNumberSettings,
+    bank_transfer: bankTransferNumberSettings,
+    bank_deposit: bankDepositNumberSettings,
+    pd_cheque: chequeSettingsFromAll(allSettings, area?.name),
   };
-  // Handle payment number field blur.
-  const handlePaymentNoBlur = (event) => {
-    const newValue = event.target.value;
+  const preview = method
+    ? previewCollectionNumber(method, settingsByMethod[method], {
+        areaName: area?.name,
+      })
+    : '';
+  const displayValue = isNewMode ? preview : values.payment_receive_no;
+  const labelId =
+    method === 'pd_cheque' ? 'cheque_document_no' : 'payment_received_no';
 
-    // Show the confirmation dialog if the value has changed and auto-increment
-    // mode is enabled.
-    if (values.payment_receive_no !== newValue && paymentReceiveAutoIncrement) {
-      openDialog('payment-receive-number-form', {
-        initialFormValues: {
-          onceManualNumber: newValue,
-          incrementMode: 'manual-transaction',
-        },
-      });
-    }
-    // Setting the payment number to the form will be manually in case
-    // auto-increment is disable.
-    if (!paymentReceiveAutoIncrement) {
-      setFieldValue('payment_receive_no', newValue);
-      setFieldValue('payment_receive_no_manually', newValue);
-    }
-  };
   return (
     <FFormGroup
       name={'payment_receive_no'}
-      label={intl.get('payment_received_no')}
+      label={intl.get(labelId)}
       inline={true}
       labelInfo={<FieldRequiredHint />}
+      helperText={
+        isNewMode ? intl.get('payment_number_assigned_on_save') : null
+      }
     >
-      <ControlGroup fill={true}>
-        <FInputGroup
-          name={'payment_receive_no'}
-          minimal={true}
-          value={values.payment_receive_no}
-          asyncControl={true}
-          onBlur={handlePaymentNoBlur}
-          onChange={() => {}}
-        />
-        <InputPrependButton
-          buttonProps={{
-            onClick: handleClickOpenDialog,
-            icon: <Icon icon={'settings-18'} />,
-          }}
-          tooltip={true}
-          tooltipProps={{
-            content: (
-              <T id={'setting_your_auto_generated_payment_receive_number'} />
-            ),
-            position: Position.BOTTOM_LEFT,
-          }}
-        />
-      </ControlGroup>
+      <FInputGroup
+        name={'payment_receive_no'}
+        minimal={true}
+        value={displayValue}
+        disabled={true}
+        placeholder={
+          method ? displayValue : intl.get('select_payment_method_first')
+        }
+      />
     </FFormGroup>
   );
 });

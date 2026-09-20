@@ -2,8 +2,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import intl from 'react-intl-universal';
-import { FastField, ErrorMessage, useFormikContext } from 'formik';
-import { useAutofocus } from '@/hooks';
+import { useFormikContext } from 'formik';
 import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
 import { isEqual } from 'lodash';
 import { Classes, Position, ControlGroup } from '@blueprintjs/core';
@@ -27,22 +26,17 @@ import {
   FDateInput,
   FMoneyInputGroup,
 } from '@/components';
-import { momentFormatter, compose } from '@/utils';
+import { momentFormatter } from '@/utils';
 import { useSetPrimaryBranchToForm } from './utils';
 import { useQuickPaymentReceiveContext } from './QuickPaymentReceiveFormProvider';
-import { withSettings } from '@/containers/Settings/withSettings';
 
 /**
  * Quick payment receive form fields.
  */
-function QuickPaymentReceiveFormFieldsInner({ paymentReceiveAutoIncrement }) {
+function QuickPaymentReceiveFormFieldsInner() {
   const baseCurrency = useCurrentOrganizationBaseCurrency();
   const { accounts, branches } = useQuickPaymentReceiveContext();
-
-  // Intl context.
   const { values } = useFormikContext();
-
-  const paymentReceiveFieldRef = useAutofocus();
 
   // Sets the primary branch to form.
   useSetPrimaryBranchToForm();
@@ -81,11 +75,12 @@ function QuickPaymentReceiveFormFieldsInner({ paymentReceiveAutoIncrement }) {
           <FFormGroup
             name={'payment_receive_no'}
             label={intl.get('payment_no')}
+            helperText={intl.get('payment_number_assigned_on_save')}
           >
             <FInputGroup
               name={'payment_receive_no'}
               minimal={true}
-              disabled={paymentReceiveAutoIncrement}
+              disabled={true}
             />
           </FFormGroup>
         </Col>
@@ -169,11 +164,7 @@ function QuickPaymentReceiveFormFieldsInner({ paymentReceiveAutoIncrement }) {
   );
 }
 
-export const QuickPaymentReceiveFormFields = compose(
-  withSettings(({ paymentReceiveSettings }) => ({
-    paymentReceiveAutoIncrement: paymentReceiveSettings?.autoIncrement,
-  })),
-)(QuickPaymentReceiveFormFieldsInner);
+export const QuickPaymentReceiveFormFields = QuickPaymentReceiveFormFieldsInner;
 
 export const BranchRowDivider = styled.div`
   height: 1px;

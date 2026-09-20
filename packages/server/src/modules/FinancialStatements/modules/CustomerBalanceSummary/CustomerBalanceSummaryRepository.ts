@@ -29,6 +29,7 @@ export class CustomerBalanceSummaryRepository {
    */
   public async getCustomers(
     customersIds: number[],
+    areaIds?: number[],
   ): Promise<ModelObject<Customer>[]> {
     return await this.customerModel()
       .query()
@@ -36,6 +37,9 @@ export class CustomerBalanceSummaryRepository {
       .onBuild((query) => {
         if (!isEmpty(customersIds)) {
           query.whereIn('id', customersIds);
+        }
+        if (!isEmpty(areaIds)) {
+          query.whereIn('areaId', areaIds);
         }
       });
   }

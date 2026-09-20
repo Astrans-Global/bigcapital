@@ -17,7 +17,8 @@ import {
   transformErrors,
   transformInvoiceToForm,
 } from './utils';
-import { compose, transactionNumber } from '@/utils';
+import { compose } from '@/utils';
+import { previewCollectionNumber } from '@/containers/Sales/PaymentsReceived/PaymentReceiveForm/collectionNumber';
 
 /**
  * Quick payment receive form.
@@ -27,31 +28,25 @@ function QuickPaymentReceiveFormInner({
   closeDialog,
 
   // #withSettings
-  paymentReceiveAutoIncrement,
-  paymentReceiveNumberPrefix,
-  paymentReceiveNextNumber,
   preferredDepositAccount,
+  bankDepositNumberSettings,
 }) {
   const { dialogName, invoice, createPaymentReceiveMutate } =
     useQuickPaymentReceiveContext();
 
-  // Payment receive number.
-  const nextPaymentNumber = transactionNumber(
-    paymentReceiveNumberPrefix,
-    paymentReceiveNextNumber,
+  const nextPaymentNumber = previewCollectionNumber(
+    'bank_deposit',
+    bankDepositNumberSettings,
   );
 
-  // Initial form values
   const initialValues = {
     ...defaultInitialValues,
-    ...(paymentReceiveAutoIncrement && {
-      payment_receive_no: nextPaymentNumber,
-    }),
+    payment_receive_no: nextPaymentNumber,
+    payment_method: 'bank_deposit',
     deposit_account_id: defaultTo(preferredDepositAccount, ''),
     ...transformInvoiceToForm(invoice),
   };
 
-  // Handles the form submit.
   const handleFormSubmit = (values, { setSubmitting, setFieldError }) => {
     const entries = [
       {
@@ -61,21 +56,17 @@ function QuickPaymentReceiveFormInner({
     ];
     const form = {
       ...omit(values, ['payment_receive_no', 'invoice_id']),
-      ...(!paymentReceiveAutoIncrement && {
-        payment_receive_no: values.payment_receive_no,
-      }),
+      payment_method: 'bank_deposit',
       entries,
     };
 
-    // Handle request response success.
-    const onSaved = (response) => {
+    const onSaved = () => {
       AppToaster.show({
         message: intl.get('the_payment_received_transaction_has_been_created'),
         intent: Intent.SUCCESS,
       });
       closeDialog(dialogName);
     };
-    // Handle request response errors.
     const onError = ({ data: { errors } }) => {
       if (errors) {
         transformErrors(errors, { setFieldError });
@@ -97,10 +88,10 @@ function QuickPaymentReceiveFormInner({
 
 export const QuickPaymentReceiveForm = compose(
   withDialogActions,
-  withSettings(({ paymentReceiveSettings }) => ({
-    paymentReceiveNextNumber: paymentReceiveSettings?.nextNumber,
-    paymentReceiveNumberPrefix: paymentReceiveSettings?.numberPrefix,
-    paymentReceiveAutoIncrement: paymentReceiveSettings?.autoIncrement,
-    preferredDepositAccount: paymentReceiveSettings?.preferredDepositAccount,
-  })),
+  withSettings(
+    ({ paymentReceiveSettings, paymentReceivesBankDepositSettings }) => ({
+      preferredDepositAccount: paymentReceiveSettings?.preferredDepositAccount,
+      bankDepositNumberSettings: paymentReceivesBankDepositSettings,
+    }),
+  ),
 )(QuickPaymentReceiveFormInner);

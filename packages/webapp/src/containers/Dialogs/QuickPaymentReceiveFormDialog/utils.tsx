@@ -13,6 +13,7 @@ export const defaultInitialValues = {
   invoice_id: '',
   customer_id: '',
   deposit_account_id: '',
+  payment_method: 'bank_deposit',
   payment_receive_no: '',
   payment_date: moment(new Date()).format('YYYY-MM-DD'),
   reference_no: '',

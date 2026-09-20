@@ -133,6 +133,9 @@ export const SettingsOptions = {
     number_prefix: {
       type: 'string',
     },
+    number_suffix: {
+      type: 'string',
+    },
     auto_increment: {
       type: 'boolean',
     },
@@ -142,6 +145,30 @@ export const SettingsOptions = {
     preferred_advance_deposit: {
       type: 'number',
     },
+  },
+  payment_receives_cash: {
+    next_number: { type: 'string' },
+    number_prefix: { type: 'string' },
+    number_suffix: { type: 'string' },
+    auto_increment: { type: 'boolean' },
+  },
+  payment_receives_bank_transfer: {
+    next_number: { type: 'string' },
+    number_prefix: { type: 'string' },
+    number_suffix: { type: 'string' },
+    auto_increment: { type: 'boolean' },
+  },
+  payment_receives_bank_deposit: {
+    next_number: { type: 'string' },
+    number_prefix: { type: 'string' },
+    number_suffix: { type: 'string' },
+    auto_increment: { type: 'boolean' },
+  },
+  pd_cheques: {
+    next_number: { type: 'string' },
+    number_prefix: { type: 'string' },
+    number_suffix: { type: 'string' },
+    auto_increment: { type: 'boolean' },
   },
   items: {
     preferred_sell_account: {

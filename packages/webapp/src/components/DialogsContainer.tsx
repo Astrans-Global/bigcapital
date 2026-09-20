@@ -4,6 +4,9 @@ import { index as UserFormDialog } from '@/containers/Dialogs/UserFormDialog';
 import { index as ItemCategoryDialog } from '@/containers/Dialogs/ItemCategoryDialog';
 import { index as ItemSubcategoryDialog } from '@/containers/Dialogs/ItemSubcategoryDialog';
 import { index as CustomerAreaDialog } from '@/containers/Dialogs/CustomerAreaDialog';
+import { index as SalesAgentDialog } from '@/containers/Dialogs/SalesAgentDialog';
+import { index as DepositCashPaymentDialog } from '@/containers/Dialogs/DepositCashPaymentDialog';
+import { index as PdChequeStatusDialog } from '@/containers/Dialogs/PdChequeStatusDialog';
 import { index as CustomerRouteCityDialog } from '@/containers/Dialogs/CustomerRouteCityDialog';
 import { index as CurrencyFormDialog } from '@/containers/Dialogs/CurrencyFormDialog';
 import { index as InventoryAdjustmentDialog } from '@/containers/Dialogs/InventoryAdjustmentFormDialog';
@@ -82,6 +85,9 @@ export default function DialogsContainer() {
       <ItemCategoryDialog dialogName={DialogsName.ItemCategoryForm} />
       <ItemSubcategoryDialog dialogName={DialogsName.ItemSubcategoryForm} />
       <CustomerAreaDialog dialogName={DialogsName.CustomerAreaForm} />
+      <SalesAgentDialog dialogName={DialogsName.SalesAgentForm} />
+      <DepositCashPaymentDialog dialogName={DialogsName.DepositCashPayment} />
+      <PdChequeStatusDialog dialogName={DialogsName.PdChequeStatus} />
       <CustomerRouteCityDialog dialogName={DialogsName.CustomerRouteCityForm} />
       <InventoryAdjustmentDialog
         dialogName={DialogsName.InventoryAdjustmentForm}

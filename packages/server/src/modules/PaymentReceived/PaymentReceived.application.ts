@@ -18,6 +18,9 @@ import { PaymentsReceivedPagesService } from './queries/PaymentsReceivedPages.se
 import { GetPaymentReceivedMailState } from './queries/GetPaymentReceivedMailState.service';
 import { BulkDeletePaymentReceivedService } from './BulkDeletePaymentReceived.service';
 import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePaymentReceived.service';
+import { GetCashInHandService } from './queries/GetCashInHand.service';
+import { DepositCashPaymentReceivedService } from './commands/DepositCashPaymentReceived.service';
+import { DepositCashPaymentDto } from './dtos/DepositCashPayment.dto';
 
 @Injectable()
 export class PaymentReceivesApplication {
@@ -35,6 +38,8 @@ export class PaymentReceivesApplication {
     private paymentsReceivedPagesService: PaymentsReceivedPagesService,
     private bulkDeletePaymentReceivedService: BulkDeletePaymentReceivedService,
     private validateBulkDeletePaymentReceivedService: ValidateBulkDeletePaymentReceivedService,
+    private getCashInHandService: GetCashInHandService,
+    private depositCashPaymentReceivedService: DepositCashPaymentReceivedService,
   ) {}
 
   /**
@@ -194,6 +199,26 @@ export class PaymentReceivesApplication {
   public getPaymentReceivedEditPage(paymentReceiveId: number) {
     return this.paymentsReceivedPagesService.getPaymentReceiveEditPage(
       paymentReceiveId,
+    );
+  }
+
+  /**
+   * Undeposited cash collections (Cash in hand).
+   */
+  public getCashInHand(query: { areaId?: number; agentId?: number }) {
+    return this.getCashInHandService.getCashInHand(query);
+  }
+
+  /**
+   * Marks one cash payment as deposited to a bank via transfer.
+   */
+  public depositCashPayment(
+    paymentReceiveId: number,
+    dto: DepositCashPaymentDto,
+  ) {
+    return this.depositCashPaymentReceivedService.depositCashPayment(
+      paymentReceiveId,
+      dto,
     );
   }
 }

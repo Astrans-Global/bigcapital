@@ -45,14 +45,9 @@ export class PaymentReceiveDTOTransformer {
       paymentReceiveDTO.amount ??
       sumBy(paymentReceiveDTO.entries, 'paymentAmount');
 
-    // Retreive the next invoice number.
-    const autoNextNumber = await this.increments.getNextPaymentReceiveNumber();
-
-    // Retrieve the next payment receive number.
-    const paymentReceiveNo =
-      paymentReceiveDTO.paymentReceiveNo ||
-      oldPaymentReceive?.paymentReceiveNo ||
-      autoNextNumber;
+    const paymentReceiveNo = oldPaymentReceive
+      ? oldPaymentReceive.paymentReceiveNo
+      : await this.increments.getNextForMethod(paymentReceiveDTO.paymentMethod);
 
     this.validators.validatePaymentNoRequire(paymentReceiveNo);
 
@@ -62,9 +57,10 @@ export class PaymentReceiveDTOTransformer {
     )(paymentReceiveDTO.entries);
 
     const initialDTO = {
-      ...formatDateFields(omit(paymentReceiveDTO, ['entries', 'attachments']), [
-        'paymentDate',
-      ]),
+      ...formatDateFields(
+        omit(paymentReceiveDTO, ['entries', 'attachments', 'paymentReceiveNo']),
+        ['paymentDate'],
+      ),
       amount,
       currencyCode: customer.currencyCode,
       ...(paymentReceiveNo ? { paymentReceiveNo } : {}),

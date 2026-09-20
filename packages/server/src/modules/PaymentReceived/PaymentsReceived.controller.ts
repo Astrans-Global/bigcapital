@@ -48,6 +48,24 @@ import { PermissionGuard } from '@/modules/Roles/Permission.guard';
 import { AuthorizationGuard } from '@/modules/Roles/Authorization.guard';
 import { AbilitySubject } from '@/modules/Roles/Roles.types';
 import { PaymentReceiveAction } from './types/PaymentReceived.types';
+import { DepositCashPaymentDto } from './dtos/DepositCashPayment.dto';
+import { ToNumber } from '@/common/decorators/Validators';
+import { IsInt, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class CashInHandQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @ToNumber()
+  @IsInt()
+  areaId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @ToNumber()
+  @IsInt()
+  agentId?: number;
+}
 
 @Controller('payments-received')
 @ApiTags('Payments Received')
@@ -207,6 +225,28 @@ export class PaymentReceivesController {
     return this.paymentReceivesApplication.bulkDeletePaymentReceives(
       bulkDeleteDto.ids,
       { skipUndeletable: bulkDeleteDto.skipUndeletable ?? false },
+    );
+  }
+
+  @Get('cash-in-hand')
+  @RequirePermission(PaymentReceiveAction.View, AbilitySubject.PaymentReceive)
+  @ApiOperation({ summary: 'Undeposited cash collections (Cash in hand).' })
+  public getCashInHand(@Query() query: CashInHandQueryDto) {
+    return this.paymentReceivesApplication.getCashInHand(query);
+  }
+
+  @Post(':id/deposit')
+  @RequirePermission(PaymentReceiveAction.Edit, AbilitySubject.PaymentReceive)
+  @ApiOperation({
+    summary: 'Mark one cash payment as deposited to a bank account.',
+  })
+  public depositCashPayment(
+    @Param('id', ParseIntPipe) paymentReceiveId: number,
+    @Body() dto: DepositCashPaymentDto,
+  ) {
+    return this.paymentReceivesApplication.depositCashPayment(
+      paymentReceiveId,
+      dto,
     );
   }
 

@@ -11,4 +11,13 @@ export class CustomerBalanceSummaryQueryDto extends ContactBalanceSummaryQueryDt
   @IsArray()
   @IsOptional()
   customersIds: number[];
+
+  @ApiPropertyOptional({
+    description: 'Filter customers by area IDs',
+    type: [Number],
+    example: [1, 2],
+  })
+  @IsArray()
+  @IsOptional()
+  areaIds?: number[];
 }

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <title>Clearing Astrans Books…</title>
+    <style>
+      body {
+        font-family: Segoe UI, sans-serif;
+        margin: 48px auto;
+        max-width: 28rem;
+        color: #1c2127;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Clearing old Chrome cache for Astrans Books…</p>
+    <p>This window will open the login page in a few seconds.</p>
+    <script>
+      (function () {
+        function wipeCookies() {
+          var parts = (document.cookie || '').split(';');
+          for (var i = 0; i < parts.length; i++) {
+            var name = parts[i].split('=')[0].trim();
+            if (!name) continue;
+            document.cookie = name + '=; Max-Age=0; path=/';
+            document.cookie =
+              name + '=; Max-Age=0; path=/; domain=' + location.hostname;
+          }
+        }
+
+        function go() {
+          location.replace('/auth/login?fresh=' + Date.now());
+        }
+
+        var jobs = [];
+        try {
+          wipeCookies();
+          localStorage.clear();
+          sessionStorage.clear();
+          if (navigator.serviceWorker) {
+            jobs.push(
+              navigator.serviceWorker.getRegistrations().then(function (rs) {
+                return Promise.all(rs.map(function (r) { return r.unregister(); }));
+              }),
+            );
+          }
+          if (window.caches) {
+            jobs.push(
+              caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+              }),
+            );
+          }
+        } catch (e) {}
+
+        Promise.all(jobs)
+          .catch(function () {})
+          .then(function () {
+            setTimeout(go, 1500);
+          });
+      })();
+    </script>
+  </body>
+</html>

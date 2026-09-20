@@ -5,11 +5,6 @@ import { DATATYPES_LENGTH } from '@/constants/dataTypes';
 
 const Schema = Yup.object().shape({
   customer_id: Yup.string().label(intl.get('customer_name_')).required(),
-  payment_receive_no: Yup.string()
-    .required()
-    .nullable()
-    .max(DATATYPES_LENGTH.STRING)
-    .label(intl.get('payment_received_no_')),
   payment_date: Yup.date().required().label(intl.get('payment_date_')),
   deposit_account_id: Yup.number()
     .required()

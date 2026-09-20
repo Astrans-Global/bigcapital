@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import moment from 'moment';
 import intl from 'react-intl-universal';
 import { Button } from '@blueprintjs/core';
@@ -8,10 +8,11 @@ import * as R from 'ramda';
 
 import { Money, ExchangeRateInputGroup, MoneyFieldCell } from '@/components';
 
-import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
+import { useCurrentOrganizationBaseCurrency, useCustomerAreas } from '@/hooks/query';
 import { useEstimateIsForeignCustomer } from './utils';
-import { transactionNumber } from '@/utils';
 import { withSettings } from '@/containers/Settings/withSettings';
+import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
+import { previewCollectionNumber } from './collectionNumber';
 
 /**
  * Invoice date cell.
@@ -121,30 +122,65 @@ export function PaymentReceiveProjectSelectButton({ label }) {
  * @returns {React.ReactNode}
  */
 export const PaymentReceiveSyncIncrementSettingsToForm = R.compose(
-  withSettings(({ paymentReceiveSettings }) => ({
-    paymentReceiveNextNumber: paymentReceiveSettings?.nextNumber,
-    paymentReceiveNumberPrefix: paymentReceiveSettings?.numberPrefix,
-    paymentReceiveAutoIncrement: paymentReceiveSettings?.autoIncrement,
-  })),
+  withSettings(
+    ({
+      allSettings,
+      paymentReceivesCashSettings,
+      paymentReceivesBankTransferSettings,
+      paymentReceivesBankDepositSettings,
+    }) => ({
+      allSettings,
+      cashNumberSettings: paymentReceivesCashSettings,
+      bankTransferNumberSettings: paymentReceivesBankTransferSettings,
+      bankDepositNumberSettings: paymentReceivesBankDepositSettings,
+    }),
+  ),
 )(({
-  paymentReceiveNextNumber,
-  paymentReceiveNumberPrefix,
-  paymentReceiveAutoIncrement,
+  allSettings,
+  cashNumberSettings,
+  bankTransferNumberSettings,
+  bankDepositNumberSettings,
 }) => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue, values } = useFormikContext();
+  const { isNewMode } = usePaymentReceiveFormContext();
+  const { data: areas } = useCustomerAreas();
+  const area = (areas || []).find(
+    (item) => String(item.id) === String(values.area_id),
+  );
+  const letter = area?.name
+    ? String(area.name).match(/[A-Za-z]/)?.[0]?.toUpperCase()
+    : '';
+  const chequeSettings = letter
+    ? allSettings?.[`pdCheques${letter}`]
+    : undefined;
+  const settingsByMethod = {
+    cash: cashNumberSettings,
+    bank_transfer: bankTransferNumberSettings,
+    bank_deposit: bankDepositNumberSettings,
+    pd_cheque: chequeSettings,
+  };
 
   useLayoutEffect(() => {
-    if (!paymentReceiveAutoIncrement) return;
+    if (!isNewMode || !values.payment_method) return;
 
     setFieldValue(
       'payment_receive_no',
-      transactionNumber(paymentReceiveNumberPrefix, paymentReceiveNextNumber),
+      previewCollectionNumber(
+        values.payment_method,
+        settingsByMethod[values.payment_method],
+        { areaName: area?.name },
+      ),
     );
   }, [
+    isNewMode,
     setFieldValue,
-    paymentReceiveNumberPrefix,
-    paymentReceiveNextNumber,
-    paymentReceiveAutoIncrement,
+    values.payment_method,
+    values.area_id,
+    area?.name,
+    cashNumberSettings,
+    bankTransferNumberSettings,
+    bankDepositNumberSettings,
+    chequeSettings,
   ]);
   return null;
 });

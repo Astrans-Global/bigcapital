@@ -16,6 +16,9 @@ import { BillVatRecord } from '@/modules/GrnVat/models/BillVatRecord.model';
 import { SaleInvoiceVatRecord } from '@/modules/SaleInvoiceVat/models/SaleInvoiceVatRecord.model';
 import { SaleInvoiceLinePnl } from '@/modules/SecondaryPnl/models/SaleInvoiceLinePnl.model';
 import { CustomerArea } from '@/modules/CustomerAreas/models/CustomerArea.model';
+import { SalesAgent } from '@/modules/SalesAgents/models/SalesAgent.model';
+import { PdCheque } from '@/modules/PdCheques/models/PdCheque.model';
+import { PdChequeEntry } from '@/modules/PdCheques/models/PdChequeEntry.model';
 import { CustomerRouteCity } from '@/modules/CustomerRouteCities/models/CustomerRouteCity.model';
 import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { PdfTemplateModel } from '@/modules/PdfTemplate/models/PdfTemplate';
@@ -67,6 +70,9 @@ const models = [
   SaleInvoiceVatRecord,
   SaleInvoiceLinePnl,
   CustomerArea,
+  SalesAgent,
+  PdCheque,
+  PdChequeEntry,
   CustomerRouteCity,
   TaxRateModel,
   PdfTemplateModel,

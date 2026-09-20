@@ -12,6 +12,10 @@ export interface WithSettingsProps {
   billPaymentSettings: SettingsGroup;
   billsettings: SettingsGroup;
   paymentReceiveSettings: SettingsGroup;
+  paymentReceivesCashSettings: SettingsGroup;
+  paymentReceivesBankTransferSettings: SettingsGroup;
+  paymentReceivesBankDepositSettings: SettingsGroup;
+  pdChequesSettings: SettingsGroup;
   estimatesSettings: SettingsGroup;
   receiptSettings: SettingsGroup;
   invoiceSettings: SettingsGroup;
@@ -47,6 +51,10 @@ export const withSettings = <Props = unknown,>(
       billPaymentSettings: data.billPayments,
       billsettings: data.bills,
       paymentReceiveSettings: data.paymentReceives,
+      paymentReceivesCashSettings: data.paymentReceivesCash,
+      paymentReceivesBankTransferSettings: data.paymentReceivesBankTransfer,
+      paymentReceivesBankDepositSettings: data.paymentReceivesBankDeposit,
+      pdChequesSettings: data.pdCheques,
       estimatesSettings: data.salesEstimates,
       receiptSettings: data.salesReceipts,
       invoiceSettings: data.salesInvoices,

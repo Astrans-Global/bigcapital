@@ -224,6 +224,24 @@ export const SidebarMenu = [
               ability: PaymentReceiveAction.View,
             },
           },
+          {
+            text: <T id={'cash_in_hand'} />,
+            href: '/cash-in-hand',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.PaymentReceive,
+              ability: PaymentReceiveAction.View,
+            },
+          },
+          {
+            text: <T id={'cheques_in_hand'} />,
+            href: '/cheques-in-hand',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.PaymentReceive,
+              ability: PaymentReceiveAction.View,
+            },
+          },
         ],
       },
       {
@@ -404,6 +422,15 @@ export const SidebarMenu = [
               ability: CustomerAction.View,
             },
           },
+          {
+            text: <T id={'agents'} />,
+            href: '/customers/agents',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.View,
+            },
+          },
         ],
       },
       {
@@ -443,6 +470,16 @@ export const SidebarMenu = [
             href: '/customers/route-cities/new',
             type: ISidebarMenuItemType.Dialog,
             dialogName: DialogsName.CustomerRouteCityForm,
+            permission: {
+              subject: AbilitySubject.Customer,
+              ability: CustomerAction.Create,
+            },
+          },
+          {
+            text: <T id={'sidebar.new_agent'} />,
+            href: '/customers/agents/new',
+            type: ISidebarMenuItemType.Dialog,
+            dialogName: DialogsName.SalesAgentForm,
             permission: {
               subject: AbilitySubject.Customer,
               ability: CustomerAction.Create,
@@ -705,8 +742,17 @@ export const SidebarMenu = [
             },
           },
           {
-            text: <T id={'sidebar.ar_aging_Summary'} />,
-            href: '/financial-reports/receivable-aging-summary',
+            text: <T id={'outstanding_aging_summary'} />,
+            href: '/financial-reports/outstanding-aging-summary',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Report,
+              ability: ReportsAction.READ_AR_AGING_SUMMARY,
+            },
+          },
+          {
+            text: <T id={'rd_outstanding_aging_summary'} />,
+            href: '/financial-reports/rd-outstanding-aging-summary',
             type: ISidebarMenuItemType.Link,
             permission: {
               subject: AbilitySubject.Report,
