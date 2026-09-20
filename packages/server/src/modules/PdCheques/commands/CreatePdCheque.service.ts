@@ -99,8 +99,8 @@ export class CreatePdChequeService {
           userId: user?.id,
           referenceNo: dto.referenceNo,
           statement: dto.statement,
-          chequesAccountId: cheques.id,
-          advancesAccountId: advances.id,
+          chequesAccountId: Number((cheques as { id: number }).id),
+          advancesAccountId: Number((advances as { id: number }).id),
           entries: entries.map((entry, index) => ({
             invoiceId: entry.invoiceId,
             paymentAmount: entry.paymentAmount,

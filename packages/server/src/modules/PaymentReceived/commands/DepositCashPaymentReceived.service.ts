@@ -74,6 +74,7 @@ export class DepositCashPaymentReceivedService {
         exchangeRate: payment.exchangeRate || 1,
         creditAccountId: payment.depositAccountId,
         cashflowAccountId: bank.id,
+        currencyCode: payment.currencyCode,
         publish: true,
         referenceNo: payment.referenceNo || payment.paymentReceiveNo,
         branchId: payment.branchId,
