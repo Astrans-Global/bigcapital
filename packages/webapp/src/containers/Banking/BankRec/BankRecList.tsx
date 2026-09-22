@@ -37,18 +37,28 @@ function money(value) {
   });
 }
 
+function field(row, camel, snake) {
+  return row?.[camel] ?? row?.[snake];
+}
+
+function formatDate(value) {
+  return value ? moment(value).format('YYYY-MM-DD') : '';
+}
+
 function ActionsMenu({ rec, onOpen, onReopen, onDelete }) {
+  const status = field(rec, 'status', 'status');
+  const canReopen = field(rec, 'canReopen', 'can_reopen');
   return (
     <Menu>
       <MenuItem
         icon={<Icon icon="reader-18" />}
-        text={rec.status === 'closed' ? 'View' : 'Open'}
+        text={status === 'closed' ? 'View' : 'Open'}
         onClick={() => onOpen(rec)}
       />
-      {rec.can_reopen && (
+      {canReopen && (
         <MenuItem text="Reopen last Rec" onClick={() => onReopen(rec)} />
       )}
-      {rec.status === 'draft' && (
+      {status === 'draft' && (
         <>
           <MenuDivider />
           <MenuItem
@@ -63,12 +73,96 @@ function ActionsMenu({ rec, onOpen, onReopen, onDelete }) {
   );
 }
 
+function ActionsCell({ row: { original }, payload }) {
+  return (
+    <Popover
+      content={
+        <ActionsMenu
+          rec={original}
+          onOpen={payload.onOpen}
+          onReopen={payload.onReopen}
+          onDelete={payload.onDelete}
+        />
+      }
+      position={Position.RIGHT_BOTTOM}
+    >
+      <Button icon={<Icon icon="more-h-16" iconSize={16} />} minimal />
+    </Popover>
+  );
+}
+
+function useBankRecColumns() {
+  return React.useMemo(
+    () => [
+      {
+        id: 'accountName',
+        Header: 'Bank',
+        accessor: (row) => field(row, 'accountName', 'account_name') || '',
+        width: 180,
+        clickable: true,
+      },
+      {
+        id: 'periodMonth',
+        Header: 'Month',
+        accessor: (row) => field(row, 'periodMonth', 'period_month') || '',
+        width: 90,
+        clickable: true,
+      },
+      {
+        id: 'startDate',
+        Header: 'Start',
+        accessor: (row) => formatDate(field(row, 'startDate', 'start_date')),
+        width: 110,
+        clickable: true,
+      },
+      {
+        id: 'endDate',
+        Header: 'End',
+        accessor: (row) => formatDate(field(row, 'endDate', 'end_date')),
+        width: 110,
+        clickable: true,
+      },
+      {
+        id: 'status',
+        Header: 'Status',
+        accessor: (row) => (
+          <Tag
+            minimal
+            round
+            intent={row.status === 'closed' ? Intent.SUCCESS : Intent.WARNING}
+          >
+            {row.status === 'closed' ? 'Closed' : 'Draft'}
+          </Tag>
+        ),
+        width: 90,
+      },
+      {
+        id: 'difference',
+        Header: 'Difference',
+        accessor: (row) => money(row.difference),
+        align: 'right',
+        width: 120,
+      },
+      {
+        id: 'actions',
+        Header: '',
+        Cell: ActionsCell,
+        width: 44,
+        disableResizing: true,
+        className: 'actions',
+      },
+    ],
+    [],
+  );
+}
+
 export default function BankRecList() {
   const history = useHistory();
   const { data, isLoading } = useBankRecs();
   const { mutateAsync: reopen } = useReopenBankRec();
   const { mutateAsync: remove } = useDeleteBankRec();
   const rows = data?.data || [];
+  const columns = useBankRecColumns();
 
   const handleNew = () => history.push('/bank-recs/new');
   const handleOpen = (rec) => history.push(`/bank-recs/${rec.id}`);
@@ -95,64 +189,8 @@ export default function BankRecList() {
     }
   };
 
-  const columns = React.useMemo(
-    () => [
-      { Header: 'Bank', accessor: 'account_name', width: 180 },
-      { Header: 'Month', accessor: 'period_month', width: 90 },
-      {
-        Header: 'Start',
-        accessor: (row) => moment(row.start_date).format('YYYY-MM-DD'),
-        width: 110,
-      },
-      {
-        Header: 'End',
-        accessor: (row) => moment(row.end_date).format('YYYY-MM-DD'),
-        width: 110,
-      },
-      {
-        Header: 'Status',
-        accessor: (row) => (
-          <Tag
-            minimal
-            round
-            intent={row.status === 'closed' ? Intent.SUCCESS : Intent.WARNING}
-          >
-            {row.status === 'closed' ? 'Closed' : 'Draft'}
-          </Tag>
-        ),
-        width: 90,
-      },
-      {
-        Header: 'Difference',
-        accessor: (row) => money(row.difference),
-        align: 'right',
-        width: 120,
-      },
-      {
-        Header: '',
-        width: 44,
-        accessor: (row) => (
-          <Popover
-            content={
-              <ActionsMenu
-                rec={row}
-                onOpen={handleOpen}
-                onReopen={handleReopen}
-                onDelete={handleDelete}
-              />
-            }
-            position={Position.RIGHT_BOTTOM}
-          >
-            <Button icon={<Icon icon="more-h-16" iconSize={16} />} />
-          </Popover>
-        ),
-      },
-    ],
-    [],
-  );
-
   return (
-    <DashboardInsider loading={isLoading} name="bank-recs">
+    <DashboardInsider name="bank-recs">
       <DashboardActionsBar>
         <Button intent={Intent.PRIMARY} onClick={handleNew}>
           New Rec
@@ -161,12 +199,19 @@ export default function BankRecList() {
       <DashboardPageContent>
         <DashboardContentTable>
           <DataTable
+            noInitialFetch={true}
             columns={columns}
             data={rows}
             loading={isLoading}
-            ProgressBar={TableSkeletonRows}
+            headerLoading={isLoading}
+            TableLoadingRenderer={TableSkeletonRows}
             onRowClick={handleOpen}
             noResults="No bank reconciliations yet."
+            payload={{
+              onOpen: handleOpen,
+              onReopen: handleReopen,
+              onDelete: handleDelete,
+            }}
           />
         </DashboardContentTable>
       </DashboardPageContent>

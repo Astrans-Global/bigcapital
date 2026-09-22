@@ -32,6 +32,14 @@ function money(value) {
   });
 }
 
+function field(row, camel, snake) {
+  return row?.[camel] ?? row?.[snake];
+}
+
+function lineId(line) {
+  return field(line, 'accountTransactionId', 'account_transaction_id');
+}
+
 export default function BankRecWorksheet() {
   const history = useHistory();
   const { id } = useParams();
@@ -53,7 +61,7 @@ export default function BankRecWorksheet() {
     if (!rec) return;
     const next = {};
     [...(rec.deposits || []), ...(rec.payments || [])].forEach((line) => {
-      next[line.account_transaction_id] = Boolean(line.ticked);
+      next[lineId(line)] = Boolean(line.ticked);
     });
     setTicks(next);
   }, [rec]);
@@ -66,19 +74,29 @@ export default function BankRecWorksheet() {
     if (!rec) return null;
     const all = [...deposits, ...payments];
     const clearedDeposits = all
-      .filter((line) => ticks[line.account_transaction_id] && Number(line.debit) > 0)
+      .filter((line) => ticks[lineId(line)] && Number(line.debit) > 0)
       .reduce((sum, line) => sum + Number(line.debit), 0);
     const unclearedDeposits = all
-      .filter((line) => !ticks[line.account_transaction_id] && Number(line.debit) > 0)
+      .filter((line) => !ticks[lineId(line)] && Number(line.debit) > 0)
       .reduce((sum, line) => sum + Number(line.debit), 0);
     const clearedPayments = all
-      .filter((line) => ticks[line.account_transaction_id] && Number(line.credit) > 0)
+      .filter((line) => ticks[lineId(line)] && Number(line.credit) > 0)
       .reduce((sum, line) => sum + Number(line.credit), 0);
     const unclearedPayments = all
-      .filter((line) => !ticks[line.account_transaction_id] && Number(line.credit) > 0)
+      .filter((line) => !ticks[lineId(line)] && Number(line.credit) > 0)
       .reduce((sum, line) => sum + Number(line.credit), 0);
-    const beginning = Number(rec.beginning_balance || rec.summary?.beginning_balance || 0);
-    const ending = Number(rec.ending_balance || rec.summary?.ending_balance || 0);
+    const beginning = Number(
+      field(rec, 'beginningBalance', 'beginning_balance') ||
+        rec.summary?.beginningBalance ||
+        rec.summary?.beginning_balance ||
+        0,
+    );
+    const ending = Number(
+      field(rec, 'endingBalance', 'ending_balance') ||
+        rec.summary?.endingBalance ||
+        rec.summary?.ending_balance ||
+        0,
+    );
     const clearedBalance = beginning + clearedDeposits - clearedPayments;
     return {
       beginning,
@@ -88,16 +106,18 @@ export default function BankRecWorksheet() {
       clearedPayments,
       unclearedPayments,
       clearedBalance,
-      bankAccountBalance: Number(rec.summary?.bank_account_balance || 0),
+      bankAccountBalance: Number(
+        rec.summary?.bankAccountBalance || rec.summary?.bank_account_balance || 0,
+      ),
       difference: ending - clearedBalance,
     };
   }, [rec, deposits, payments, ticks]);
 
   const payload = () => ({
-    endingBalance: Number(rec?.ending_balance || 0),
+    endingBalance: Number(field(rec, 'endingBalance', 'ending_balance') || 0),
     lines: [...deposits, ...payments].map((line) => ({
-      accountTransactionId: line.account_transaction_id,
-      ticked: Boolean(ticks[line.account_transaction_id]),
+      accountTransactionId: lineId(line),
+      ticked: Boolean(ticks[lineId(line)]),
     })),
   });
 
@@ -108,14 +128,14 @@ export default function BankRecWorksheet() {
 
   const allVisibleTicked =
     visible.length > 0 &&
-    visible.every((line) => ticks[line.account_transaction_id]);
+    visible.every((line) => ticks[lineId(line)]);
 
   const handleTickAll = (value) => {
     if (readOnly) return;
     setTicks((current) => {
       const next = { ...current };
       visible.forEach((line) => {
-        next[line.account_transaction_id] = value;
+        next[lineId(line)] = value;
       });
       return next;
     });
@@ -185,7 +205,7 @@ export default function BankRecWorksheet() {
             </Button>
           </>
         )}
-        {rec.can_reopen && (
+        {(rec.canReopen || rec.can_reopen) && (
           <Button intent={Intent.WARNING} loading={reopening} onClick={handleReopen}>
             Reopen last Rec
           </Button>
@@ -196,9 +216,11 @@ export default function BankRecWorksheet() {
           <Main>
             <Header>
               <div>
-                <h2>{rec.account_name}</h2>
+                <h2>{field(rec, 'accountName', 'account_name')}</h2>
                 <p>
-                  {rec.period_month} · {rec.start_date} to {rec.end_date} ·{' '}
+                  {field(rec, 'periodMonth', 'period_month')} ·{' '}
+                  {field(rec, 'startDate', 'start_date')} to{' '}
+                  {field(rec, 'endDate', 'end_date')} ·{' '}
                   {readOnly ? 'Closed' : 'Draft'}
                 </p>
               </div>
@@ -309,21 +331,18 @@ function LineTable({ lines, ticks, readOnly, allTicked, onTick, onTickAll }) {
         </thead>
         <tbody>
           {lines.map((line) => (
-            <tr key={line.account_transaction_id}>
+            <tr key={lineId(line)}>
               <td>
                 <Checkbox
-                  checked={Boolean(ticks[line.account_transaction_id])}
+                  checked={Boolean(ticks[lineId(line)])}
                   disabled={readOnly}
                   onChange={(event) =>
-                    onTick(
-                      line.account_transaction_id,
-                      event.currentTarget.checked,
-                    )
+                    onTick(lineId(line), event.currentTarget.checked)
                   }
                 />
               </td>
               <td>{line.date}</td>
-              <td>{line.reference_no || '—'}</td>
+              <td>{field(line, 'referenceNo', 'reference_no') || '—'}</td>
               <td>{line.payee || '—'}</td>
               <td>{line.type || '—'}</td>
               <td className="amount">{money(line.amount)}</td>

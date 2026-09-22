@@ -39,9 +39,11 @@ export default function BankRecSetup() {
   const { mutateAsync: reopen, isLoading: reopening } = useReopenBankRec();
 
   const banks = eligibility?.banks || [];
-  const lockedStart = eligibility?.locked_start_date;
-  const beginning = eligibility?.beginning_balance;
-  const draftId = eligibility?.draft_id;
+  const lockedStart =
+    eligibility?.lockedStartDate ?? eligibility?.locked_start_date;
+  const beginning =
+    eligibility?.beginningBalance ?? eligibility?.beginning_balance;
+  const draftId = eligibility?.draftId ?? eligibility?.draft_id;
 
   useEffect(() => {
     if (draftId && numericAccountId) {
@@ -154,14 +156,16 @@ export default function BankRecSetup() {
               onChange={(event) => setPeriodMonth(event.currentTarget.value)}
             />
           </FormGroup>
-          {eligibility?.can_reopen_last && eligibility?.last_rec && (
+          {(eligibility?.canReopenLast || eligibility?.can_reopen_last) &&
+            (eligibility?.lastRec || eligibility?.last_rec) && (
             <Button
               intent={Intent.WARNING}
               loading={reopening}
               onClick={async () => {
+                const lastRec = eligibility.lastRec || eligibility.last_rec;
                 try {
-                  await reopen(eligibility.last_rec.id);
-                  history.push(`/bank-recs/${eligibility.last_rec.id}`);
+                  await reopen(lastRec.id);
+                  history.push(`/bank-recs/${lastRec.id}`);
                 } catch (error) {
                   toastBankRecErrors(error?.response?.data?.errors);
                 }
