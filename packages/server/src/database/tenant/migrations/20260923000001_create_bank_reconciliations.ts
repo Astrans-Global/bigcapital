@@ -1,4 +1,9 @@
 exports.up = async function (knex) {
+  // Retry-safe: a previous attempt created the header table then failed on
+  // MySQL's 64-char unique index name for the lines table.
+  await knex.schema.dropTableIfExists('bank_reconciliation_lines');
+  await knex.schema.dropTableIfExists('bank_reconciliations');
+
   await knex.schema.createTable('bank_reconciliations', (table) => {
     table.increments();
     table.integer('account_id').unsigned().notNullable().index();
@@ -28,7 +33,9 @@ exports.up = async function (knex) {
       .notNullable()
       .index();
     table.boolean('ticked').notNullable().defaultTo(false);
-    table.unique(['reconciliation_id', 'account_transaction_id']);
+    table.unique(['reconciliation_id', 'account_transaction_id'], {
+      indexName: 'bank_rec_lines_rec_tx_unique',
+    });
   });
 };
 
