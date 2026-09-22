@@ -4,6 +4,7 @@ import { ServiceError } from '@/modules/Items/ServiceError';
 import { BankReconciliation } from '../models/BankReconciliation.model';
 import { BankReconciliationQueryService } from '../queries/BankReconciliationQuery.service';
 import { BANK_REC_ERRORS, BANK_REC_STATUS } from '../constants';
+import * as moment from 'moment';
 
 @Injectable()
 export class ReopenBankReconciliationService {
@@ -41,7 +42,7 @@ export class ReopenBankReconciliationService {
 
     return this.recModel().query().patchAndFetchById(id, {
       status: BANK_REC_STATUS.DRAFT,
-      reopenedAt: new Date(),
+      reopenedAt: moment().toMySqlDateTime(),
       closedAt: null,
     });
   }

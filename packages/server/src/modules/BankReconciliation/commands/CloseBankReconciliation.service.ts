@@ -9,6 +9,7 @@ import { LoadBankReconciliationLinesService } from '../queries/LoadBankReconcili
 import { SaveBankReconciliationDraftService } from './SaveBankReconciliationDraft.service';
 import { SaveBankReconciliationDraftDto } from '../dtos/BankReconciliation.dto';
 import { BANK_REC_ERRORS, BANK_REC_STATUS } from '../constants';
+import * as moment from 'moment';
 
 @Injectable()
 export class CloseBankReconciliationService {
@@ -55,7 +56,7 @@ export class CloseBankReconciliationService {
     return this.uow.withTransaction(async (trx: Knex.Transaction) => {
       return this.recModel().query(trx).patchAndFetchById(id, {
         status: BANK_REC_STATUS.CLOSED,
-        closedAt: new Date(),
+        closedAt: moment().toMySqlDateTime(),
         reopenedAt: null,
       });
     });
