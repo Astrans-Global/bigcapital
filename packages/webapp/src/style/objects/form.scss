@@ -263,6 +263,43 @@ label.bp4-label {
   }
 }
 
+.bp4-dark .form-group--select-list {
+  .#{$ns}-button {
+    color: rgba(255, 255, 255, 0.7);
+
+    &:not([class*="bp4-intent-"]):not(.bp4-minimal) {
+
+      &,
+      &:hover {
+        border: 1px solid var(--color-ui-input-border);
+
+        &:not(:disabled) {
+          background: var(--color-ui-input-background);
+        }
+      }
+
+      &:focus {
+        box-shadow: 0 0 0 1px var(--color-primary);
+        border-color: var(--color-primary);
+      }
+    }
+  }
+
+  .bp4-popover-target.bp4-popover-open {
+    .#{$ns}-button {
+
+      &:not([class*="bp4-intent-"]):not(.bp4-minimal):not(:disabled),
+      &:not([class*="bp4-intent-"]):not(.bp4-minimal):hover:not(:disabled) {
+        background-color: var(--color-ui-input-background);
+      }
+    }
+  }
+
+  .bp4-popover-target .bp4-button {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
 .select-list--fill-popover {
   position: relative;
 

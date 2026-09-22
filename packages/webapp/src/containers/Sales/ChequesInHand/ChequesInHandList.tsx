@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import intl from 'react-intl-universal';
 import {
   NavbarGroup,
@@ -280,6 +280,7 @@ function ChequesInHandListInner({ openDialog }) {
           />
         </NavbarGroup>
       </DashboardActionsBar>
+      <ChequesCustomerPopoverStyle />
       <ChequesFilterBar>
         <div
           style={{
@@ -318,7 +319,12 @@ function ChequesInHandListInner({ openDialog }) {
               textProp="display_name"
               defaultText={intl.get('all_customers')}
               filterable={true}
-              popoverProps={{ minimal: true, usePortal: true, fill: true }}
+              popoverProps={{
+                minimal: true,
+                usePortal: true,
+                fill: true,
+                popoverClassName: 'cheques-in-hand-customer-popover',
+              }}
               className="cheques-in-hand-customer-select"
               onItemSelect={(item) =>
                 setCustomerId(item?.id === '' || item?.id == null ? '' : item.id)
@@ -429,7 +435,7 @@ function ChequesInHandListInner({ openDialog }) {
 
 const ChequesFilterBar = styled.div`
   padding: 10px 16px 12px;
-  border-bottom: 1px solid #e1e4e8;
+  border-bottom: 1px solid var(--color-ui-input-border);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -439,13 +445,45 @@ const ChequesFilterBar = styled.div`
     min-width: 320px;
   }
 
-  .cheques-in-hand-customer-select .bp4-button {
+  .cheques-in-hand-customer-select.form-group--select-list .bp4-button:not([class*='bp4-intent-']):not(.bp4-minimal) {
     width: 100%;
     justify-content: flex-start;
+    background: var(--color-ui-input-background);
+    background-image: none;
+    box-shadow: none;
+    border: 1px solid var(--color-ui-input-border);
+    color: inherit;
+
+    &,
+    &:hover,
+    &:focus {
+      background: var(--color-ui-input-background);
+      background-image: none;
+      box-shadow: none;
+      border-color: var(--color-ui-input-border);
+      color: inherit;
+    }
   }
 
   .cheques-in-hand-cheque-no {
     width: 88px;
+  }
+`;
+
+const ChequesCustomerPopoverStyle = createGlobalStyle`
+  .cheques-in-hand-customer-popover.bp4-popover,
+  .bp4-dark .cheques-in-hand-customer-popover {
+    .bp4-input {
+      background: var(--color-ui-input-background);
+      border-color: var(--color-ui-input-border);
+      box-shadow: none;
+      color: inherit;
+    }
+
+    .bp4-menu {
+      background: var(--color-ui-input-background);
+      color: inherit;
+    }
   }
 `;
 
