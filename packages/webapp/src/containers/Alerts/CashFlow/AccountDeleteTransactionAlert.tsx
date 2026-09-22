@@ -72,6 +72,14 @@ function AccountDeleteTransactionAlertInner({
               'Cannot delete a transaction matched to the bank transaction',
             intent: Intent.DANGER,
           });
+        } else if (
+          errors.find((e) => e.type === 'DOCUMENT_LOCKED_BY_BANK_REC')
+        ) {
+          AppToaster.show({
+            message:
+              'This document is on a closed bank reconciliation. Reopen the last Rec for that bank first.',
+            intent: Intent.DANGER,
+          });
         }
       })
       .finally(() => {

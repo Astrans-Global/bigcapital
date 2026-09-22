@@ -123,4 +123,8 @@ export class GetPdChequesQueryDto {
   @IsOptional()
   @IsString()
   sortBy?: string;
+
+  @IsOptional()
+  @IsString()
+  chequeNo?: string;
 }

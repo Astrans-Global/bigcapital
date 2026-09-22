@@ -1,6 +1,7 @@
 import { Intent } from '@blueprintjs/core';
 import intl from 'react-intl-universal';
 import { AppToaster } from '@/components';
+import { toastBankRecErrors } from '@/containers/Banking/BankRec/bankRecErrors';
 
 export const handleDeleteErrors = (errors: any) => {
   if (
@@ -19,4 +20,5 @@ export const handleDeleteErrors = (errors: any) => {
       message: 'Cannot delete a transaction matched with a bank transaction.',
     });
   }
+  toastBankRecErrors(errors);
 };

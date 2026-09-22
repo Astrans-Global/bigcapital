@@ -165,7 +165,7 @@ export class InvoiceAgingRepository {
         dueAmount,
         daysDue,
         buckets,
-        totalOutstanding: dueAmount,
+        totalOutstanding: kind === 'outstanding' ? dueAmount : actualDue,
         unrealized,
         balance: invoiceAmount - unrealized,
         realized,

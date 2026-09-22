@@ -13,6 +13,7 @@ import {
 } from '@blueprintjs/core';
 
 import { Money, Icon, Can } from '@/components';
+import { BankRecSeal } from '@/containers/Banking/BankRec/BankRecSeal';
 import { safeCallback } from '@/utils';
 import { CLASSES } from '@/constants/classes';
 import {
@@ -44,6 +45,7 @@ export function ActionsMenu({
         <MenuItem
           icon={<Icon icon="pen-18" />}
           text={intl.get('edit_payment_received')}
+          disabled={paymentReceive.is_bank_rec_cleared}
           onClick={safeCallback(onEdit, paymentReceive)}
         />
       </Can>
@@ -52,6 +54,7 @@ export function ActionsMenu({
         <MenuItem
           text={intl.get('delete_payment_received')}
           intent={Intent.DANGER}
+          disabled={paymentReceive.is_bank_rec_cleared}
           onClick={safeCallback(onDelete, paymentReceive)}
           icon={<Icon icon="trash-16" iconSize={16} />}
         />
@@ -143,6 +146,14 @@ export function usePaymentReceivesColumns() {
         className: 'reference_no',
         clickable: true,
         textOverview: true,
+      },
+      {
+        id: 'bank_rec',
+        Header: 'Bank Rec',
+        accessor: (row) => (
+          <BankRecSeal visible={row.is_bank_rec_cleared} label="Cleared" />
+        ),
+        width: 110,
       },
     ],
     [],

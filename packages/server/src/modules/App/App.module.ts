@@ -42,6 +42,7 @@ import { SecondaryPnlModule } from '../SecondaryPnl/SecondaryPnl.module';
 import { CustomerAreaModule } from '../CustomerAreas/CustomerArea.module';
 import { SalesAgentModule } from '../SalesAgents/SalesAgent.module';
 import { PdChequeModule } from '../PdCheques/PdCheque.module';
+import { BankReconciliationModule } from '../BankReconciliation/BankReconciliation.module';
 import { CustomerRouteCityModule } from '../CustomerRouteCities/CustomerRouteCity.module';
 import { DeliveryPrepModule } from '../DeliveryPrep/DeliveryPrep.module';
 import { WarehouseInventoryModule } from '../WarehouseInventory/WarehouseInventory.module';
@@ -219,6 +220,7 @@ import { AppThrottleModule } from './AppThrottle.module';
     CustomerAreaModule,
     SalesAgentModule,
     PdChequeModule,
+    BankReconciliationModule,
     CustomerRouteCityModule,
     DeliveryPrepModule,
     WarehouseInventoryModule,

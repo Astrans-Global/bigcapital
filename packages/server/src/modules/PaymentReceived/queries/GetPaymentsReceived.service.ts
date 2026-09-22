@@ -7,12 +7,14 @@ import { PaymentReceived } from '../models/PaymentReceived';
 import { IFilterMeta, IPaginationMeta } from '@/interfaces/Model';
 import { GetPaymentsReceivedQueryDto } from '../dtos/GetPaymentsReceivedQuery.dto';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { BankReconciliationSealsService } from '@/modules/BankReconciliation/commands/BankReconciliationSeals.service';
 
 @Injectable()
 export class GetPaymentsReceivedService {
   constructor(
     private readonly dynamicListService: DynamicListService,
     private readonly transformer: TransformerInjectable,
+    private readonly bankRecSeals: BankReconciliationSealsService,
 
     @Inject(PaymentReceived.name)
     private readonly paymentReceivedModel: TenantModelProxy<
@@ -63,7 +65,7 @@ export class GetPaymentsReceivedService {
       new PaymentReceiveTransfromer(),
     );
     return {
-      data,
+      data: await this.bankRecSeals.attachPaymentSeals(data),
       pagination,
       filterMeta: dynamicList.getResponseMeta(),
     };

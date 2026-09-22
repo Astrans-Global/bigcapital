@@ -16,6 +16,7 @@ import {
 } from '@/utils';
 import { ERROR } from '@/constants/errors';
 import { AppToaster } from '@/components';
+import { toastBankRecErrors } from '@/containers/Banking/BankRec/bankRecErrors';
 import { useCurrentOrganizationBaseCurrency } from '@/hooks/query';
 import {
   aggregateItemEntriesTaxRates,
@@ -211,6 +212,7 @@ export const transformErrors = (errors, { setErrors }) => {
       invoice_no: intl.get('invoice.field.error.invoice_no_required'),
     });
   }
+  toastBankRecErrors(errors);
 };
 
 /**

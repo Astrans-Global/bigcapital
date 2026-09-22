@@ -167,6 +167,11 @@ export const BadDebtMenuItem = ({
 export function InvoiceDetailsStatus({ invoice }) {
   return (
     <Choose>
+      <Choose.When condition={invoice.is_bank_rec_sealed}>
+        <StatusTag intent={Intent.DANGER} round={true}>
+          Payment Received
+        </StatusTag>
+      </Choose.When>
       <Choose.When condition={invoice.is_fully_paid && invoice.is_delivered}>
         <StatusTag intent={Intent.SUCCESS} round={true}>
           <T id={'paid'} />

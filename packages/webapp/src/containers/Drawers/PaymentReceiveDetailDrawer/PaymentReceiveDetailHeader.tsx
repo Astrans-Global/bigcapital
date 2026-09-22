@@ -13,6 +13,7 @@ import {
   ExchangeRateDetailItem,
 } from '@/components';
 import { usePaymentReceiveDetailContext } from './PaymentReceiveDetailProvider';
+import { BankRecSeal } from '@/containers/Banking/BankRec/BankRecSeal';
 
 /**
  * Payment receive detail header.
@@ -27,6 +28,10 @@ export function PaymentReceiveDetailHeader() {
           <DetailItem label={intl.get('amount')}>
             <h3 class="big-number">{paymentReceive.formatted_amount}</h3>
           </DetailItem>
+          <BankRecSeal
+            visible={paymentReceive.is_bank_rec_cleared}
+            label="Cleared"
+          />
         </DetailsMenu>
       </CommercialDocTopHeader>
 

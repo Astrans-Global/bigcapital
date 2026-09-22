@@ -19,10 +19,15 @@ import {
   PaymentReceiveAction,
   AbilitySubject,
 } from '@/constants/abilityOption';
+import { BankRecSeal } from '@/containers/Banking/BankRec/BankRecSeal';
+import { toastBankRecErrors } from '@/containers/Banking/BankRec/bankRecErrors';
 
 export function InvoiceStatus({ invoice }) {
   return (
     <Choose>
+      <Choose.When condition={invoice.is_bank_rec_sealed}>
+        <BankRecSeal visible label="Payment Received" />
+      </Choose.When>
       <Choose.When condition={invoice.is_fully_paid && invoice.is_delivered}>
         <Tag intent={Intent.SUCCESS} round minimal>
           <T id={'paid'} />
@@ -133,6 +138,7 @@ export const handleDeleteErrors = (errors) => {
       message: 'Cannot delete a transaction matched with a bank transaction.',
     });
   }
+  toastBankRecErrors(errors);
 };
 
 export function ActionsMenu({
@@ -160,6 +166,7 @@ export function ActionsMenu({
         <MenuItem
           icon={<Icon icon="pen-18" />}
           text={intl.get('edit_invoice')}
+          disabled={original.is_bank_rec_sealed}
           onClick={safeCallback(onEdit, original)}
         />
         <MenuItem
@@ -201,6 +208,7 @@ export function ActionsMenu({
         <MenuItem
           text={intl.get('delete_invoice')}
           intent={Intent.DANGER}
+          disabled={original.is_bank_rec_sealed}
           onClick={safeCallback(onDelete, original)}
           icon={<Icon icon="trash-16" iconSize={16} />}
         />

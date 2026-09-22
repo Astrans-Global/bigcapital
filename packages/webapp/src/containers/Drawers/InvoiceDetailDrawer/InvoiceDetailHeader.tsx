@@ -16,6 +16,7 @@ import {
 } from '@/components';
 import { useInvoiceDetailDrawerContext } from './InvoiceDetailDrawerProvider';
 import { InvoiceDetailsStatus } from './utils';
+import { BankRecSeal } from '@/containers/Banking/BankRec/BankRecSeal';
 
 /**
  * Invoice detail header.
@@ -33,6 +34,10 @@ export function InvoiceDetailHeader() {
 
           <StatusDetailItem label={''}>
             <InvoiceDetailsStatus invoice={invoice} />
+            <BankRecSeal
+              visible={invoice.is_bank_rec_sealed}
+              label="Payment Received"
+            />
           </StatusDetailItem>
         </DetailsMenu>
       </CommercialDocTopHeader>

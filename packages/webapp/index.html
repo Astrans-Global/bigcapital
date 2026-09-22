@@ -15,20 +15,46 @@
     <script type="module" src="/public/preload-theme.js"></script>
     <title>Astrans Global DMS</title>
     <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (rs) {
-          rs.forEach(function (r) {
-            r.unregister();
+      (function () {
+        var KEY = 'astrans-sw-bust-v3';
+        function flagged() {
+          try {
+            return sessionStorage.getItem(KEY) === '1';
+          } catch (e) {
+            return false;
+          }
+        }
+        function flag() {
+          try {
+            sessionStorage.setItem(KEY, '1');
+          } catch (e) {}
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (rs) {
+            var active = (rs && rs.length) || navigator.serviceWorker.controller;
+            rs.forEach(function (r) {
+              r.unregister();
+            });
+            var cacheJob = window.caches
+              ? caches.keys().then(function (keys) {
+                  return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+                })
+              : Promise.resolve();
+            cacheJob.then(function () {
+              if (active && !flagged()) {
+                flag();
+                location.reload();
+              }
+            });
           });
-        });
-      }
-      if (window.caches) {
-        caches.keys().then(function (keys) {
-          keys.forEach(function (k) {
-            caches.delete(k);
+        } else if (window.caches) {
+          caches.keys().then(function (keys) {
+            keys.forEach(function (k) {
+              caches.delete(k);
+            });
           });
-        });
-      }
+        }
+      })();
     </script>
   </head>
   <body class="bp4-dark">

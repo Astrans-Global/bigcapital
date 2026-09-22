@@ -9,7 +9,54 @@ import {
   ITableRow,
 } from '../../types/Table.types';
 import { OUTSTANDING_AGING_BUCKETS } from './agingBuckets';
+import {
+  AGING_GROUP_LABEL,
+  buildInvoiceAgingWorkbook,
+} from './InvoiceAgingExcel';
 import * as moment from 'moment';
+
+function flattenColumns(columns: ITableColumn[]): ITableColumn[] {
+  return columns.flatMap((col) =>
+    col.children?.length ? flattenColumns(col.children) : [col],
+  );
+}
+
+const IDENTITY_MONEY_KEYS = new Set([
+  'invoiceAmount',
+  'dueAmount',
+  'totalOutstanding',
+  'unrealized',
+  'balance',
+  'realized',
+  'pendingCheque',
+  'undepositedCash',
+  'actualDue',
+]);
+
+const AGING_PDF_CSS = `
+  .sheet__table { font-size: 10px; }
+  .sheet__table th {
+    text-align: center;
+    white-space: normal;
+    background: #f4f4f4;
+    font-size: 9px;
+  }
+  .sheet__table th.column--b0_30,
+  .sheet__table th.column--b31_60,
+  .sheet__table th.column--b61_80,
+  .sheet__table th.column--b81_90,
+  .sheet__table th.column--b91_120,
+  .sheet__table th.column--b121_150,
+  .sheet__table th.column--b151_270,
+  .sheet__table th.column--b271_360,
+  .sheet__table th.column--b_gt_360,
+  .sheet__table th.column--totalOutstanding {
+    background: #95B3D7;
+  }
+  .sheet__table td { text-align: center; }
+  .sheet__table td.cell--customerName { text-align: left; }
+  .row_type--total { font-weight: 700; }
+`;
 
 @Injectable()
 export class InvoiceAgingService {
@@ -24,25 +71,29 @@ export class InvoiceAgingService {
       query,
       kind,
     );
-    const sheetName =
+    const banner =
       kind === 'outstanding'
         ? `OUTSTANDING ${titleArea}`
-        : `RD OUTSTANDING ${titleArea}`;
+        : `Daily Outstanding ${titleArea}`;
+    const sheetName =
+      kind === 'outstanding'
+        ? 'Outstanding Aging Summary'
+        : 'RD Outstanding Aging Summary';
 
     const columns: ITableColumn[] =
       kind === 'outstanding'
         ? this.outstandingColumns()
         : this.rdColumns();
+    const leafColumns = flattenColumns(columns);
 
     const tableRows: ITableRow[] = rows.map((row) => ({
-      cells: columns.map((col) => ({
+      cells: leafColumns.map((col) => ({
         key: col.key,
         value: this.cellValue(row, col.key),
       })),
     }));
 
-    const totals = this.totalsRow(rows, columns, kind);
-    tableRows.push(totals);
+    tableRows.push(this.totalsRow(rows, leafColumns));
 
     const metaBase = await this.financialSheetMeta.meta();
     return {
@@ -51,6 +102,8 @@ export class InvoiceAgingService {
       meta: {
         ...metaBase,
         sheetName,
+        banner,
+        titleArea,
         formattedAsDate: moment(asDate).format('YYYY-MM-DD'),
         formattedDateRange: moment(asDate).format('YYYY-MM-DD'),
       },
@@ -58,98 +111,110 @@ export class InvoiceAgingService {
   }
 
   public async xlsx(query: InvoiceAgingQueryDto, kind: 'outstanding' | 'rd') {
-    const table = await this.table(query, kind);
-    const sheet = new TableSheet(table.table);
-    return sheet.convertToBuffer(sheet.convertToXLSX(), 'xlsx');
+    const { rows, titleArea, asDate } = await this.repository.computeRows(
+      query,
+      kind,
+    );
+    const metaBase = await this.financialSheetMeta.meta();
+    return buildInvoiceAgingWorkbook({
+      kind,
+      rows,
+      titleArea,
+      asDate,
+      organizationName: metaBase.organizationName,
+    });
   }
 
   public async csv(query: InvoiceAgingQueryDto, kind: 'outstanding' | 'rd') {
     const table = await this.table(query, kind);
-    return new TableSheet(table.table).convertToCSV();
+    return new TableSheet({
+      columns: flattenColumns(table.table.columns),
+      rows: table.table.rows,
+    }).convertToCSV();
   }
 
   public async pdf(query: InvoiceAgingQueryDto, kind: 'outstanding' | 'rd') {
     const table = await this.table(query, kind);
     return this.tableSheetPdf.convertToPdf(
-      table.table,
+      {
+        columns: flattenColumns(table.table.columns),
+        rows: table.table.rows,
+      },
       table.meta.organizationName,
-      table.meta.sheetName,
+      table.meta.banner || table.meta.sheetName,
       table.meta.formattedAsDate,
+      AGING_PDF_CSS,
     );
+  }
+
+  private agingGroupColumn(): ITableColumn {
+    return {
+      key: 'aging',
+      label: AGING_GROUP_LABEL,
+      children: [
+        ...OUTSTANDING_AGING_BUCKETS.map((bucket) => ({
+          key: bucket.key,
+          label: bucket.label,
+        })),
+        { key: 'totalOutstanding', label: 'Total Outstanding' },
+      ],
+    };
   }
 
   private outstandingColumns(): ITableColumn[] {
     return [
-      { key: 'customerName', label: 'Customer' },
+      { key: 'customerName', label: 'Customer Name' },
       { key: 'routeCity', label: 'Route City' },
-      { key: 'invoiceDate', label: 'Invoice Date' },
+      { key: 'invoiceDate', label: 'Date of Invoice' },
       { key: 'invoiceNo', label: 'Invoice Number' },
       { key: 'invoiceAmount', label: 'Invoice Amount' },
       { key: 'dueAmount', label: 'Due Amount' },
       { key: 'daysDue', label: 'Days Due' },
-      ...OUTSTANDING_AGING_BUCKETS.map((bucket) => ({
-        key: bucket.key,
-        label: bucket.label,
-      })),
-      { key: 'totalOutstanding', label: 'Total Outstanding' },
+      this.agingGroupColumn(),
     ];
   }
 
   private rdColumns(): ITableColumn[] {
     return [
-      { key: 'customerName', label: 'Customer' },
+      { key: 'customerName', label: 'Customer Name' },
       { key: 'routeCity', label: 'Route City' },
-      { key: 'invoiceDate', label: 'Invoice Date' },
+      { key: 'invoiceDate', label: 'Date of Invoice' },
       { key: 'invoiceNo', label: 'Invoice Number' },
       { key: 'invoiceAmount', label: 'Invoice Amount' },
-      { key: 'unrealized', label: 'Unrealized / Undeposited' },
-      { key: 'balance', label: 'Balance' },
-      { key: 'realized', label: 'Realized / Deposited' },
-      { key: 'pendingCheque', label: 'Pending Cheque' },
-      { key: 'undepositedCash', label: 'Undeposited Cash' },
+      { key: 'unrealized', label: 'Given Unrealized/undeposited Amount' },
+      { key: 'balance', label: 'Balance Amount' },
+      { key: 'realized', label: 'Realised / Deposited Amount' },
+      { key: 'pendingCheque', label: 'Pending Cheque Amount' },
+      { key: 'undepositedCash', label: 'Undeposited Cash Amount' },
       { key: 'actualDue', label: 'Actual Due' },
       { key: 'daysDue', label: 'Days Due' },
-      ...OUTSTANDING_AGING_BUCKETS.map((bucket) => ({
-        key: bucket.key,
-        label: bucket.label,
-      })),
-      { key: 'totalOutstanding', label: 'Total' },
+      this.agingGroupColumn(),
     ];
   }
 
   private cellValue(row: any, key: string) {
     if (row.buckets && row.buckets[key] != null) {
-      return this.formatNumber(row.buckets[key]);
+      return this.formatNumber(row.buckets[key], true);
     }
     const value = row[key];
     if (typeof value === 'number') {
-      return key === 'daysDue' ? String(value) : this.formatNumber(value);
+      return key === 'daysDue'
+        ? String(value)
+        : this.formatNumber(value, false);
     }
     return value == null ? '' : String(value);
   }
 
-  private formatNumber(value: number) {
-    if (!value) {
+  private formatNumber(value: number, blankIfZero = false) {
+    if (!value && blankIfZero) {
       return '';
     }
-    return Number(value).toFixed(2);
+    return Number(value || 0).toFixed(2);
   }
 
-  private totalsRow(
-    rows: any[],
-    columns: ITableColumn[],
-    kind: 'outstanding' | 'rd',
-  ): ITableRow {
+  private totalsRow(rows: any[], columns: ITableColumn[]): ITableRow {
     const sumKeys = new Set([
-      'invoiceAmount',
-      'dueAmount',
-      'totalOutstanding',
-      'unrealized',
-      'balance',
-      'realized',
-      'pendingCheque',
-      'undepositedCash',
-      'actualDue',
+      ...IDENTITY_MONEY_KEYS,
       ...OUTSTANDING_AGING_BUCKETS.map((bucket) => bucket.key),
     ]);
     const totals: Record<string, number> = {};
@@ -166,9 +231,9 @@ export class InvoiceAgingService {
         key: col.key,
         value:
           col.key === 'customerName'
-            ? 'Total'
+            ? 'Sub Total'
             : sumKeys.has(col.key)
-            ? this.formatNumber(totals[col.key] || 0)
+            ? this.formatNumber(totals[col.key] || 0, false)
             : '',
       })),
     };

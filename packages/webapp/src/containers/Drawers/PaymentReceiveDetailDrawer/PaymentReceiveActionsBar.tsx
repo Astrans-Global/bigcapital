@@ -46,7 +46,8 @@ function PaymentsReceivedActionsBar({
   const history = useHistory();
 
   // Retrieve the payment receive drawer context.
-  const { paymentReceiveId } = usePaymentReceiveDetailContext();
+  const { paymentReceiveId, paymentReceive } = usePaymentReceiveDetailContext();
+  const cleared = Boolean(paymentReceive?.is_bank_rec_cleared);
 
   // Handle edit payment receive.
   const handleEditPaymentReceive = () => {
@@ -84,6 +85,7 @@ function PaymentsReceivedActionsBar({
             className={Classes.MINIMAL}
             icon={<Icon icon="pen-18" />}
             text={<T id={'edit_payment_received'} />}
+            disabled={cleared}
             onClick={handleEditPaymentReceive}
           />
           <NavbarDivider />
@@ -109,6 +111,7 @@ function PaymentsReceivedActionsBar({
             icon={<Icon icon={'trash-16'} iconSize={16} />}
             text={<T id={'delete'} />}
             intent={Intent.DANGER}
+            disabled={cleared}
             onClick={handleDeletePaymentReceive}
           />
         </Can>

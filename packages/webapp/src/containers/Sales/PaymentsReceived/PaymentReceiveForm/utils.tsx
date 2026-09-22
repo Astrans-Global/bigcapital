@@ -6,6 +6,7 @@ import { omit, pick, first, sumBy } from 'lodash';
 import { useFormikContext } from 'formik';
 import { Intent } from '@blueprintjs/core';
 import { AppToaster } from '@/components';
+import { toastBankRecErrors } from '@/containers/Banking/BankRec/bankRecErrors';
 import { usePaymentReceiveFormContext } from './PaymentReceiveFormProvider';
 import {
   defaultFastFieldShouldUpdate,
@@ -221,6 +222,7 @@ export const transformErrors = (errors, { setFieldError }) => {
       intent: Intent.DANGER,
     });
   }
+  toastBankRecErrors(errors);
 };
 
 /**

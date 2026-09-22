@@ -1502,6 +1502,39 @@ export const getDashboardRoutes = () => [
     pageTitle: 'Tax Rates',
     subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
   },
+  {
+    path: '/bank-recs/new',
+    component: lazy(() =>
+      import('@/containers/Banking/BankRec/BankRecSetup').then((m) => ({
+        default: m.default,
+      })),
+    ),
+    pageTitle: 'New Bank Rec',
+    breadcrumb: 'New Bank Rec',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: '/bank-recs/:id',
+    component: lazy(() =>
+      import('@/containers/Banking/BankRec/BankRecWorksheet').then((m) => ({
+        default: m.default,
+      })),
+    ),
+    pageTitle: 'Bank Rec',
+    breadcrumb: 'Bank Rec',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
+  {
+    path: '/bank-recs',
+    component: lazy(() =>
+      import('@/containers/Banking/BankRec/BankRecList').then((m) => ({
+        default: m.default,
+      })),
+    ),
+    pageTitle: 'Bank Recs',
+    breadcrumb: 'Bank Recs',
+    subscriptionActive: [SUBSCRIPTION_TYPE.MAIN],
+  },
   // Bank Rules
   {
     path: '/bank-rules',

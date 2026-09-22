@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
+import styled from 'styled-components';
 import intl from 'react-intl-universal';
 import {
   NavbarGroup,
@@ -16,6 +17,7 @@ import {
   FormGroup,
   Checkbox,
   NavbarDivider,
+  InputGroup,
 } from '@blueprintjs/core';
 import moment from 'moment';
 
@@ -30,6 +32,7 @@ import {
   FormattedMessage as T,
   Money,
   AppToaster,
+  ListSelect,
 } from '@/components';
 import {
   usePdCheques,
@@ -169,6 +172,7 @@ function ChequesInHandListInner({ openDialog }) {
   const [bankingDateTo, setBankingDateTo] = useState('');
   const [sortBy, setSortBy] = useState('bankingDate');
   const [statuses, setStatuses] = useState([]);
+  const [chequeNo, setChequeNo] = useState('');
   const [returnTarget, setReturnTarget] = useState(null);
 
   const { data: areas } = useCustomerAreas();
@@ -184,6 +188,7 @@ function ChequesInHandListInner({ openDialog }) {
     ...(bankingDateFrom ? { bankingDateFrom } : {}),
     ...(bankingDateTo ? { bankingDateTo } : {}),
     ...(statuses.length ? { status: statuses.join(',') } : {}),
+    ...(chequeNo.trim() ? { chequeNo: chequeNo.trim() } : {}),
     sortBy,
   };
 
@@ -192,12 +197,31 @@ function ChequesInHandListInner({ openDialog }) {
   const total = data?.total || 0;
   const columns = useChequesColumns();
 
-  const filteredCustomers = areaId
-    ? customers.filter(
-        (customer) =>
-          (customer.area_id ?? customer.areaId) === Number(areaId),
-      )
-    : customers;
+  const allCustomersItem = useMemo(
+    () => ({
+      id: '',
+      display_name: intl.get('all_customers'),
+    }),
+    [],
+  );
+
+  const filteredCustomers = useMemo(() => {
+    if (!areaId) {
+      return [allCustomersItem];
+    }
+    return [
+      allCustomersItem,
+      ...customers
+        .filter(
+          (customer) =>
+            Number(customer.area_id ?? customer.areaId) === Number(areaId),
+        )
+        .map((customer) => ({
+          ...customer,
+          display_name: customer.display_name || customer.displayName,
+        })),
+    ];
+  }, [allCustomersItem, areaId, customers]);
 
   const handleStatusToggle = (status) => {
     setStatuses((current) =>
@@ -240,7 +264,31 @@ function ChequesInHandListInner({ openDialog }) {
   return (
     <DashboardInsider name={'cheques-in-hand-list'}>
       <DashboardActionsBar>
-        <NavbarGroup>
+        <NavbarGroup align="right">
+          <Button
+            className={Classes.MINIMAL}
+            icon={<Icon icon="file-export" />}
+            text={intl.get('export_to_excel')}
+            onClick={() => handleExport('xlsx')}
+          />
+          <NavbarDivider />
+          <Button
+            className={Classes.MINIMAL}
+            icon={<Icon icon="print-16" />}
+            text="PDF"
+            onClick={() => handleExport('pdf')}
+          />
+        </NavbarGroup>
+      </DashboardActionsBar>
+      <ChequesFilterBar>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: 16,
+          }}
+        >
           <FormGroup label={intl.get('area')} inline style={{ marginBottom: 0 }}>
             <HTMLSelect
               value={areaId}
@@ -260,24 +308,42 @@ function ChequesInHandListInner({ openDialog }) {
           <FormGroup
             label={intl.get('customer_name')}
             inline
-            style={{ marginBottom: 0, marginLeft: 12 }}
+            style={{ marginBottom: 0, flex: '1 1 380px', minWidth: 380, maxWidth: 640 }}
           >
-            <HTMLSelect
-              value={customerId}
-              onChange={(event) => setCustomerId(event.target.value)}
-            >
-              <option value="">{intl.get('all')}</option>
-              {filteredCustomers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.display_name || customer.displayName}
-                </option>
-              ))}
-            </HTMLSelect>
+            <ListSelect
+              key={areaId || 'all-areas'}
+              items={filteredCustomers}
+              selectedItem={customerId}
+              selectedItemProp="id"
+              textProp="display_name"
+              defaultText={intl.get('all_customers')}
+              filterable={true}
+              popoverProps={{ minimal: true, usePortal: true, fill: true }}
+              className="cheques-in-hand-customer-select"
+              onItemSelect={(item) =>
+                setCustomerId(item?.id === '' || item?.id == null ? '' : item.id)
+              }
+            />
+          </FormGroup>
+          <FormGroup
+            label={intl.get('cheque_number')}
+            inline
+            style={{ marginBottom: 0 }}
+          >
+            <InputGroup
+              value={chequeNo}
+              maxLength={6}
+              placeholder="000000"
+              className="cheques-in-hand-cheque-no"
+              onChange={(event) =>
+                setChequeNo(event.target.value.replace(/\D/g, '').slice(0, 6))
+              }
+            />
           </FormGroup>
           <FormGroup
             label={intl.get('banking_date')}
             inline
-            style={{ marginBottom: 0, marginLeft: 12 }}
+            style={{ marginBottom: 0 }}
           >
             <input
               type="date"
@@ -293,38 +359,23 @@ function ChequesInHandListInner({ openDialog }) {
               className={Classes.INPUT}
             />
           </FormGroup>
-          <FormGroup
-            label={intl.get('status')}
-            inline
-            style={{ marginBottom: 0, marginLeft: 12 }}
-          >
-            {STATUSES.map((status) => (
-              <Checkbox
-                key={status}
-                inline
-                checked={statuses.includes(status)}
-                label={intl.get(`cheque_status.${status}`)}
-                onChange={() => handleStatusToggle(status)}
-              />
-            ))}
-          </FormGroup>
-        </NavbarGroup>
-        <NavbarGroup align="right">
-          <Button
-            className={Classes.MINIMAL}
-            icon={<Icon icon="file-export" />}
-            text={intl.get('export_to_excel')}
-            onClick={() => handleExport('xlsx')}
-          />
-          <NavbarDivider />
-          <Button
-            className={Classes.MINIMAL}
-            icon={<Icon icon="print-16" />}
-            text="PDF"
-            onClick={() => handleExport('pdf')}
-          />
-        </NavbarGroup>
-      </DashboardActionsBar>
+        </div>
+        <FormGroup
+          label={intl.get('status')}
+          inline
+          style={{ marginBottom: 0 }}
+        >
+          {STATUSES.map((status) => (
+            <Checkbox
+              key={status}
+              inline
+              checked={statuses.includes(status)}
+              label={intl.get(`cheque_status.${status}`)}
+              onChange={() => handleStatusToggle(status)}
+            />
+          ))}
+        </FormGroup>
+      </ChequesFilterBar>
       <DashboardPageContent>
         <DashboardContentTable>
           <DataTable
@@ -375,6 +426,28 @@ function ChequesInHandListInner({ openDialog }) {
     </DashboardInsider>
   );
 }
+
+const ChequesFilterBar = styled.div`
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid #e1e4e8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .cheques-in-hand-customer-select {
+    width: 100%;
+    min-width: 320px;
+  }
+
+  .cheques-in-hand-customer-select .bp4-button {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cheques-in-hand-cheque-no {
+    width: 88px;
+  }
+`;
 
 export const ChequesInHandList = compose(withDialogActions)(
   ChequesInHandListInner,

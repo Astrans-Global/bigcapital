@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { BullModule } from '@nestjs/bullmq';
@@ -47,6 +47,7 @@ import { ValidateBulkDeletePaymentReceivedService } from './ValidateBulkDeletePa
 import { GetCashInHandService } from './queries/GetCashInHand.service';
 import { DepositCashPaymentReceivedService } from './commands/DepositCashPaymentReceived.service';
 import { BankingTransactionsModule } from '../BankingTransactions/BankingTransactions.module';
+import { BankReconciliationModule } from '../BankReconciliation/BankReconciliation.module';
 
 @Module({
   controllers: [PaymentReceivesController],
@@ -104,6 +105,7 @@ import { BankingTransactionsModule } from '../BankingTransactions/BankingTransac
     DynamicListModule,
     MailModule,
     BankingTransactionsModule,
+    forwardRef(() => BankReconciliationModule),
     BullModule.registerQueue({ name: SEND_PAYMENT_RECEIVED_MAIL_QUEUE }),
     BullBoardModule.forFeature({
       name: SEND_PAYMENT_RECEIVED_MAIL_QUEUE,

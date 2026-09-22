@@ -33,6 +33,10 @@ export class GetPdChequesService {
         if (query.bankingDateTo) {
           builder.where('bankingDate', '<=', query.bankingDateTo);
         }
+        const chequeNo = String(query.chequeNo || '').trim();
+        if (chequeNo) {
+          builder.where('chequeNo', 'like', `%${chequeNo}%`);
+        }
         const sortBy =
           query.sortBy === 'collectedDate' ? 'collectedDate' : 'bankingDate';
         builder.orderBy(sortBy, 'desc');

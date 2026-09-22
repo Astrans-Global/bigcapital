@@ -10,6 +10,7 @@ import { ACCOUNT_TYPE } from '@/constants/accounts';
 import { PdChequeGLService } from './PdChequeGL.service';
 import { PdChequeInvoiceSync } from './PdChequeInvoiceSync.service';
 import { ERRORS, PD_CHEQUE_STATUS } from '../constants';
+import { BankReconciliationLockService } from '@/modules/BankReconciliation/commands/BankReconciliationLock.service';
 
 @Injectable()
 export class PdChequeStatusService {
@@ -17,6 +18,7 @@ export class PdChequeStatusService {
     private readonly uow: UnitOfWork,
     private readonly gl: PdChequeGLService,
     private readonly invoiceSync: PdChequeInvoiceSync,
+    private readonly bankRecLock: BankReconciliationLockService,
 
     @Inject(PdCheque.name)
     private readonly pdChequeModel: TenantModelProxy<typeof PdCheque>,
@@ -63,6 +65,7 @@ export class PdChequeStatusService {
   }
 
   public async markReturned(chequeId: number) {
+    await this.bankRecLock.assertChequeUnlocked(chequeId);
     const cheque = await this.requireCheque(chequeId);
     this.assertStatus(cheque.status, [
       PD_CHEQUE_STATUS.PENDING,

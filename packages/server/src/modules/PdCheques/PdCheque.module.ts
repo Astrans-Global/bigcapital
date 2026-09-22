@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TenancyModule } from '../Tenancy/Tenancy.module';
 import { TenancyDatabaseModule } from '../Tenancy/TenancyDB/TenancyDB.module';
 import { LedgerModule } from '../Ledger/Ledger.module';
@@ -15,6 +15,7 @@ import { PdChequeInvoiceSync } from './commands/PdChequeInvoiceSync.service';
 import { GetPdChequesService } from './queries/GetPdCheques.service';
 import { PdChequeIncrementService } from './commands/PdChequeIncrement.service';
 import { AutoIncrementOrdersModule } from '../AutoIncrementOrders/AutoIncrementOrders.module';
+import { BankReconciliationModule } from '../BankReconciliation/BankReconciliation.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AutoIncrementOrdersModule } from '../AutoIncrementOrders/AutoIncrementO
     AccountsModule,
     ChromiumlyTenancyModule,
     AutoIncrementOrdersModule,
+    forwardRef(() => BankReconciliationModule),
   ],
   controllers: [PdChequeController],
   providers: [

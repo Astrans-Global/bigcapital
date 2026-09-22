@@ -54,6 +54,7 @@ function InvoiceDetailActionsBarInner({
 
   // Invoice detail drawer context.
   const { invoiceId, invoice } = useInvoiceDetailDrawerContext();
+  const sealed = Boolean(invoice?.is_bank_rec_sealed);
 
   // Handle edit sale invoice.
   const handleEditInvoice = () => {
@@ -123,6 +124,7 @@ function InvoiceDetailActionsBarInner({
             className={Classes.MINIMAL}
             icon={<Icon icon="pen-18" />}
             text={<T id={'edit_invoice'} />}
+            disabled={sealed}
             onClick={handleEditInvoice}
           />
           <NavbarDivider />
@@ -159,6 +161,7 @@ function InvoiceDetailActionsBarInner({
             icon={<Icon icon={'trash-16'} iconSize={16} />}
             text={<T id={'delete'} />}
             intent={Intent.DANGER}
+            disabled={sealed}
             onClick={handleDeleteInvoice}
           />
         </Can>

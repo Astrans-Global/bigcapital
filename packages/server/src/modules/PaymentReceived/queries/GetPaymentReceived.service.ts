@@ -5,11 +5,13 @@ import { PaymentReceived } from '../models/PaymentReceived';
 import { TransformerInjectable } from '../../Transformer/TransformerInjectable.service';
 import { ServiceError } from '../../Items/ServiceError';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { BankReconciliationSealsService } from '@/modules/BankReconciliation/commands/BankReconciliationSeals.service';
 
 @Injectable()
 export class GetPaymentReceivedService {
   constructor(
     private readonly transformer: TransformerInjectable,
+    private readonly bankRecSeals: BankReconciliationSealsService,
 
     @Inject(PaymentReceived.name)
     private readonly paymentReceiveModel: TenantModelProxy<
@@ -38,9 +40,10 @@ export class GetPaymentReceivedService {
     if (!paymentReceive) {
       throw new ServiceError(ERRORS.PAYMENT_RECEIVE_NOT_EXISTS);
     }
-    return this.transformer.transform(
+    const transformed = await this.transformer.transform(
       paymentReceive,
       new PaymentReceiveTransfromer(),
     );
+    return this.bankRecSeals.attachPaymentSeal(transformed);
   }
 }

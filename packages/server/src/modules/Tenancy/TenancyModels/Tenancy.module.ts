@@ -19,6 +19,8 @@ import { CustomerArea } from '@/modules/CustomerAreas/models/CustomerArea.model'
 import { SalesAgent } from '@/modules/SalesAgents/models/SalesAgent.model';
 import { PdCheque } from '@/modules/PdCheques/models/PdCheque.model';
 import { PdChequeEntry } from '@/modules/PdCheques/models/PdChequeEntry.model';
+import { BankReconciliation } from '@/modules/BankReconciliation/models/BankReconciliation.model';
+import { BankReconciliationLine } from '@/modules/BankReconciliation/models/BankReconciliationLine.model';
 import { CustomerRouteCity } from '@/modules/CustomerRouteCities/models/CustomerRouteCity.model';
 import { TaxRateModel } from '@/modules/TaxRates/models/TaxRate.model';
 import { PdfTemplateModel } from '@/modules/PdfTemplate/models/PdfTemplate';
@@ -73,6 +75,8 @@ const models = [
   SalesAgent,
   PdCheque,
   PdChequeEntry,
+  BankReconciliation,
+  BankReconciliationLine,
   CustomerRouteCity,
   TaxRateModel,
   PdfTemplateModel,

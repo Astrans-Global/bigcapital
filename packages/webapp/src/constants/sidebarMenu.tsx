@@ -580,6 +580,15 @@ export const SidebarMenu = [
             },
           },
           {
+            text: 'Bank Recs',
+            href: '/bank-recs',
+            type: ISidebarMenuItemType.Link,
+            permission: {
+              subject: AbilitySubject.Cashflow,
+              ability: CashflowAction.View,
+            },
+          },
+          {
             text: 'Rules',
             href: '/bank-rules',
             type: ISidebarMenuItemType.Link,

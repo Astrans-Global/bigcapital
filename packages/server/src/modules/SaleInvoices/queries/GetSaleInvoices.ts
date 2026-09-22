@@ -8,12 +8,14 @@ import { IFilterMeta, IPaginationMeta } from '@/interfaces/Model';
 import { SaleInvoice } from '../models/SaleInvoice';
 import { GetSaleInvoicesQueryDto } from '../dtos/GetSaleInvoicesQuery.dto';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
+import { BankReconciliationSealsService } from '@/modules/BankReconciliation/commands/BankReconciliationSeals.service';
 
 @Injectable()
 export class GetSaleInvoicesService {
   constructor(
     private readonly dynamicListService: DynamicListService,
     private readonly transformer: TransformerInjectable,
+    private readonly bankRecSeals: BankReconciliationSealsService,
 
     @Inject(SaleInvoice.name)
     private readonly saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
@@ -63,7 +65,7 @@ export class GetSaleInvoicesService {
     );
 
     return {
-      data,
+      data: await this.bankRecSeals.attachInvoiceSeals(data),
       pagination,
       filterMeta: dynamicFilter.getResponseMeta(),
     };

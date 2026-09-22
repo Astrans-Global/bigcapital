@@ -8,6 +8,7 @@ import { CommandSaleInvoiceValidators } from '../commands/CommandSaleInvoiceVali
 import { events } from '@/common/events/events';
 import { TenantModelProxy } from '@/modules/System/models/TenantBaseModel';
 import { SaleInvoiceResponseDto } from '../dtos/SaleInvoiceResponse.dto';
+import { BankReconciliationSealsService } from '@/modules/BankReconciliation/commands/BankReconciliationSeals.service';
 
 @Injectable()
 export class GetSaleInvoice {
@@ -15,6 +16,7 @@ export class GetSaleInvoice {
     private transformer: TransformerInjectable,
     private validators: CommandSaleInvoiceValidators,
     private eventPublisher: EventEmitter2,
+    private bankRecSeals: BankReconciliationSealsService,
 
     @Inject(SaleInvoice.name)
     private saleInvoiceModel: TenantModelProxy<typeof SaleInvoice>,
@@ -56,6 +58,6 @@ export class GetSaleInvoice {
       events.saleInvoice.onViewed,
       eventPayload,
     );
-    return transformed;
+    return this.bankRecSeals.attachInvoiceSeal(transformed);
   }
 }

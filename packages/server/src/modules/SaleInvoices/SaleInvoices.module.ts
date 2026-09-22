@@ -65,6 +65,7 @@ import { PaymentLinksModule } from '../PaymentLinks/PaymentLinks.module';
 import { BulkDeleteSaleInvoicesService } from './BulkDeleteSaleInvoices.service';
 import { ValidateBulkDeleteSaleInvoicesService } from './ValidateBulkDeleteSaleInvoices.service';
 import { ExportStatutoryInvoiceService } from './queries/ExportStatutoryInvoice.service';
+import { BankReconciliationModule } from '../BankReconciliation/BankReconciliation.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { ExportStatutoryInvoiceService } from './queries/ExportStatutoryInvoice.
     WarehousesModule,
     TaxRatesModule,
     PaymentsReceivedModule,
+    forwardRef(() => BankReconciliationModule),
     LedgerModule,
     AccountsModule,
     MailModule,
